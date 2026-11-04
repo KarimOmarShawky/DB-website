@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join Algorithms &amp; Aggregates Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1d1b26; --ink-2:#4a4658; --muted:#7a768a;
+  --paper:#fffdf8; --panel:#f6f2e9; --line:#d9d2c3;
+  --blue:#2459a8; --blue-soft:#e3ecfa;
+  --green:#1f7a4d; --green-soft:#e0f3e8;
+  --red:#b8322a; --red-soft:#fbe5e2;
+  --amber:#b5770c; --amber-soft:#fff1d1;
+  --violet:#6a3fb5; --violet-soft:#ece5fa;
+  --note:#fff4a8;
+  --hand:'Caveat', 'Comic Sans MS', cursive;
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, Consolas, monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:#e9e4d8;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62}
+.doc{max-width:900px;margin:0 auto;background:var(--paper);box-shadow:0 0 40px rgba(0,0,0,.12)}
+.sheet{padding:56px 64px;position:relative}
+.chapter{border-top:1px dashed var(--line)}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0 0 .4em}
+h2{font-size:34px;font-weight:800;letter-spacing:-.01em}
+h3{font-size:22px;font-weight:700;margin-top:1.6em;color:var(--blue)}
+h4{font-size:17px;font-family:var(--sans);font-weight:700;margin-top:1.2em}
+p{margin:.55em 0}
+ul,ol{padding-left:1.3em;margin:.5em 0}
+li{margin:.2em 0}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--panel);padding:1px 5px;border-radius:4px}
+b,strong{font-weight:700}
+.kicker{display:inline-block;font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--ink);padding:4px 10px;border-radius:3px;margin-bottom:12px}
+.lead{font-size:17px;color:var(--ink-2)}
+.hand{font-family:var(--hand);font-size:1.35em;line-height:1.1}
+.muted{color:var(--muted)}
+.c-blue{color:var(--blue)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-amber{color:var(--amber)} .c-violet{color:var(--violet)}
+.src{font-size:11.5px;color:var(--muted);font-style:italic}
+
+/* ---------- cover ---------- */
+.cover{min-height:1060px;display:flex;flex-direction:column;justify-content:space-between;background:
+ radial-gradient(circle at 85% 10%, #ffe9a8 0, transparent 40%),
+ radial-gradient(circle at 10% 90%, #d9e6fb 0, transparent 45%), var(--paper)}
+.cover h1{font-size:68px;font-weight:800;letter-spacing:-.02em;margin:10px 0 6px}
+.cover h1 span{color:var(--blue)}
+.cover .sub{font-size:19px;color:var(--ink-2);max-width:620px}
+.cover .badge{font-family:var(--hand);font-size:28px;color:var(--red);transform:rotate(-4deg);display:inline-block;margin-top:14px}
+.cover-tree{margin:20px auto 0;width:100%;max-width:720px}
+.cover-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;font-size:13px}
+.cover-meta div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.cover-meta b{display:block;font-family:var(--serif);font-size:24px}
+
+/* ---------- TOC ---------- */
+.toc{columns:2;column-gap:36px;padding:0;list-style:none;counter-reset:t}
+.toc li{break-inside:avoid;display:flex;gap:10px;padding:7px 0;border-bottom:1px dotted var(--line)}
+.toc li span.n{font-family:var(--serif);font-weight:800;color:var(--blue);min-width:28px}
+.toc a{color:inherit;text-decoration:none}
+
+/* ---------- boxes (Head-First style) ---------- */
+.box{border-radius:12px;padding:16px 20px;margin:18px 0;position:relative;break-inside:avoid}
+.box > .tag{position:absolute;top:-13px;left:16px;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;color:#fff}
+.brain{background:var(--violet-soft);border:2px solid var(--violet)} .brain>.tag{background:var(--violet)}
+.watch{background:var(--red-soft);border:2px solid var(--red)} .watch>.tag{background:var(--red)}
+.key{background:var(--green-soft);border:2px solid var(--green)} .key>.tag{background:var(--green)}
+.example{background:var(--blue-soft);border:2px solid var(--blue)} .example>.tag{background:var(--blue)}
+.lecture{background:var(--amber-soft);border:2px solid var(--amber)} .lecture>.tag{background:var(--amber)}
+.nodumb{background:#fff;border:2px dashed var(--ink-2)} .nodumb>.tag{background:var(--ink-2)}
+.nodumb dt{font-weight:700;margin-top:10px}
+.nodumb dt::before{content:"Q: ";color:var(--red);font-family:var(--serif)}
+.nodumb dd{margin:2px 0 0 0}
+.nodumb dd::before{content:"A: ";font-weight:700;color:var(--green);font-family:var(--serif)}
+.sticky{background:var(--note);font-family:var(--hand);font-size:22px;line-height:1.15;padding:14px 18px;box-shadow:2px 4px 10px rgba(0,0,0,.15);transform:rotate(-1.5deg);width:fit-content;max-width:330px;margin:14px 0;break-inside:avoid}
+.sticky.r{transform:rotate(1.8deg);margin-left:auto}
+.bubble{position:relative;background:#fff;border:2px solid var(--ink);border-radius:18px;padding:10px 14px;font-family:var(--hand);font-size:21px;line-height:1.15;width:fit-content;max-width:300px}
+.bubble::after{content:"";position:absolute;left:24px;bottom:-12px;border:6px solid transparent;border-top:8px solid var(--ink)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;break-inside:avoid}
+.card h4{margin-top:0}
+.figure{margin:20px 0;padding:16px;background:#fff;border:1.5px solid var(--line);border-radius:14px;break-inside:avoid}
+.figure figcaption,.caption{font-size:13px;color:var(--ink-2);margin-top:8px;text-align:center}
+svg{max-width:100%;height:auto;display:block;margin:0 auto}
+svg text{font-family:var(--sans)}
+svg .hand{font-family:var(--hand)}
+
+table.t{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;break-inside:avoid}
+table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+table.t th{background:var(--panel);font-weight:700}
+table.t.center td,table.t.center th{text-align:center}
+
+pre.code{font-family:var(--mono);font-size:13px;background:#1f1d2b;color:#f3efe2;padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.5;break-inside:avoid}
+pre.code .k{color:#ffb86b} pre.code .c{color:#8c88a3} pre.code .s{color:#a8e6a1}
+
+.formula{font-family:var(--serif);font-size:22px;text-align:center;background:#fff;border:2px solid var(--ink);border-radius:12px;padding:14px;margin:16px auto;max-width:560px}
+.formula small{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-2)}
+
+/* mini data blocks */
+.blk{display:inline-flex;flex-direction:column;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:#fff;min-width:70px;vertical-align:top}
+.blk .h{background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:2px 6px;text-align:center}
+.blk span{padding:2px 8px;border-top:1px solid var(--line);font-family:var(--mono);font-size:13px;text-align:center}
+.blk span.hit{background:#ffe17a;font-weight:700}
+
+/* flow */
+.flow{display:flex;flex-direction:column;gap:0;align-items:stretch;max-width:560px}
+.flow .step{display:flex;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 14px}
+.flow .step b.n{font-family:var(--serif);font-size:20px;color:var(--blue);min-width:26px}
+.flow .arrow{text-align:center;color:var(--muted);line-height:1;font-size:18px;padding:3px 0}
+
+/* bars */
+.bar{height:22px;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+
+/* quiz */
+.q{break-inside:avoid;margin:10px 0 14px;padding-left:38px;position:relative}
+.q .qn{position:absolute;left:0;top:0;font-family:var(--serif);font-weight:800;color:var(--blue);font-size:17px}
+.q ol.opts{list-style:none;padding:0;margin:6px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:3px 22px}
+.q ol.opts li::before{content:attr(data-l) ") ";font-weight:700;color:var(--ink-2)}
+.q .tf{font-weight:700;color:var(--ink-2);font-size:13px;margin-left:6px}
+.q .lines{border-bottom:1px solid var(--line);height:26px}
+.ans{break-inside:avoid;margin:8px 0;padding:8px 0 8px 38px;position:relative;border-bottom:1px dotted var(--line)}
+.ans .qn{position:absolute;left:0;top:8px;font-family:var(--serif);font-weight:800;color:var(--green)}
+.ans b.a{color:var(--green)}
+.ans-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-size:14px}
+.ans-grid div{background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.ans-grid b{color:var(--blue)}
+
+/* ---------- animation ---------- */
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes dash{to{stroke-dashoffset:-24}}
+@keyframes glow{0%,100%{fill:#fff}50%{fill:#ffe17a}}
+@keyframes pulseR{0%,100%{box-shadow:0 0 0 0 rgba(184,50,42,.35)}50%{box-shadow:0 0 0 8px rgba(184,50,42,0)}}
+@keyframes drop{0%{transform:translateY(-30px);opacity:0}60%{transform:translateY(4px);opacity:1}100%{transform:none;opacity:1}}
+@keyframes wiggle{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1deg)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes path1{0%,100%{fill:#fff}8%,30%{fill:#ffe17a}}
+@keyframes path2{0%,25%,100%{fill:#fff}33%,55%{fill:#ffe17a}}
+@keyframes path3{0%,50%,100%{fill:#fff}58%,80%{fill:#ffe17a}}
+@keyframes path4{0%,75%,100%{fill:#fff}83%,97%{fill:#b8f0c8}}
+
+html.js .reveal{opacity:0}
+html.js .reveal.in{animation:up .7s cubic-bezier(.2,.7,.2,1) both}
+.pop{animation:pop .6s cubic-bezier(.2,.7,.2,1) both}
+.flowline{stroke-dasharray:6 6;animation:dash 1.2s linear infinite}
+.sticky{animation:wiggle 5s ease-in-out infinite}
+.sticky.r{animation:none}
+.bar.anim{transform-origin:left;animation:grow 1.4s cubic-bezier(.2,.7,.2,1) both}
+.dropin{animation:drop 1s ease-out 0.4s both}
+.s1{animation:path1 4s infinite}.s2{animation:path2 4s infinite}.s3{animation:path3 4s infinite}.s4{animation:path4 4s infinite}
+.hit-pulse{animation:pulseR 1.8s infinite}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1}
+}
+
+/* ---------- small screens ---------- */
+@media (max-width:720px){
+  .sheet{padding:28px 16px}
+  .grid2,.grid3,.cover-meta{grid-template-columns:1fr}
+  .toc{columns:1}
+  .cover h1{font-size:44px}
+  h2{font-size:28px}
+  .q ol.opts{grid-template-columns:1fr}
+  .ans-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ---------- print ---------- */
+@page{size:A4;margin:13mm 12mm 14mm}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  .doc{box-shadow:none;max-width:none}
+  .sheet{padding:0 2mm}
+  .chapter{border-top:none;break-before:page}
+  .cover{min-height:265mm;padding-top:10mm}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1!important;transform:none!important}
+  .sticky{transform:rotate(-1.5deg)}
+  .sticky.r{transform:rotate(1.8deg)}
+  .flowline{stroke-dasharray:6 6}
+  .s1,.s2,.s3{fill:#ffe17a}.s4{fill:#b8f0c8}
+  h2,h3,h4{break-after:avoid}
+  .box,.figure,.card,table,pre,.q,.ans{break-inside:avoid}
+  .no-print{display:none!important}
+  .sheet{padding-top:3mm}
+  .box{padding-top:30px;margin-top:12px}
+  .box > .tag{top:8px}
+  pre.code{white-space:pre-wrap;word-break:break-word}
+  a{color:inherit;text-decoration:none}
+}
+.print-btn{position:fixed;right:18px;bottom:18px;z-index:9;background:var(--ink);color:#fff;border:0;border-radius:30px;padding:12px 18px;font:600 14px var(--sans);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.print-btn:hover{background:var(--blue)}
+
+/* ---------- interactive quiz (screen only; print output unchanged) ---------- */
+@media screen{
+  .quiz-on .q .tf{display:none}
+  .quiz-on .q ol.opts li{cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:5px 10px;background:#fff;transition:background .2s,border-color .2s,transform .15s}
+  .quiz-on .q:not(.done) ol.opts li:hover,.quiz-on .q:not(.done) ol.opts li:focus-visible{border-color:var(--blue);background:var(--blue-soft);outline:none;transform:translateX(3px)}
+  .quiz-on .q.done ol.opts li{cursor:default}
+  .quiz-on .q ol.opts li.ok{background:var(--green-soft);border-color:var(--green);font-weight:600}
+  .quiz-on .q ol.opts li.bad{background:var(--red-soft);border-color:var(--red);text-decoration:line-through;text-decoration-color:var(--red)}
+  .qi{margin-top:8px}
+  .qi .tfb{display:flex;gap:8px}
+  .qi button{font:600 13px var(--sans);border:1.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:20px;padding:5px 14px;cursor:pointer;transition:background .2s,color .2s}
+  .qi button:hover:not(:disabled){background:var(--ink);color:#fff}
+  .qi button:disabled{cursor:default;opacity:.55}
+  .qi button.ok{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+  .qi button.bad{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+  .qi .fb{margin-top:8px;padding:8px 12px;border-radius:8px;font-size:14px;animation:up .4s ease both}
+  .qi .fb.ok{background:var(--green-soft);border-left:4px solid var(--green)}
+  .qi .fb.bad{background:var(--red-soft);border-left:4px solid var(--red)}
+  .qi .fb.model{background:var(--amber-soft);border-left:4px solid var(--amber)}
+  .qi .fb pre.code{margin:8px 0 0}
+  .qi textarea{width:100%;min-height:90px;font:14px/1.5 var(--sans);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink);resize:vertical}
+  .qi textarea:focus{outline:none;border-color:var(--blue)}
+  .qi .row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center}
+  .qi .self{font-size:13px;color:var(--ink-2)}
+  .quiz-intro{background:var(--blue-soft);border:2px solid var(--blue);border-radius:12px;padding:12px 16px;margin:14px 0;font-size:14px}
+  .scorebar{position:fixed;left:18px;bottom:18px;z-index:9;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px 14px;font:14px var(--sans);box-shadow:0 6px 18px rgba(0,0,0,.18);display:none;gap:12px;align-items:center}
+  .scorebar.show{display:flex}
+  .scorebar b{font-family:var(--serif);font-size:20px;color:var(--blue)}
+  .scorebar .meter{width:120px;height:8px;background:var(--panel);border-radius:5px;overflow:hidden}
+  .scorebar .meter i{display:block;height:100%;background:var(--green);width:0;transition:width .4s}
+  .scorebar button{font:600 12px var(--sans);border:1.5px solid var(--ink);background:#fff;border-radius:16px;padding:4px 10px;cursor:pointer}
+  .scorebar button:hover{background:var(--ink);color:#fff}
+}
+@media (max-width:720px){ .scorebar{left:8px;right:8px;bottom:70px;justify-content:space-between} }
+</style>
+<link rel="stylesheet" href="study-site.css">
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d1b26"/></marker>
+    <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2459a8"/></marker>
+    <marker id="ahR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b8322a"/></marker>
+    <marker id="ahG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f7a4d"/></marker>
+  </defs>
+</svg>
+
+<header class="study-nav">
+  <nav class="study-nav-inner" aria-label="Primary navigation">
+    <a class="study-brand" href="index.html">
+      <span class="study-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5.5" rx="7.5" ry="3"></ellipse>
+          <path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13"></path>
+          <path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"></path>
+        </svg>
+      </span>
+      Database Engineering
+    </a>
+    <a class="back-home" href="index.html">
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11.5 4 5.5 10l6 6M6 10h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to Home
+    </a>
+  </nav>
+</header>
+
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<main class="doc">
+<!-- COVER -->
+<section class="sheet cover">
+  <div>
+    <span class="kicker">Database Management Engineering · Lecture 4</span>
+    <h1>How Tables<br><span>Get Joined</span></h1>
+    <p class="sub">A friendly, picture-first guide to the Week 4 lecture on query processing algorithms: aggregate operators, GROUP BY, selectivity, and the three equi-join algorithms (nested-loop, single-loop, sort-merge) with full block-counting cost formulas and the Employee ⋈ Department worked example. Ends with a 60-question exam and a full answer key.</p>
+    <span class="badge">Every join traced with real numbers.</span>
+  </div>
+  <svg class="cover-tree" viewBox="0 0 720 300" role="img" aria-label="Two sorted tables being merged by two pointers">
+    <g font-size="13" font-weight="700" text-anchor="middle">
+      <rect x="40" y="30" width="170" height="30" rx="6" fill="#1d1b26"/><text x="125" y="50" fill="#fff">R: Dept (sorted by DeptID)</text>
+      <rect x="480" y="30" width="200" height="30" rx="6" fill="#1d1b26"/><text x="580" y="50" fill="#fff">S: Student (sorted by DeptNum)</text>
+    </g>
+    <g font-size="14" font-family="JetBrains Mono, monospace" text-anchor="middle">
+      <g class="pop" style="animation-delay:.2s">
+      <rect x="40" y="66" width="170" height="30" fill="#fff" stroke="#d9d2c3"/><text x="125" y="86">1  IT</text>
+      <rect x="40" y="96" width="170" height="30" fill="#ffe17a" stroke="#b5770c" stroke-width="2"/><text x="125" y="116">2  IS</text>
+      <rect x="40" y="126" width="170" height="30" fill="#fff" stroke="#d9d2c3"/><text x="125" y="146">3  OR</text>
+      <rect x="40" y="156" width="170" height="30" fill="#fff" stroke="#d9d2c3"/><text x="125" y="176">4  CS</text></g>
+      <g class="pop" style="animation-delay:.5s">
+      <rect x="480" y="66" width="200" height="30" fill="#ffe17a" stroke="#b5770c" stroke-width="2"/><text x="580" y="86">2  Ayman</text>
+      <rect x="480" y="96" width="200" height="30" fill="#fff" stroke="#d9d2c3"/><text x="580" y="116">2  Randa</text>
+      <rect x="480" y="126" width="200" height="30" fill="#fff" stroke="#d9d2c3"/><text x="580" y="146">3  Novi</text>
+      <rect x="480" y="156" width="200" height="30" fill="#fff" stroke="#d9d2c3"/><text x="580" y="176">4  Heba</text>
+      <rect x="480" y="186" width="200" height="30" fill="#fff" stroke="#d9d2c3"/><text x="580" y="206">4  Nemin</text>
+      <rect x="480" y="216" width="200" height="30" fill="#fff" stroke="#d9d2c3"/><text x="580" y="236">4  Manar</text></g>
+    </g>
+    <g stroke="#b8322a" stroke-width="2.5" fill="none" class="flowline"><path d="M214 111 L474 82" marker-end="url(#ahR)"/></g>
+    <text x="250" y="190" class="hand" font-size="26" fill="#b8322a">two pointers,</text><text x="250" y="220" class="hand" font-size="26" fill="#b8322a">each file read once</text>
+  </svg>
+  <div class="cover-meta">
+    <div><b>12</b>illustrated lessons</div>
+    <div><b>60</b>exam questions</div>
+    <div><b>3</b>join algorithms, fully costed</div>
+  </div>
+</section>
+<!-- TOC -->
+<section class="sheet chapter">
+  <span class="kicker">Start here</span>
+  <h2>What's inside</h2>
+  <ol class="toc">
+    <li><span class="n">01</span><a href="#c1">Where we are: the operator families and the bottlenecks</a></li>
+    <li><span class="n">02</span><a href="#c2">Aggregate operators: MAX, MIN, SUM, AVG, COUNT</a></li>
+    <li><span class="n">03</span><a href="#c3">GROUP BY: sort, partition, aggregate</a></li>
+    <li><span class="n">04</span><a href="#c4">The optimizer's vocabulary: conditions, comparisons, access paths, selectivity</a></li>
+    <li><span class="n">05</span><a href="#c5">Join basics: scope and the three methods</a></li>
+    <li><span class="n">06</span><a href="#c6">How big is a join result? Join selectivity</a></li>
+    <li><span class="n">07</span><a href="#c7">Nested-loop join (J1)</a></li>
+    <li><span class="n">08</span><a href="#c8">Buffers and the choice of outer relation</a></li>
+    <li><span class="n">09</span><a href="#c9">Single-loop join (J2)</a></li>
+    <li><span class="n">10</span><a href="#c10">Sort-merge join (J3)</a></li>
+    <li><span class="n">11</span><a href="#c11">Worked example: EMPLOYEE ⋈ DEPARTMENT</a></li>
+    <li><span class="n">12</span><a href="#c12">Summary, key ideas & dictionary</a></li>
+    <li><span class="n">Q</span><a href="#quiz">Final exam: 60 questions</a></li>
+    <li><span class="n">A</span><a href="#key">Answer key</a></li>
+  </ol>
+  <h3>How to use this guide</h3>
+  <p>Read the lessons in order: each one builds on the one before. Along the way you'll meet a few kinds of boxes, plus <span style="background:var(--note);padding:0 4px;font-family:var(--hand);font-size:1.25em">yellow sticky notes</span>: hints in the margin, like a friend scribbling on your book.</p>
+  <div class="grid2">
+    <div class="box key"><span class="tag">Key point</span>The idea you must remember. If you only re-read one thing before the exam, read these.</div>
+    <div class="box watch"><span class="tag">Watch it!</span>A common mistake or trap. Exams love these.</div>
+    <div class="box brain"><span class="tag">Brain power</span>Stop and think for a minute before reading on. Thinking beats re-reading.</div>
+    <div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Is it okay to ask "obvious" questions?</dt><dd>Yes. These boxes answer the questions most students are afraid to ask.</dd></dl></div>
+    <div class="box example"><span class="tag">Example</span>A worked example with real numbers.</div>
+    <div class="box lecture"><span class="tag">From the lecture</span>A definition or statement taken straight from your lecture slides, so you know the exact wording your teacher used.</div>
+  </div>
+</section>
+<section class="sheet chapter" id="c1">
+  <span class="kicker">Lesson 01</span>
+  <h2>Where we are: the operator families and the bottlenecks</h2>
+  <p class="lead">Before any algorithm, a map: which operators are cheap, which are expensive, and why joins and selections get all the attention.</p>
+<div class="box lecture"><span class="tag">From the lecture</span>Relational algebra operators can be classified into <b>three groups</b> [selection, projection, grouping, duplicate elimination, set operations, Cartesian product, join]:
+<ul><li><b>Tuple-at-a-time unary operators</b>: selection and projection. No need to bring the entire relation into memory at one time.</li>
+<li><b>Full-relation unary operators</b>: duplicate elimination and grouping. Require seeing all or most of the tuples in memory at once.</li>
+<li><b>Full-relation binary operators</b>: union, intersection, difference, join and Cartesian product. Require seeing the tuples of both relations in memory.</li></ul></div>
+<p>Why does this classification matter? Because <b>memory</b> is the scarce resource of query processing. An operator that handles one tuple and forgets it can work with a single buffer, however large the table. An operator that must <i>remember</i> many tuples (to spot a duplicate, to build a group, to match a join partner) needs more memory, and when memory is short it must go back to the disk more often.</p>
+<table class="t"><tr><th>Family</th><th>Operators</th><th>Memory need</th><th>Typical trick</th></tr><tr><td>Tuple-at-a-time unary</td><td>σ select, π project (without DISTINCT)</td><td>One input buffer</td><td>Stream blocks through; test each record and forget it</td></tr><tr><td>Full-relation unary</td><td>duplicate elimination, GROUP BY, aggregates</td><td>Most of the relation</td><td>Sort first, then one pass over neighbours</td></tr><tr><td>Full-relation binary</td><td>∪ ∩ − ⋈ ×</td><td>Both relations</td><td>Sort both, or index one, or chunk one into memory</td></tr></table>
+<figure class="figure reveal"><svg viewBox="0 0 760 170" role="img" aria-label="Three families of operators and how much of the relation they must see">
+<g font-size="14" font-weight="700" text-anchor="middle">
+<rect x="20" y="20" width="220" height="110" rx="12" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="130" y="48" fill="#1f7a4d">Tuple at a time</text>
+<rect x="100" y="64" width="60" height="22" fill="#fff" stroke="#1d1b26"/><text x="130" y="80" font-size="11">1 record</text><text x="130" y="112" font-size="12" font-weight="500">σ, π</text>
+<rect x="270" y="20" width="220" height="110" rx="12" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="380" y="48" fill="#b5770c">Full relation, unary</text>
+<rect x="300" y="64" width="160" height="22" fill="#fff" stroke="#1d1b26"/><text x="380" y="80" font-size="11">whole R</text><text x="380" y="112" font-size="12" font-weight="500">DISTINCT, GROUP BY</text>
+<rect x="520" y="20" width="220" height="110" rx="12" fill="#fbe5e2" stroke="#b8322a" stroke-width="2"/><text x="630" y="48" fill="#b8322a">Full relation, binary</text>
+<rect x="535" y="64" width="90" height="22" fill="#fff" stroke="#1d1b26"/><text x="580" y="80" font-size="11">all of R</text><rect x="635" y="64" width="90" height="22" fill="#fff" stroke="#1d1b26"/><text x="680" y="80" font-size="11">all of S</text><text x="630" y="112" font-size="12" font-weight="500">∪ ∩ − ⋈ ×</text></g>
+<text x="20" y="160" class="hand" font-size="22" fill="#b8322a">more of the relation in memory  →  more expensive</text></svg><figcaption>The three operator families, from cheapest to most expensive in memory terms.</figcaption></figure>
+<h3>Query optimization, restated</h3><div class="box lecture"><span class="tag">From the lecture</span><b>Query optimization — what?</b> Finding the best way to execute a SELECT query; finding the fastest way; finding the way with the least amount of disk access; finding the way with the smallest number of block reads.<br><b>Bottlenecks</b> of a query [selections, projections, joins, …]: <b>selections (σ)</b> and <b>joins (⋈)</b>. <i>Why?</i></div>
+<p>The slide asks <i>why</i>. Selection is a bottleneck because it is the first thing that touches the raw tables, and a table can be huge: every extra block read on a big table is paid thousands of times. Join is a bottleneck because it must relate <b>two</b> files to each other, and the naive way compares every record of one with every record of the other. The result can also be large, and it must often be <b>written back to disk</b> as an intermediate result.</p>
+<p>The optimizer's job is to pick, for each operation, an <b>algorithm</b> that fits the available <b>comparison</b> and <b>access structure</b>:</p>
+<div class="flow">
+<div class="step"><b class="n">1</b>Look at the condition: simple, conjunctive (AND) or disjunctive (OR)?</div><div class="arrow">↓</div>
+<div class="step"><b class="n">2</b>Look at the comparison: equality or non-equality?</div><div class="arrow">↓</div>
+<div class="step"><b class="n">3</b>Look at the access path: none, ordered file, or an index?</div><div class="arrow">↓</div>
+<div class="step"><b class="n">4</b>Pick the algorithm whose estimated block count is smallest</div></div>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Is "optimizer" the same as "the best plan"?</dt><dd>No. It looks for a <b>reasonably</b> good plan using estimates. The slide lists four ways of saying the same goal, and the last one is the practical one: <b>fewest block reads</b>, because disk access dominates everything else.</dd><dt>Why do the slides count blocks and not records?</dt><dd>The disk delivers a <b>whole block</b> at a time. Reading one record or ten records in the same block costs the same single block read.</dd></dl></div>
+<div class="box brain"><span class="tag">Brain power</span>The query <code>SELECT * FROM EMPLOYEE</code> contains only a projection. Why is it never described as "a bottleneck" the way a join is?</div>
+</section>
+<section class="sheet chapter" id="c2">
+  <span class="kicker">Lesson 02</span>
+  <h2>Aggregate operators: MAX, MIN, SUM, AVG, COUNT</h2>
+  <p class="lead">Aggregates turn a set of rows into one number. With the right structure they can be astonishingly cheap.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Aggregate operators</b>: functions that operate on sets (<code>COUNT, SUM, AVG, MAX, MIN</code>). They produce <b>numbers</b> (not tables). You needn't the whole row.<br>Example: <code>SELECT MAX(Salary) FROM EMPLOYEE;</code></div>
+<p>An aggregate collapses many rows into one number. The key observation from the lecture is in the last bullet: <b>you do not need the whole row</b>, only one column. That lets the DBMS read less, and a good index can answer the question without touching the table at all.</p>
+<h3>Three situations</h3>
+<table class="t"><tr><th>Situation</th><th>What the DBMS does</th><th>Cost idea</th></tr><tr><td><b>An index exists</b> on the column</td><td><b>Index scan</b>: walk the index instead of the table</td><td>A few index blocks (tree height) for MIN/MAX; the whole leaf level for SUM/AVG</td></tr><tr><td><b>No index</b>, table <b>sorted</b> on the column</td><td>The min and max are <b>readily available</b>: first and last record</td><td>About one block read</td></tr><tr><td><b>No index</b>, table <b>not sorted</b></td><td><b>Table scan</b>: read every block, keep a running answer</td><td>b blocks (the whole file)</td></tr></table>
+<h3>Aggregates on a B⁺-tree index</h3><figure class="figure reveal"><svg viewBox="0 0 760 250" role="img" aria-label="A B+-tree: MIN follows the left edge, MAX the right edge">
+<g font-size="14" font-family="JetBrains Mono, monospace" text-anchor="middle">
+<rect x="300" y="20" width="160" height="36" rx="6" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="380" y="43">26  |  60</text>
+<g class="pop" style="animation-delay:.3s">
+<rect x="40" y="150" width="190" height="36" rx="6" fill="#ffe17a" stroke="#b5770c" stroke-width="2"/><text x="135" y="173">1  2  4  6  12</text>
+<rect x="290" y="150" width="180" height="36" rx="6" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="380" y="173">26 27 29 42</text>
+<rect x="530" y="150" width="190" height="36" rx="6" fill="#b8f0c8" stroke="#1f7a4d" stroke-width="2"/><text x="625" y="173">60 64 70 90</text></g></g>
+<g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M330 56 L170 148"/><path d="M380 56 L380 148"/><path d="M430 56 L590 148"/></g>
+<g stroke="#b5770c" stroke-width="3.5" fill="none" class="flowline"><path d="M330 56 L170 148" marker-end="url(#ah)"/></g>
+<g stroke="#1f7a4d" stroke-width="3.5" fill="none" class="flowline"><path d="M430 56 L590 148" marker-end="url(#ahG)"/></g>
+<text x="40" y="215" class="hand" font-size="24" fill="#b5770c">MIN = 1: go left, left, left…</text>
+<text x="470" y="215" class="hand" font-size="24" fill="#1f7a4d">MAX = 90: go right, right…</text></svg><figcaption>MIN and MAX each follow one edge of the tree. The cost is the tree height, regardless of how many keys exist.</figcaption></figure>
+<table class="t"><tr><th>Aggregate</th><th>How an index answers it</th><th>Why</th></tr><tr><td><b>MAX</b></td><td>Traverse until the <b>right-most</b> index key</td><td>Keys are ordered; the largest is at the far right</td></tr><tr><td><b>MIN</b></td><td>Traverse until the <b>left-most</b> index key</td><td>The smallest is at the far left</td></tr><tr><td><b>SUM</b></td><td><b>Visit all keys</b></td><td>Every value must be added; no shortcut</td></tr><tr><td><b>AVERAGE</b></td><td><b>Visit all keys</b></td><td>Needs the sum and the count, so every value again</td></tr><tr><td><b>COUNT</b></td><td>Usually part of the <b>catalog</b>, so it can be found directly</td><td>The DBMS keeps the number of records as a statistic</td></tr></table>
+<div class="box example"><span class="tag">Example</span><b>Which is cheapest?</b> For a table of 2,000 blocks: MAX with an index on Salary reads about the height of the index (say 3–4 blocks). MAX on a sorted file without an index reads the last block (1). MAX on an unsorted file with no index reads all 2,000. SUM(Salary) needs <i>every</i> salary in all three cases; the index only helps by letting the DBMS read the narrow index leaf level instead of the wide table rows.</div>
+<div class="box watch"><span class="tag">Watch it!</span><b>MIN/MAX are not like SUM/AVG.</b> MIN and MAX need just one end of the ordered structure; SUM and AVG need <b>everything</b>. Only COUNT (of the whole table) can be free, because the catalog already stores it. A COUNT with a WHERE condition is a different story: the catalog cannot know it.</div>
+<div class="sticky">MAX → right edge<br>MIN → left edge<br>SUM/AVG → all keys<br>COUNT → catalog</div>
+</section>
+<section class="sheet chapter" id="c3">
+  <span class="kicker">Lesson 03</span>
+  <h2>GROUP BY: sort, partition, aggregate</h2>
+  <p class="lead">Grouping means finding all the rows that share a value. Sorting is the standard way to bring them together.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>GROUP BY</b>: <code>SELECT Dno, AVG(Salary) FROM EMPLOYEE GROUP BY Dno;</code><br><b>Sorting approach</b>: (1) sort the relation on the grouping attributes; (2) partition the relation into groups by the grouping attributes; (3) apply the aggregate operators on the groups.<br>Computation is complex. <b>Clustering index → already grouped.</b></div>
+<p>GROUP BY is an aggregate repeated once per group. The difficulty is <i>finding</i> the groups: employees of department 3 are scattered through the file. The lecture's solution is the same trick that solves many full-relation problems: <b>sort so that equal values become neighbours</b>.</p>
+<h3>The sort-based method, traced</h3>
+<div class="grid3">
+<div class="card"><h4 class="c-blue">1 · Input (unsorted)</h4><table class="t center"><tr><th>Dno</th><th>Salary</th></tr><tr><td>1</td><td>3000</td></tr><tr><td>5</td><td>4000</td></tr><tr><td>3</td><td>4000</td></tr><tr><td>3</td><td>4000</td></tr><tr><td>5</td><td>2000</td></tr><tr><td>3</td><td>2000</td></tr><tr><td>1</td><td>4000</td></tr></table></div>
+<div class="card"><h4 class="c-amber">2 · Sorted on Dno</h4><table class="t center"><tr><th>Dno</th><th>Salary</th></tr><tr style="background:#e3ecfa"><td>1</td><td>3000</td></tr><tr style="background:#e3ecfa"><td>1</td><td>4000</td></tr><tr style="background:#fff1d1"><td>3</td><td>4000</td></tr><tr style="background:#fff1d1"><td>3</td><td>4000</td></tr><tr style="background:#fff1d1"><td>3</td><td>2000</td></tr><tr style="background:#e0f3e8"><td>5</td><td>2000</td></tr><tr style="background:#e0f3e8"><td>5</td><td>4000</td></tr></table></div>
+<div class="card"><h4 class="c-green">3 · AVG per group</h4><table class="t center"><tr><th>Dno</th><th>AVG(Salary)</th></tr><tr><td>1</td><td>(3000+4000)/2 = <b>3500</b></td></tr><tr><td>3</td><td>(4000+4000+2000)/3 = <b>3333</b></td></tr><tr><td>5</td><td>(2000+4000)/2 = <b>3000</b></td></tr></table><p class="muted" style="font-size:13px">One pass over the sorted data; a group ends when Dno changes.</p></div></div>
+<h3>Why the clustering index is a gift</h3>
+<p>A <b>clustering index</b> on <code>Dno</code> means the file is physically ordered by Dno. The data is <b>already grouped</b>, so step 1 (the expensive sort) disappears: the DBMS just reads the file once and cuts a group every time Dno changes. Without it, sorting costs far more than the single pass that follows.</p>
+<table class="t"><tr><th>Situation</th><th>Work needed</th></tr><tr><td>No index on the grouping attribute</td><td>Sort (expensive) + one pass to partition and aggregate</td></tr><tr><td>Clustering index / file ordered on it</td><td>One pass only: groups are already contiguous</td></tr></table>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Why is it called "complex computation"?</dt><dd>Because step 1 is a full sort of the relation, which itself takes several passes over the data when the relation is bigger than memory.</dd><dt>Can I group by two attributes?</dt><dd>Yes. Sort on the <b>pair</b> (first attribute, then second). Equal pairs become neighbours, and so do the groups.</dd></dl></div>
+<div class="box brain"><span class="tag">Brain power</span>Ten employees, three departments. After sorting by Dno, how does the algorithm know where one group ends and the next begins? Which single comparison does it need between neighbouring records?</div>
+</section>
+<section class="sheet chapter" id="c4">
+  <span class="kicker">Lesson 04</span>
+  <h2>The optimizer's vocabulary: conditions, comparisons, access paths, selectivity</h2>
+  <p class="lead">Three questions the optimizer asks about every operation, plus the one number it needs to predict output size.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Algorithms — the three dimensions the optimizer looks at:</b><br><b>Conditions</b>: simple (one comparison), conjunctive (multiple comparisons with AND), disjunctive (multiple comparisons with OR).<br><b>Comparisons</b>: equality, non-equality.<br><b>Access paths</b>: none, ordered file, index.</div>
+<table class="t"><tr><th>Dimension</th><th>Options</th><th>Example</th></tr><tr><td><b>Condition</b></td><td>simple / conjunctive (AND) / disjunctive (OR)</td><td><code>Dno=5</code> · <code>Dno=5 AND Salary&gt;300</code> · <code>Dno=5 OR Dno=7</code></td></tr><tr><td><b>Comparison</b></td><td>equality / non-equality</td><td><code>Dno = 5</code> · <code>Dno &gt; 5</code></td></tr><tr><td><b>Access path</b></td><td>none / ordered file / index</td><td>heap file · file sorted on Dno · index on Dno</td></tr></table>
+<h3>Condition selectivity (sl)</h3><div class="box lecture"><span class="tag">From the lecture</span><b>Condition selectivity (sl)</b> is the percentage of the records that satisfy the condition, a number in <b>[0, 1]</b>.<br>Equality condition on a <b>key</b> attribute (e.g. <code>Name = 'Allen, Sam'</code>): selectivity = <b>1 / relation size</b>.<br>Equality condition on a <b>non-key</b> attribute with <i>i</i> distinct values that are <b>uniformly distributed</b> (e.g. <code>Dept_number = 1</code>): selectivity = <b>1 / i</b>.</div>
+<div class="formula">s = sl × r<small>selection cardinality: the average number of records that satisfy the condition (r = number of records)</small></div>
+<div class="box example"><span class="tag">Example</span>EMPLOYEE has <b>r = 10,000</b> records.<ul>
+<li><code>Ssn = '1234'</code>: key, so sl = 1/10,000 = 0.0001 and <b>s = 1</b> record.</li>
+<li><code>Dno = 5</code>: 125 distinct departments, uniform, so sl = 1/125 = 0.008 and <b>s = 10,000 × 0.008 = 80</b> records.</li>
+<li><code>Gender = 'F'</code>: 2 distinct values, so sl = 0.5 and <b>s = 5,000</b> records. Half the table is not "selective" at all!</li></ul></div>
+<div class="box watch"><span class="tag">Watch it!</span><b>Uniform distribution is an assumption.</b> If one department secretly holds half of all employees, <code>1/i</code> underestimates <code>Dno = that department</code> badly. This is why real systems also keep histograms (see the heuristics and cost-based guide).</div>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Small sl or large sl: which is "more selective"?</dt><dd>A <b>small</b> sl is more selective (few records pass). sl = 0.0001 is excellent; sl = 0.5 is poor.</dd><dt>Why does join algorithm choice need selectivity at all?</dt><dd>Because it predicts <b>how many records match</b>: the size of the output and how many index probes return many records.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c5">
+  <span class="kicker">Lesson 05</span>
+  <h2>Join basics: scope and the three methods</h2>
+  <p class="lead">The lecture restricts itself to the case that matters most in practice: equi-joins between two files.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>⋈ Algorithms — scope:</b> only <b>equi-join</b> (i.e. no theta-join); only <b>two-way join</b> (i.e. no multi-way join), e.g. <code>R ⋈<sub>A=B</sub> S</code>, not <code>R ⋈<sub>A=B</sub> S ⋈<sub>C=D</sub> T</code>.<br>Examples: <code>EMPLOYEE ⋈<sub>DNO=DNUMBER</sub> DEPARTMENT</code> and <code>DEPARTMENT ⋈<sub>MGRSSN=SSN</sub> EMPLOYEE</code>.</div>
+<p>An <b>equi-join</b> keeps the pairs <code>(r, s)</code> where <code>r[A] = s[B]</code>. Anything other than "=" (a theta-join such as <code>A &lt; B</code>) is outside the lecture. A <b>two-way join</b> joins exactly two files. A three-table query <code>R ⋈ S ⋈ T</code> is executed as <b>a sequence of two-way joins</b>: first <code>R ⋈ S</code> (stored as an intermediate result <code>RS</code>), then <code>RS ⋈ T</code>.</p>
+<h3>The three methods</h3>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Methods for implementing joins:</b> <b>Sort-merge join</b> [both files are ordered on the join attribute]; <b>Single-loop join</b> [using an index to retrieve the matching records]; <b>Nested-loop join</b> [linear search].</div>
+<div class="grid3"><div class="card"><h4 class="c-green">Sort-merge</h4><b>When:</b> both files ordered on the join attributes.<br><b>How:</b> walk both files once in parallel, matching as you go.<br><b>Cost:</b> the cheapest by far.</div><div class="card"><h4 class="c-blue">Single-loop</h4><b>When:</b> one relation has an index on its join attribute.<br><b>How:</b> for each record of R, probe the index on S.<br><b>Cost:</b> one loop instead of two.</div><div class="card"><h4 class="c-red">Nested-loop</h4><b>When:</b> no index on either join attribute. The fallback, always available.<br><b>How:</b> read a chunk of R into memory, scan all of S against it, repeat.<br><b>Cost:</b> the most expensive.</div></div><div class="box watch"><span class="tag">Watch it!</span><b>Numbering trap.</b> The labels J1/J2/J3 are not consistent across your slides. In the Week 4 slides the overview page lists sort-merge as J1, single-loop as J2 and nested-loop as J3, but the detailed slides title nested-loop <b>(J1)</b>, single-loop <b>(J2)</b> and sort-merge <b>(J3)</b>, and the Week 6 cost slides use the same J1/J2/J3 = nested/single/sort-merge. This guide follows the detailed slides and Week 6: <b>J1 nested-loop · J2 single-loop · J3 sort-merge</b>. In an exam, always write the <i>name</i> next to the label.</div>
+<h3>Choosing among them</h3><div class="flow">
+<div class="step"><b class="n">?</b>Are both files already ordered on their join attributes?</div><div class="arrow">yes → <b class="c-green">sort-merge (J3)</b>, cost bR + bS (+ output) &nbsp;&nbsp; | &nbsp;&nbsp; no ↓</div>
+<div class="step"><b class="n">?</b>Does one relation have an index on its join attribute?</div><div class="arrow">yes → <b class="c-blue">single-loop (J2)</b>, probe that index &nbsp;&nbsp; | &nbsp;&nbsp; no ↓</div>
+<div class="step"><b class="n">!</b><b class="c-red">Nested-loop (J1)</b>: always works</div></div>
+<div class="box watch"><span class="tag">Watch it!</span><b>This is a first filter, not the final answer.</b> The decision flow tells you what is <i>possible</i>. The optimizer still computes the cost of every possible plan, and an indexed single-loop join can lose to a nested-loop join when the outer relation is big and the buffers plentiful (you will see exactly this in Lesson 11).</div>
+</section>
+<section class="sheet chapter" id="c6">
+  <span class="kicker">Lesson 06</span>
+  <h2>How big is a join result? Join selectivity</h2>
+  <p class="lead">Before costing a join we need to know how many blocks of output it writes.</p>
+<p>Join cost has two parts: the cost of <b>reading</b> the input files, and the cost of <b>writing the result</b>. The second part needs an estimate of how big the result is.</p>
+<h3>Why the result size matters</h3>
+<div class="box lecture"><span class="tag">From the lecture</span><b>What is the problem about join?</b> The result should be stored, and other operations may be done on it ("intermediate results"). The resulting file is stored to disk. <code>R ⋈ S ⋈ T ≡ (R ⋈ S) → store result as RS, then RS ⋈ T</code>. <b>How to estimate the result?</b></div>
+<h3>Join selectivity (js)</h3><div class="formula">js = |R ⋈<sub>A=B</sub> S| / |R × S|<small>0 ≤ js ≤ 1 · the fraction of the Cartesian product that survives the join condition</small></div>
+<div class="grid2"><div class="card"><h4 class="c-red">No join condition</h4>That is a Cartesian product: every pair survives, so <b>js = 1</b>.</div><div class="card"><h4 class="c-green">No matching tuples</h4>Nothing survives, so <b>js = 0</b>.</div></div><h3>From js to blocks</h3><div class="formula">result records = js × |R| × |S|</div>
+<div class="formula">result blocks = ⌈ (js × |R| × |S|) / bfr<sub>RS</sub> ⌉<small>bfr<sub>RS</sub> = blocking factor of the result file (records per block)</small></div>
+<div class="box example"><span class="tag">Example</span><b>EMPLOYEE ⋈<sub>Dno=Dnumber</sub> DEPARTMENT.</b> |EMPLOYEE| = 10,000, |DEPARTMENT| = 125, js = 1/125, bfr<sub>ED</sub> = 4.<br>result records = (1/125) × 10,000 × 125 = <b>10,000</b>. That makes sense: every employee belongs to exactly one department, so the result has one record per employee.<br>result blocks = 10,000 / 4 = <b>2,500</b>.</div>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Where does js = 1/125 come from?</dt><dd>DEPARTMENT's join attribute (Dnumber) is a <b>key</b> with 125 values, and every EMPLOYEE record matches exactly one. In a key–foreign key join, <b>js = 1 / |relation holding the key|</b>.</dd><dt>Is the result blocking factor the same as the inputs'?</dt><dd>No. Result records are <b>wider</b> (they carry the attributes of both), so fewer fit per block. That is why bfr<sub>ED</sub> = 4 here while EMPLOYEE has bfr = 5 and DEPARTMENT has bfr = 10.</dd></dl></div>
+<div class="box key"><span class="tag">Key point</span><b>Every join algorithm</b> pays the same output term, <code>(js × |R| × |S|) / bfr<sub>RS</sub></code>. It does not depend on the algorithm. Only the <b>reading</b> part differs, which is why the lecture compares algorithms on their reading cost.</div>
+</section>
+<section class="sheet chapter" id="c7">
+  <span class="kicker">Lesson 07</span>
+  <h2>Nested-loop join (J1)</h2>
+  <p class="lead">The fallback that always works: compare everything with everything, but block by block.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Nested-loop join (J1)</b>, aka nested-block join. <b>When:</b> no indexes are available for the joining attributes. <b>How:</b> for each block in R (outer loop), for each block in S (inner loop): compare each record in R's block with each record in S's block; if <code>r[A] == s[B]</code> add <code>r[A]+s[B]</code> to the result set.</div>
+<pre class="code"><span class="k">for each</span> block br <span class="k">in</span> R:             <span class="c">-- OUTER loop</span>
+    <span class="k">for each</span> block bs <span class="k">in</span> S:         <span class="c">-- INNER loop</span>
+        <span class="k">for each</span> record r <span class="k">in</span> br, s <span class="k">in</span> bs:
+            <span class="k">if</span> r[A] == s[B]:  add r + s to the result</pre>
+<h3>Worked example</h3><div class="grid2">
+<div class="card"><h4>R(B, C)</h4><table class="t center"><tr><th>B</th><th>C</th></tr><tr><td>a</td><td>10</td></tr><tr><td>a</td><td>20</td></tr><tr><td>b</td><td>10</td></tr><tr><td>d</td><td>30</td></tr></table></div>
+<div class="card"><h4>S(C, D)</h4><table class="t center"><tr><th>C</th><th>D</th></tr><tr><td>10</td><td>cat</td></tr><tr><td>40</td><td>dog</td></tr><tr><td>15</td><td>bat</td></tr><tr><td>20</td><td>rat</td></tr></table></div></div>
+<p>Join on <code>R.C = S.C</code>. The algorithm compares every R record with every S record (4 × 4 = 16 comparisons) and finds three matches:</p>
+<table class="t center"><tr><th>B</th><th>C</th><th>D</th><th>because</th></tr><tr><td>a</td><td>10</td><td>cat</td><td>R(a,10) meets S(10,cat)</td></tr><tr><td>a</td><td>20</td><td>rat</td><td>R(a,20) meets S(20,rat)</td></tr><tr><td>b</td><td>10</td><td>cat</td><td>R(b,10) meets S(10,cat)</td></tr></table>
+<p>R(d,30) matched nothing, and S(40,dog) and S(15,bat) were never wanted. A join result never contains unmatched records (that would be an outer join, outside this lecture).</p><h3>Two ideas to hold on to</h3>
+<div class="grid2"><div class="card"><h4 class="c-blue">Outer relation</h4>Read <b>once</b>, a chunk at a time. Its blocks are read exactly <code>b<sub>R</sub></code> times in total.</div>
+<div class="card"><h4 class="c-red">Inner relation</h4>Read <b>again and again</b>: once <i>per chunk</i> of the outer relation. This is the term that hurts.</div></div><div class="box lecture"><span class="tag">From the lecture</span><b>Factors affecting JOIN performance:</b> available buffer space [memory buffers] and the choice of inner vs outer relation.</div>
+<div class="box brain"><span class="tag">Brain power</span>If R has 1 block and S has 1,000,000 blocks, how many times is S read when R is the outer relation? And if S is the outer relation and R the inner?</div>
+</section>
+<section class="sheet chapter" id="c8">
+  <span class="kicker">Lesson 08</span>
+  <h2>Buffers and the choice of outer relation</h2>
+  <p class="lead">The same join can cost 19 blocks or 17 blocks depending on which file you put outside. Here is why.</p>
+<p>The lecture poses a question on two successive slides: <b>"Which is better, R ⋈<sub>A=B</sub> S or S ⋈<sub>B=A</sub> R? Calculate the number of blocks that are read. It depends on who is the smaller and bigger relation."</b> Same join, same answer, different cost, just by swapping which file is outer.</p>
+<h3>Counting block reads</h3>
+<p>Take R with <b>b<sub>R</sub> = 7</b> blocks, S with <b>b<sub>S</sub> = 3</b> blocks. The buffer lets us hold <b>2 blocks of the outer relation</b> at a time.</p>
+<figure class="figure reveal"><svg viewBox="0 0 760 250" role="img" aria-label="R outer in chunks of two blocks, S scanned fully for every chunk">
+<g font-size="12" font-weight="700" text-anchor="middle">
+<text x="380" y="18" font-size="14">R outer, chunks of 2 blocks → 4 chunks → S is scanned 4 times</text>
+<g class="pop"><rect x="30" y="35" width="40" height="28" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="50" y="54">R1</text><rect x="30" y="63" width="40" height="28" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="50" y="82">R2</text></g>
+<g class="pop" style="animation-delay:.2s"><rect x="210" y="35" width="40" height="28" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="230" y="54">R3</text><rect x="210" y="63" width="40" height="28" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="230" y="82">R4</text></g>
+<g class="pop" style="animation-delay:.4s"><rect x="390" y="35" width="40" height="28" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="410" y="54">R5</text><rect x="390" y="63" width="40" height="28" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="410" y="82">R6</text></g>
+<g class="pop" style="animation-delay:.6s"><rect x="570" y="35" width="40" height="28" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="590" y="54">R7</text></g></g>
+<g font-size="12" font-weight="700" text-anchor="middle" fill="#2459a8">
+<g stroke="#2459a8" fill="#e3ecfa" stroke-width="2"><rect x="90" y="35" width="36" height="24"/><rect x="90" y="59" width="36" height="24"/><rect x="90" y="83" width="36" height="24"/>
+<rect x="270" y="35" width="36" height="24"/><rect x="270" y="59" width="36" height="24"/><rect x="270" y="83" width="36" height="24"/>
+<rect x="450" y="35" width="36" height="24"/><rect x="450" y="59" width="36" height="24"/><rect x="450" y="83" width="36" height="24"/>
+<rect x="630" y="35" width="36" height="24"/><rect x="630" y="59" width="36" height="24"/><rect x="630" y="83" width="36" height="24"/></g>
+<text x="108" y="52">S1</text><text x="108" y="76">S2</text><text x="108" y="100">S3</text><text x="288" y="52">S1</text><text x="288" y="76">S2</text><text x="288" y="100">S3</text><text x="468" y="52">S1</text><text x="468" y="76">S2</text><text x="468" y="100">S3</text><text x="648" y="52">S1</text><text x="648" y="76">S2</text><text x="648" y="100">S3</text></g>
+<g font-size="14" text-anchor="middle"><text x="380" y="150" font-weight="700">reads of R: 7 (each block once) + reads of S: 4 × 3 = 12</text>
+<text x="380" y="176" fill="#b8322a" font-weight="700" font-size="18">7 + 4 × 3 = 19 blocks</text></g>
+<text x="40" y="225" class="hand" font-size="22" fill="#b8322a">⌈7 / 2⌉ = 4 chunks</text></svg><figcaption>R outer (7 blocks, chunk size 2): four chunks, so S is re-read four times.</figcaption></figure>
+<div class="formula">b<sub>R</sub> + ⌈ b<sub>R</sub> / Buffers ⌉ × b<sub>S</sub><small>R in the outer loop · "Buffers" = how many outer blocks fit in memory at a time</small></div>
+<table class="t"><tr><th>Outer relation</th><th>Formula</th><th>Chunks</th><th>Total reads</th></tr><tr><td><b>R</b> (7 blocks)</td><td>b<sub>R</sub> + ⌈b<sub>R</sub>/2⌉ × b<sub>S</sub> = 7 + 4 × 3</td><td>4</td><td><b>19</b></td></tr><tr><td><b>S</b> (3 blocks)</td><td>b<sub>S</sub> + ⌈b<sub>S</sub>/2⌉ × b<sub>R</sub> = 3 + 2 × 7</td><td>2</td><td><b>17</b></td></tr></table>
+<div class="box key"><span class="tag">The rule</span><b>Rule: put the SMALLER relation in the outer loop.</b> The outer relation is read once either way (7 or 3); what changes is the <b>number of chunks</b>, and each chunk costs one full scan of the inner relation. Fewer blocks outside → fewer chunks → fewer scans of the big file.</div>
+<h3>From "Buffers" to nB − 2</h3><div class="box lecture"><span class="tag">From the lecture</span><b>Assume the memory buffer is n<sub>B</sub> blocks:</b> <code>cost = b<sub>R</sub> + ⌈b<sub>R</sub>/(n<sub>B</sub> − 2)⌉ × b<sub>S</sub> + (js × |R| × |S|)/bfr<sub>RS</sub></code> — <i>"Why?"</i></div>
+<p>The slide leaves the <b>why</b> as a question. Here is the answer. Of the <code>n<sub>B</sub></code> memory blocks you cannot give all of them to the outer relation:</p>
+<ul><li><b>1 block</b> to read the current block of the <b>inner</b> relation S;</li><li><b>1 block</b> as the <b>output</b> buffer where result records are built before being written;</li><li>the remaining <b>n<sub>B</sub> − 2</b> blocks hold the outer chunk.</li></ul>
+<p>So in the first example, "we consider 2 blocks to read from outer R" means <code>n<sub>B</sub> − 2 = 2</code> (n<sub>B</sub> = 4). That is why the quiz question "b<sub>R</sub> = 7, b<sub>S</sub> = 3, n<sub>B</sub> = 4" has the answer 19.</p>
+<h3>How much do buffers matter?</h3><p>EMPLOYEE (b = 2,000) joined with DEPARTMENT (b = 13), DEPARTMENT outer, plus the 2,500 output blocks:</p><table class="t center"><tr><th>n<sub>B</sub></th><th>Chunk (n<sub>B</sub>−2)</th><th>Chunks ⌈13/chunk⌉</th><th>Reading cost 13 + chunks × 2000</th><th>Plus output 2,500</th></tr><tr><td>3</td><td>1</td><td>13</td><td>26,013</td><td><b>28,513</b></td></tr><tr><td>5</td><td>3</td><td>5</td><td>10,013</td><td><b>12,513</b></td></tr><tr><td>8</td><td>6</td><td>3</td><td>6,013</td><td><b>8,513</b></td></tr><tr><td>15</td><td>13</td><td>1</td><td>2,013</td><td><b>4,513</b></td></tr></table>
+<div class="box watch"><span class="tag">Watch it!</span><b>Once the outer relation fits entirely in memory, more buffers help no more.</b> At n<sub>B</sub> = 15 the whole of DEPARTMENT (13 blocks) sits in memory and EMPLOYEE is read just once. With n<sub>B</sub> = 100 the cost is still 4,513.</div>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Why not just give the inner relation more buffers?</dt><dd>It does not help: the inner relation is scanned sequentially, one block at a time, and each block is used immediately. Buffers pay off only for the <b>outer</b> relation, because a bigger chunk means fewer scans of the inner one.</dd><dt>Is the output term affected by the swap?</dt><dd>No. Both orders produce the same result records, so the output cost is identical. Only the reading cost depends on which relation is outer.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c9">
+  <span class="kicker">Lesson 09</span>
+  <h2>Single-loop join (J2)</h2>
+  <p class="lead">Replace the inner loop by an index lookup. One loop, many probes.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Single-loop join (J2). When:</b> one table has an index on its join attribute. <b>How:</b> assume table S has an index on attribute B. For each block <i>b</i> in R, for each record <i>r</i> in <i>b</i>: retrieve the record in S with B = A using the index.</div>
+<pre class="code"><span class="k">for each</span> block b <span class="k">in</span> R:                       <span class="c">-- one loop over R's blocks</span>
+    <span class="k">for each</span> record r <span class="k">in</span> b:
+        use the index on S.B to fetch the records with B = r[A]
+        add each (r, s) pair to the result</pre>
+<h3>Seeing it with Dept ⋈ Student</h3><div class="grid2">
+<div class="card"><h4>R: Dept (no index needed)</h4><table class="t center"><tr><th>DeptName</th><th>DeptID</th></tr><tr><td>IT</td><td>1</td></tr><tr><td>IS</td><td>2</td></tr><tr><td>OR</td><td>3</td></tr><tr><td>CS</td><td>4</td></tr></table></div>
+<div class="card"><h4>S: Student, <b>index on DeptNum</b></h4><table class="t center"><tr><th>DeptNum</th><th>StudentID</th><th>Name</th></tr><tr><td>2</td><td>20090320</td><td>Ayman</td></tr><tr><td>2</td><td>20090310</td><td>Randa</td></tr><tr><td>3</td><td>20090300</td><td>Novi</td></tr><tr><td>4</td><td>20092300</td><td>Nemin</td></tr><tr><td>4</td><td>20092300</td><td>Manar</td></tr></table></div></div>
+<p>For each Dept record, the DBMS asks the index "where are the students with DeptNum = this DeptID?" and jumps straight to those data blocks. IT (1) finds nothing; IS (2) finds two blocks' worth; OR (3) one; CS (4) two. Students of other departments are <b>never read</b>. That is the whole advantage: S is not scanned, only probed.</p>
+<h3>The cost formulas</h3><div class="box lecture"><span class="tag">From the lecture</span><b>Primary index:</b> b<sub>R</sub> + (|R| × (x<sub>B</sub> + 1)) + (js × |R| × |S| / bfr<sub>RS</sub>)<br><b>Clustering index:</b> b<sub>R</sub> + (|R| × (x<sub>B</sub> + ⌈s<sub>B</sub>/bfr<sub>B</sub>⌉)) + (js × |R| × |S| / bfr<sub>RS</sub>)<br><b>Secondary index:</b> b<sub>R</sub> + (|R| × (x<sub>B</sub> + 1 + s<sub>B</sub>)) + (js × |R| × |S| / bfr<sub>RS</sub>)</div>
+<table class="t"><tr><th>Symbol</th><th>Meaning</th></tr><tr><td>b<sub>R</sub></td><td>blocks of the outer relation R (read once, sequentially)</td></tr><tr><td>|R|</td><td>records of R: <b>one index probe per record</b></td></tr><tr><td>x<sub>B</sub></td><td>index levels on attribute B of S</td></tr><tr><td>s<sub>B</sub></td><td>selection cardinality for B in S (matching S records per value)</td></tr><tr><td>bfr<sub>B</sub></td><td>blocking factor of S (records per block), used to turn s<sub>B</sub> into blocks</td></tr><tr><td>last term</td><td>output blocks, same for every algorithm</td></tr></table>
+<h3>Why these three shapes?</h3>
+<p>The part in the middle is the cost of <b>one probe</b>, times |R| probes:</p>
+<table class="t"><tr><th>Index on S.B</th><th>One probe costs</th><th>Reason</th></tr>
+<tr><td><b>Primary</b></td><td>x<sub>B</sub> + 1</td><td>x index blocks to find the key, then 1 data block (one match, key is unique)</td></tr>
+<tr><td><b>Clustering</b></td><td>x<sub>B</sub> + ⌈s<sub>B</sub>/bfr<sub>B</sub>⌉</td><td>x index blocks, then the matching records are <b>contiguous</b>, so they occupy only ⌈s/bfr⌉ blocks</td></tr>
+<tr><td><b>Secondary (non-key)</b></td><td>x<sub>B</sub> + 1 + s<sub>B</sub></td><td>x index levels, 1 pointer block, then each of the s matches may sit in a <b>different</b> data block</td></tr></table>
+<div class="box watch"><span class="tag">Watch it!</span><b>|R|, not b<sub>R</sub>.</b> The outer file is read block by block (b<sub>R</sub> reads), but the index must be probed <b>once per record</b>, because each record carries its own join value. A block of 5 employees needs 5 probes, not 1.</div>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Which relation should be outer in a single-loop join?</dt><dd>The one <b>without</b> the useful index is the outer one (it gets read sequentially); the <b>indexed</b> relation is probed. If both have indexes, try both and pick the cheaper: usually the one with fewer <b>records</b> as outer, since |R| multiplies the probe cost.</dd><dt>Why is a clustering-index probe cheaper than a secondary one?</dt><dd>Matching records sit next to each other, so s matches need only ⌈s/bfr⌉ blocks instead of up to s blocks.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c10">
+  <span class="kicker">Lesson 10</span>
+  <h2>Sort-merge join (J3)</h2>
+  <p class="lead">Two sorted files, two pointers, one pass: the cheapest join there is, if the files are already ordered.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Sort-merge join (J3). When:</b> R is ordered by A and S is ordered by B. <b>Cost:</b> b<sub>R</sub> + b<sub>S</sub> + ((js × |R| × |S|) / bfr<sub>RS</sub>).</div>
+<p>If both files are sorted on their join attributes, matching records are neighbours in both files, so two pointers walking down the files once will meet every match. Each file is read <b>exactly once</b>.</p>
+<h3>The algorithm</h3>
+<pre class="code">sort the tuples in R on attribute A;   <span class="c">-- skip if already sorted</span>
+sort the tuples in S on attribute B;
+i ← 1; j ← 1;                          <span class="c">-- n = |R|, m = |S|</span>
+<span class="k">while</span> (i ≤ n) <span class="k">and</span> (j ≤ m) <span class="k">do</span> {
+  <span class="k">if</span>      R(i)[A] &gt; S(j)[B]  <span class="k">then</span> j ← j + 1
+  <span class="k">else if</span> R(i)[A] &lt; S(j)[B]  <span class="k">then</span> i ← i + 1
+  <span class="k">else</span> {                                   <span class="c">-- R(i)[A] = S(j)[B]: a match</span>
+     output &lt;R(i), S(j)&gt; to T;
+     l ← j + 1;                           <span class="c">-- other S tuples matching R(i)</span>
+     <span class="k">while</span> (l ≤ m) <span class="k">and</span> (R(i)[A] = S(l)[B]) { output &lt;R(i), S(l)&gt; to T; l ← l + 1 }
+     k ← i + 1;                           <span class="c">-- other R tuples matching S(j)</span>
+     <span class="k">while</span> (k ≤ n) <span class="k">and</span> (R(k)[A] = S(j)[B]) { output &lt;R(k), S(j)&gt; to T; k ← k + 1 }
+     i ← k; j ← l                         <span class="c">-- jump past the whole group</span>
+  }
+}</pre>
+<h3>The full trace (Dept ⋈ Student)</h3><p>R = Dept sorted by DeptID (n = 4), S = Student sorted by DeptNum (m = 6). Watch the pointers <code>i, j</code> and the look-ahead pointers <code>k, l</code>:</p><table class="t"><tr><th>Step</th><th>i (R)</th><th>j (S)</th><th>Compare</th><th>Action</th><th>Output so far</th></tr><tr><td>1</td><td>1 → DeptID 1</td><td>1 → DeptNum 2</td><td>1 &lt; 2</td><td>advance i</td><td>—</td></tr><tr><td>2</td><td>2 → DeptID 2</td><td>1 → DeptNum 2</td><td>2 = 2</td><td>match; output IS–Ayman</td><td>1</td></tr><tr><td>3</td><td>2</td><td>l = 2 → DeptNum 2</td><td>2 = 2</td><td>output IS–Randa; l = 3</td><td>2</td></tr><tr><td>4</td><td>2</td><td>l = 3 → DeptNum 3</td><td>2 ≠ 3</td><td>stop looking in S; k = 3 → DeptID 3 ≠ 2, stop. Set i = 3, j = 3</td><td>2</td></tr><tr><td>5</td><td>3 → OR</td><td>3 → DeptNum 3</td><td>3 = 3</td><td>match; output OR–Novi; l = 4 (4 ≠ 3), k = 4 (4 ≠ 3). Set i = 4, j = 4</td><td>3</td></tr><tr><td>6</td><td>4 → CS</td><td>4 → Heba</td><td>4 = 4</td><td>match; output CS–Heba</td><td>4</td></tr><tr><td>7</td><td>4</td><td>l = 5 → Nemin</td><td>4 = 4</td><td>output CS–Nemin; l = 6</td><td>5</td></tr><tr><td>8</td><td>4</td><td>l = 6 → Manar</td><td>4 = 4</td><td>output CS–Manar; l = 7 &gt; m, stop. k = 5 &gt; n, stop. i = 5, j = 7</td><td>6</td></tr><tr><td>9</td><td>5 &gt; n</td><td></td><td></td><td>loop ends (i &gt; n)</td><td><b>6 tuples</b></td></tr></table>
+<p>Result T: IS–Ayman, IS–Randa, OR–Novi, CS–Heba, CS–Nemin, CS–Manar. Each of the 4 Dept records and 6 Student records was visited <b>once</b>; the group look-ahead (<code>k</code>, <code>l</code>) handles duplicate join values on either side.</p><div class="formula">cost = b<sub>R</sub> + b<sub>S</sub> + (js × |R| × |S|)/bfr<sub>RS</sub><small>reading each file once + writing the output</small></div>
+<div class="box example"><span class="tag">Example</span>EMPLOYEE (2,000 blocks) ⋈ DEPARTMENT (13 blocks), both <b>already sorted</b> on the join attributes: 2,000 + 13 + 2,500 = <b>4,513</b> blocks. Compare that with the nested-loop plan with only 3 buffers: 28,513.</div>
+<div class="box watch"><span class="tag">Watch it!</span><b>"Already sorted" is a big assumption.</b> The formula b<sub>R</sub> + b<sub>S</sub> does <b>not</b> include sorting. If a file is not sorted on the join attribute, the cost of sorting it must be added, and sort-merge may then lose to a single-loop or nested-loop join. When the file <i>is</i> sorted (for example by a primary or clustering index on that attribute), sort-merge is the cheapest of the three.</div>
+<div class="box watch"><span class="tag">Watch it!</span><b>Duplicates on <i>both</i> sides.</b> The pseudocode above pairs R(i) with the whole run of equal S records (pointer l) and S(j) with the whole run of equal R records (pointer k). That covers the case drawn in the lecture, where only one side has duplicates (two or three Students per Dept). If <i>both</i> files contain a run of equal values, the true join must output <b>every pair</b> of the two runs (2 × 3 = 6 pairs for runs of 2 and 3), so a complete implementation loops over both runs. In an exam, say "all matching pairs".</div>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>What is the point of k and l?</dt><dd>Duplicates. Pointer <b>l</b> walks the run of equal join values in S for the current R record; pointer <b>k</b> walks the run in R for the current S record. They let the merge cope with repeated join values instead of assuming each value occurs once.</dd><dt>Does sort-merge work for non-equality conditions?</dt><dd>Not in this lecture: only <b>equi-joins</b> are covered.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c11">
+  <span class="kicker">Lesson 11</span>
+  <h2>Worked example: EMPLOYEE ⋈ DEPARTMENT</h2>
+  <p class="lead">Four plans, four costs, and a twist when memory grows.</p>
+<p>This is the lecture's grand worked example. We cost <code>EMPLOYEE ⋈<sub>Dno=Dnumber</sub> DEPARTMENT</code> four ways, then change the buffers.</p>
+<h3>The data</h3>
+<table class="t"><tr><th></th><th>EMPLOYEE</th><th>DEPARTMENT</th></tr><tr><td>records (r)</td><td>10,000</td><td>125</td></tr><tr><td>blocking factor (bfr)</td><td>5</td><td>10</td></tr><tr><td>blocks (b)</td><td>2,000</td><td>13</td></tr><tr><td>useful index on the join attribute</td><td>secondary index on Dno: x = 2, s = 80</td><td>primary index on Dnumber: x = 1</td></tr><tr><td>join parameters</td><td>js = 1/125 · bfr<sub>ED</sub> = 4 · n<sub>B</sub> = 3</td><td></td></tr></table>
+<p><b>Output term</b> (same everywhere): (1/125 × 10,000 × 125) / 4 = <b>2,500</b> blocks.</p><h3>The four plans</h3><div class="grid2"><div class="card"><h4 class="c-red">1 · Nested-loop, EMPLOYEE outer</h4><code>b<sub>R</sub> + ⌈b<sub>R</sub>/(n<sub>B</sub>−2)⌉·b<sub>S</sub> + out</code><br>= 2,000 + ⌈2,000/1⌉ × 13 + 2,500<br>= 2,000 + 26,000 + 2,500 = <b>30,500</b></div><div class="card"><h4 class="c-red">2 · Nested-loop, DEPARTMENT outer</h4>= 13 + ⌈13/1⌉ × 2,000 + 2,500<br>= 13 + 26,000 + 2,500 = <b>28,513</b></div><div class="card"><h4 class="c-blue">3 · Single-loop, EMPLOYEE outer</h4>probe DEPARTMENT's <b>primary</b> index (x = 1)<br><code>b<sub>R</sub> + |R|(x<sub>B</sub>+1) + out</code><br>= 2,000 + 10,000 × (1+1) + 2,500 = <b>24,500</b></div><div class="card"><h4 class="c-green">4 · Single-loop, DEPARTMENT outer</h4>probe EMPLOYEE's <b>secondary</b> index (x = 2, s = 80)<br><code>b<sub>R</sub> + |R|(x<sub>B</sub>+1+s<sub>B</sub>) + out</code><br>= 13 + 125 × (2+1+80) + 2,500 = 13 + 10,375 + 2,500 = <b>12,888</b></div></div><div class="figure reveal" style="padding:14px 18px"><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Single-loop, DEPARTMENT outer</div><div class="bar anim" style="width:42.3%;background:#1f7a4d">12,888 blocks</div></div><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Single-loop, EMPLOYEE outer</div><div class="bar anim" style="width:80.3%;background:#2459a8">24,500 blocks</div></div><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Nested-loop, DEPARTMENT outer</div><div class="bar anim" style="width:93.5%;background:#b5770c">28,513 blocks</div></div><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Nested-loop, EMPLOYEE outer</div><div class="bar anim" style="width:100.0%;background:#b8322a">30,500 blocks</div></div></div>
+<div class="box watch"><span class="tag">Watch it!</span><b>A discrepancy in your slides.</b> The printed answers are 40,500 and 38,513 (nested-loop), and 12,763 (single-loop, DEPARTMENT outer). Plugging the slide's own numbers into the slide's own formulas gives <b>30,500</b>, <b>28,513</b> and <b>12,888</b>: both nested-loop slides are 10,000 too high, and the last one is 125 too low (it looks as if x + s = 82 was used instead of x + 1 + s = 83). The slide that uses 15 buffers prints 4,513, which matches the formula exactly. <b>The ranking is the same either way</b> and the method is what an exam rewards: write the formula, substitute, compute. If your exam uses the printed slide numbers, mention the formula you used.</div>
+<h3>What did we learn?</h3><ul><li><b>Plan 4 wins</b> because only <b>125</b> probes are needed (one per department), each costing 83 blocks. Plan 3 needs <b>10,000</b> probes at 2 blocks each. <i>Fewer outer records beats cheaper probes.</i></li>
+<li>Both nested-loop plans are expensive with only <b>3 buffers</b>, because the chunk is a single block, so the inner file is scanned once per outer block.</li>
+<li>Between the two nested-loop plans, the <b>smaller (DEPARTMENT) outer</b> wins again.</li></ul>
+<h3>What if there are more buffers? (n<sub>B</sub> = 15)</h3><div class="box example"><span class="tag">Example</span>Nested-loop, DEPARTMENT outer, n<sub>B</sub> = 15: 13 + ⌈13/(15−2)⌉ × 2,000 + 2,500 = 13 + 1 × 2,000 + 2,500 = <b>4,513</b>.<br>The whole DEPARTMENT file (13 blocks) now fits in the 13-block chunk, so EMPLOYEE is scanned just once. <b>The "worst" algorithm has become the best</b>: 4,513 beats single-loop's 12,888.</div>
+<div class="figure reveal" style="padding:14px 18px"><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Nested-loop, DEPT outer, n<sub>B</sub> = 15</div><div class="bar anim" style="width:15.8%;background:#1f7a4d">4,513 blocks</div></div><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Single-loop, DEPT outer</div><div class="bar anim" style="width:45.2%;background:#2459a8">12,888 blocks</div></div><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Nested-loop, DEPT outer, n<sub>B</sub> = 3</div><div class="bar anim" style="width:100.0%;background:#b8322a">28,513 blocks</div></div></div>
+<div class="box key"><span class="tag">The big lesson</span><b>The best algorithm depends on memory, on index structure and on the data sizes together.</b> That is exactly why the optimizer <i>computes</i> costs for each candidate instead of following a fixed rule.</div>
+</section>
+<section class="sheet chapter" id="c12">
+  <span class="kicker">Lesson 12</span>
+  <h2>Summary, key ideas &amp; dictionary</h2>
+  <p class="lead">Everything on one page: when to use which join, and what each costs.</p>
+<h3>The three join algorithms side by side</h3><table class="t"><tr><th></th><th>Nested-loop (J1)</th><th>Single-loop (J2)</th><th>Sort-merge (J3)</th></tr><tr><td><b>Needs</b></td><td>nothing</td><td>index on one join attribute</td><td>both files ordered on the join attributes</td></tr><tr><td><b>Reads</b></td><td>R once; S once per outer chunk</td><td>R once; S probed once per R record</td><td>R once; S once</td></tr><tr><td><b>Reading cost</b></td><td>b<sub>R</sub> + ⌈b<sub>R</sub>/(n<sub>B</sub>−2)⌉·b<sub>S</sub></td><td>b<sub>R</sub> + |R|·(probe cost)</td><td>b<sub>R</sub> + b<sub>S</sub></td></tr><tr><td><b>Output cost</b></td><td>(js·|R|·|S|)/bfr<sub>RS</sub></td><td>same</td><td>same</td></tr><tr><td><b>Outer relation</b></td><td>the smaller (in blocks)</td><td>the one with fewer records (or without the index)</td><td>no outer/inner: both walked together</td></tr><tr><td><b>Buffers matter?</b></td><td><b>Yes, a lot</b></td><td>barely</td><td>barely</td></tr><tr><td><b>Weakness</b></td><td>huge when memory is small</td><td>one probe per record</td><td>sorting cost if not already sorted</td></tr></table>
+<h3>Probe cost cheat sheet (single-loop)</h3><table class="t"><tr><th>Index on S.B</th><th>Per-probe cost</th></tr><tr><td>Primary</td><td>x + 1</td></tr><tr><td>Clustering</td><td>x + ⌈s/bfr⌉</td></tr><tr><td>Secondary, key</td><td>x + 1</td></tr><tr><td>Secondary, non-key</td><td>x + 1 + s</td></tr></table>
+<h3>Key ideas</h3><ul><li><b>Aggregates</b>: MIN/MAX follow one tree edge, SUM/AVG visit all keys, COUNT is in the catalog.</li><li><b>GROUP BY</b>: sort, partition, aggregate; a clustering index skips the sort.</li><li><b>Selectivity</b>: 1/|R| for a key, 1/i for a uniform non-key; s = sl × r.</li><li><b>Join size</b>: js × |R| × |S| records, divided by bfr<sub>RS</sub> for blocks.</li><li><b>Nested-loop</b>: smaller relation outer; buffers n<sub>B</sub> − 2 for the chunk.</li><li><b>Single-loop</b>: |R| probes; formula depends on the index type.</li><li><b>Sort-merge</b>: b<sub>R</sub> + b<sub>S</sub> if already sorted.</li></ul><h3>Dictionary</h3><table class="t"><tr><th>Term</th><th>Meaning</th></tr><tr><td>equi-join</td><td>join whose condition is equality, R.A = S.B</td></tr><tr><td>two-way join</td><td>join of exactly two files</td></tr><tr><td>outer / inner relation</td><td>the relation of the outer / inner loop of a nested-loop join</td></tr><tr><td>chunk</td><td>the portion of the outer relation held in memory at once, n<sub>B</sub> − 2 blocks</td></tr><tr><td>n<sub>B</sub></td><td>number of available memory buffer blocks</td></tr><tr><td>js</td><td>join selectivity = |R ⋈ S| / |R × S|</td></tr><tr><td>bfr<sub>RS</sub></td><td>blocking factor of the join result</td></tr><tr><td>x<sub>B</sub>, s<sub>B</sub></td><td>index levels on attribute B; selection cardinality for B</td></tr><tr><td>sl, s</td><td>selectivity and selection cardinality (s = sl × r)</td></tr><tr><td>intermediate result</td><td>output of one operation, stored to disk to feed the next</td></tr><tr><td>index probe</td><td>one lookup into an index to find the records for one value</td></tr></table>
+<div class="sticky r">smaller outer.<br>count probes.<br>write the formula.</div>
+</section>
+<section class="sheet chapter" id="quiz">
+  <span class="kicker">Final exam</span>
+  <h2>60 questions</h2>
+  <p class="lead">15 True/False · 30 Multiple choice · 5 Written · 10 Practical. Try them all before you look at the answer key.</p>
+  <div class="grid2"><div class="card"><b>Part A</b> True / False: Q1–Q15<br><b>Part B</b> Multiple choice: Q16–Q45</div><div class="card"><b>Part C</b> Long-form written: Q46–Q50<br><b>Part D</b> Practical: Q51–Q60</div></div>
+  <h3>Part A · True or False</h3>
+  <p class="muted">Write T or F. If false, try to say what would make it true.</p>
+  <div class="q"><span class="qn">1</span>Aggregate operators such as MAX and SUM produce tables, not single numbers.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">2</span>With a B⁺-tree index on the column, MAX can be found by following the right-most key.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">3</span>SUM(Salary) can be answered from the catalog without visiting the data.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">4</span>For GROUP BY the relation is sorted on the grouping attributes, partitioned into groups, then the aggregate is applied to each group.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">5</span>If a clustering index exists on the grouping attribute, the data is already grouped.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">6</span>Selection and projection are tuple-at-a-time operators that do not need the whole relation in memory.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">7</span>Duplicate elimination is a tuple-at-a-time operator.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">8</span>The selectivity of an equality condition on a key attribute is 1 divided by the relation size.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">9</span>Condition selectivity is a number between 0 and 1.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">10</span>The join algorithms of the lecture cover theta-joins and multi-way joins.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">11</span>A three-table join R ⋈ S ⋈ T is executed as a sequence of two-way joins.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">12</span>A nested-loop join requires an index on one of the join attributes.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">13</span>Putting the larger relation in the outer loop minimizes the cost of a nested-loop join.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">14</span>If both files are already sorted on the join attributes, sort-merge join reads each file once.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">15</span>When there is no join condition, the join selectivity is 1.<span class="tf">T / F</span></div>
+  <h3>Part B · Multiple choice</h3>
+  <p class="muted">Choose the one best answer.</p>
+  <div class="q"><span class="qn">16</span>Which aggregate can usually be answered directly from the catalog?<ol class="opts"><li data-l="a">SUM</li><li data-l="b">COUNT</li><li data-l="c">AVG</li><li data-l="d">MAX</li></ol></div>
+  <div class="q"><span class="qn">17</span>MIN using a B⁺-tree index is found by:<ol class="opts"><li data-l="a">visiting all keys</li><li data-l="b">reading the catalog</li><li data-l="c">traversing to the left-most key</li><li data-l="d">traversing to the right-most key</li></ol></div>
+  <div class="q"><span class="qn">18</span>MAX on an unsorted table with no index requires:<ol class="opts"><li data-l="a">reading one block</li><li data-l="b">a table scan</li><li data-l="c">an index scan</li><li data-l="d">a sort-merge join</li></ol></div>
+  <div class="q"><span class="qn">19</span>For a table sorted on the column and with no index, MIN and MAX are:<ol class="opts"><li data-l="a">impossible to find</li><li data-l="b">readily available at the ends of the file</li><li data-l="c">found only by a table scan</li><li data-l="d">found from the catalog</li></ol></div>
+  <div class="q"><span class="qn">20</span>The first step of the sort-based GROUP BY is:<ol class="opts"><li data-l="a">apply the aggregate</li><li data-l="b">sort on the grouping attributes</li><li data-l="c">build an index</li><li data-l="d">write the result</li></ol></div>
+  <div class="q"><span class="qn">21</span>Which operator needs to see most of the relation in memory?<ol class="opts"><li data-l="a">selection</li><li data-l="b">projection</li><li data-l="c">duplicate elimination</li><li data-l="d">none of them</li></ol></div>
+  <div class="q"><span class="qn">22</span>Union, intersection and difference belong to the family of:<ol class="opts"><li data-l="a">tuple-at-a-time unary operators</li><li data-l="b">full-relation unary operators</li><li data-l="c">full-relation binary operators</li><li data-l="d">catalog operators</li></ol></div>
+  <div class="q"><span class="qn">23</span>Which pair is named in the lecture as the bottlenecks of a query?<ol class="opts"><li data-l="a">projection and union</li><li data-l="b">selection and join</li><li data-l="c">sorting and grouping</li><li data-l="d">COUNT and MAX</li></ol></div>
+  <div class="q"><span class="qn">24</span><code>Dept_number = 1</code> with 5 uniformly distributed department values has selectivity:<ol class="opts"><li data-l="a">1/5</li><li data-l="b">1/r</li><li data-l="c">5</li><li data-l="d">1/2</li></ol></div>
+  <div class="q"><span class="qn">25</span>Join selectivity js is defined as:<ol class="opts"><li data-l="a">|R| / |S|</li><li data-l="b">|R ⋈ S| / |R × S|</li><li data-l="c">|R × S| / |R ⋈ S|</li><li data-l="d">b<sub>R</sub> / b<sub>S</sub></li></ol></div>
+  <div class="q"><span class="qn">26</span>The number of records in R ⋈ S is estimated as:<ol class="opts"><li data-l="a">js + |R| + |S|</li><li data-l="b">js × |R| × |S|</li><li data-l="c">|R| × |S| / js</li><li data-l="d">js × (|R| + |S|)</li></ol></div>
+  <div class="q"><span class="qn">27</span>The number of blocks of the join result is:<ol class="opts"><li data-l="a">js × |R| × |S|</li><li data-l="b">js × |R| × |S| / bfr<sub>RS</sub></li><li data-l="c">b<sub>R</sub> × b<sub>S</sub></li><li data-l="d">|R| / bfr<sub>RS</sub></li></ol></div>
+  <div class="q"><span class="qn">28</span>Both files ordered on their join attributes: the natural choice is:<ol class="opts"><li data-l="a">nested-loop join</li><li data-l="b">single-loop join</li><li data-l="c">sort-merge join</li><li data-l="d">Cartesian product</li></ol></div>
+  <div class="q"><span class="qn">29</span>One relation has an index on its join attribute. The natural choice is:<ol class="opts"><li data-l="a">single-loop join</li><li data-l="b">nested-loop join</li><li data-l="c">sort-merge join</li><li data-l="d">union</li></ol></div>
+  <div class="q"><span class="qn">30</span>No index and no ordering on either join attribute:<ol class="opts"><li data-l="a">sort-merge join</li><li data-l="b">single-loop join</li><li data-l="c">nested-loop join</li><li data-l="d">no join is possible</li></ol></div>
+  <div class="q"><span class="qn">31</span>The sort-merge join cost (files already sorted) is:<ol class="opts"><li data-l="a">b<sub>R</sub> × b<sub>S</sub></li><li data-l="b">b<sub>R</sub> + b<sub>S</sub> + output</li><li data-l="c">|R| × x</li><li data-l="d">b<sub>R</sub> + |R|</li></ol></div>
+  <div class="q"><span class="qn">32</span>In a single-loop join, the indexed relation is:<ol class="opts"><li data-l="a">scanned fully for every outer block</li><li data-l="b">probed through its index</li><li data-l="c">sorted first</li><li data-l="d">ignored</li></ol></div>
+  <div class="q"><span class="qn">33</span>The nested-loop cost with R outer and n<sub>B</sub> buffers is (reading part):<ol class="opts"><li data-l="a">b<sub>R</sub> + b<sub>S</sub></li><li data-l="b">b<sub>R</sub> + ⌈b<sub>R</sub>/(n<sub>B</sub>−2)⌉ × b<sub>S</sub></li><li data-l="c">b<sub>R</sub> × b<sub>S</sub></li><li data-l="d">|R| × b<sub>S</sub></li></ol></div>
+  <div class="q"><span class="qn">34</span>Why does the formula use n<sub>B</sub> − 2?<ol class="opts"><li data-l="a">two blocks are reserved for the catalog</li><li data-l="b">one block for the inner relation and one for the output</li><li data-l="c">the outer relation uses two blocks per chunk</li><li data-l="d">it is a convention without a reason</li></ol></div>
+  <div class="q"><span class="qn">35</span>b<sub>R</sub> = 7, b<sub>S</sub> = 3, chunk of 2 blocks, R outer. Blocks read:<ol class="opts"><li data-l="a">10</li><li data-l="b">17</li><li data-l="c">19</li><li data-l="d">21</li></ol></div>
+  <div class="q"><span class="qn">36</span>Same relations, S outer, chunk of 2 blocks. Blocks read:<ol class="opts"><li data-l="a">17</li><li data-l="b">19</li><li data-l="c">14</li><li data-l="d">21</li></ol></div>
+  <div class="q"><span class="qn">37</span>EMPLOYEE (2,000 blocks) and DEPARTMENT (13), n<sub>B</sub> = 15, DEPARTMENT outer. The reading part is:<ol class="opts"><li data-l="a">13 + 2,000</li><li data-l="b">13 + 13 × 2,000</li><li data-l="c">2,000 + 13</li><li data-l="d">2,013 × 13</li></ol></div>
+  <div class="q"><span class="qn">38</span>Single-loop with a primary index on S.B costs per probe:<ol class="opts"><li data-l="a">x<sub>B</sub> + 1</li><li data-l="b">x<sub>B</sub> + s<sub>B</sub></li><li data-l="c">b<sub>S</sub></li><li data-l="d">1</li></ol></div>
+  <div class="q"><span class="qn">39</span>Single-loop with a secondary index on a non-key attribute costs per probe:<ol class="opts"><li data-l="a">x<sub>B</sub> + 1</li><li data-l="b">x<sub>B</sub> + 1 + s<sub>B</sub></li><li data-l="c">x<sub>B</sub> + ⌈s<sub>B</sub>/bfr⌉</li><li data-l="d">b<sub>S</sub>/2</li></ol></div>
+  <div class="q"><span class="qn">40</span>The single-loop formula multiplies by |R| and not b<sub>R</sub> because:<ol class="opts"><li data-l="a">|R| is smaller than b<sub>R</sub></li><li data-l="b">the index is probed once per record</li><li data-l="c">blocks are not used in joins</li><li data-l="d">it is a typographical convention</li></ol></div>
+  <div class="q"><span class="qn">41</span>As n<sub>B</sub> increases, the nested-loop join cost generally:<ol class="opts"><li data-l="a">increases</li><li data-l="b">decreases, until the outer relation fits in memory</li><li data-l="c">stays exactly the same</li><li data-l="d">becomes infinite</li></ol></div>
+  <div class="q"><span class="qn">42</span>In the merge loop, when R(i)[A] &lt; S(j)[B] the algorithm:<ol class="opts"><li data-l="a">advances j</li><li data-l="b">advances i</li><li data-l="c">outputs a tuple</li><li data-l="d">stops</li></ol></div>
+  <div class="q"><span class="qn">43</span>In the Week 6 cost slides, J1, J2 and J3 are respectively:<ol class="opts"><li data-l="a">sort-merge, single-loop, nested-loop</li><li data-l="b">nested-loop, single-loop, sort-merge</li><li data-l="c">single-loop, nested-loop, sort-merge</li><li data-l="d">nested-loop, sort-merge, single-loop</li></ol></div>
+  <div class="q"><span class="qn">44</span>Which condition is the <b>most selective</b>?<ol class="opts"><li data-l="a">sl = 0.5</li><li data-l="b">sl = 0.1</li><li data-l="c">sl = 0.0001</li><li data-l="d">sl = 1</li></ol></div>
+  <div class="q"><span class="qn">45</span>For EMPLOYEE ⋈ DEPARTMENT with n<sub>B</sub> = 3, which of the four plans is cheapest?<ol class="opts"><li data-l="a">nested-loop, EMPLOYEE outer</li><li data-l="b">nested-loop, DEPARTMENT outer</li><li data-l="c">single-loop, EMPLOYEE outer</li><li data-l="d">single-loop, DEPARTMENT outer</li></ol></div>
+  <h3>Part C · Written</h3>
+  <p class="muted">Answer in your own words, in 2–5 sentences.</p>
+  <div class="q"><span class="qn">46</span>Explain how MAX, MIN, SUM, AVG and COUNT can be answered using an index, and why SUM and AVG are more expensive than MAX and MIN.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">47</span>Describe the sort-based GROUP BY algorithm and explain how a clustering index changes the cost.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">48</span>Derive the nested-loop cost b<sub>R</sub> + ⌈b<sub>R</sub>/(n<sub>B</sub>−2)⌉ × b<sub>S</sub> and explain why the smaller relation should be the outer one.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">49</span>Explain how sort-merge join handles duplicate join values, using the pointers i, j, k and l.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">50</span>For EMPLOYEE ⋈ DEPARTMENT, explain why single-loop with DEPARTMENT outer beats single-loop with EMPLOYEE outer even though a DEPARTMENT probe costs only 2 blocks per employee.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <h3>Part D · Practical</h3>
+  <p class="muted">Show your working. Use a calculator if you like; the formulas are in the lessons.</p>
+  <div class="q"><span class="qn">51</span>A relation has r = 20,000 records and an attribute with 40 uniformly distributed distinct values. Find sl and s for an equality condition on it.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">52</span>Nested-loop join, b<sub>R</sub> = 10, b<sub>S</sub> = 4, n<sub>B</sub> = 3 (chunk of 1). Compute the reading cost with R outer and with S outer. Which is better?<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">53</span>b<sub>R</sub> = 20, b<sub>S</sub> = 6, n<sub>B</sub> = 6. Compute both nested-loop orders (reading cost only).<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">54</span>|R| = 1,000, |S| = 200, js = 1/200, bfr<sub>RS</sub> = 10. How many records and blocks does the join produce?<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">55</span>Single-loop join with a <b>primary</b> index on S.B: b<sub>R</sub> = 50, |R| = 500, x<sub>B</sub> = 2, output = 40 blocks. Find the total cost.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">56</span>Single-loop join with a <b>secondary</b> index on a non-key S.B: b<sub>R</sub> = 20, |R| = 100, x<sub>B</sub> = 2, s<sub>B</sub> = 5, output = 30 blocks. Find the cost.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">57</span>Sort-merge join, both files already sorted: b<sub>R</sub> = 300, b<sub>S</sub> = 500, output = 100 blocks. Find the cost.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">58</span>R.A = 1, 2, 5, 7 and S.B = 2, 2, 3, 5, 5, 8 (both sorted). Trace i and j through the sort-merge join and count the output tuples.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">59</span>bR = 100, bS = 40, |R| = 2,000, |S| = 800, n<sub>B</sub> = 4, S has a <b>primary</b> index on its join attribute (x<sub>B</sub> = 1), output = 60 blocks. Cost: nested-loop R outer, nested-loop S outer, single-loop R outer. Which is cheapest?<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">60</span>Compute AVG(Salary) per Dno for the rows (A,10), (B,20), (A,30), (B,50), (A,50) written as (Dno, Salary). Show the sort and partition.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+</section>
+<section class="sheet chapter" id="key">
+  <span class="kicker">Answer key</span>
+  <h2>Answers &amp; explanations</h2>
+  <h3>Part A · True / False</h3>
+  <div class="ans-grid">
+<div><b>1</b> F</div><div><b>2</b> T</div><div><b>3</b> F</div><div><b>4</b> T</div><div><b>5</b> T</div><div><b>6</b> T</div><div><b>7</b> F</div><div><b>8</b> T</div><div><b>9</b> T</div><div><b>10</b> F</div><div><b>11</b> T</div><div><b>12</b> F</div><div><b>13</b> F</div><div><b>14</b> T</div><div><b>15</b> T</div>
+  </div>
+  <div style="font-size:13.5px;margin-top:10px">
+    <div class="ans"><span class="qn">1</span><b class="a">False.</b> They produce <b>numbers</b>, not tables.</div>
+    <div class="ans"><span class="qn">2</span><b class="a">True.</b> The largest key is at the far right of the ordered index.</div>
+    <div class="ans"><span class="qn">3</span><b class="a">False.</b> It is <b>COUNT</b> that is usually kept in the catalog. SUM must visit all keys.</div>
+    <div class="ans"><span class="qn">4</span><b class="a">True.</b> The three steps of the lecture's sorting approach.</div>
+    <div class="ans"><span class="qn">5</span><b class="a">True.</b> The records of each group are physically contiguous, so the sort is unnecessary.</div>
+    <div class="ans"><span class="qn">6</span><b class="a">True.</b> Each record is tested and forgotten.</div>
+    <div class="ans"><span class="qn">7</span><b class="a">False.</b> It is a <b>full-relation unary</b> operator: you must see other tuples to know a record is a duplicate.</div>
+    <div class="ans"><span class="qn">8</span><b class="a">True.</b> Exactly one record matches out of r.</div>
+    <div class="ans"><span class="qn">9</span><b class="a">True.</b> It is the fraction of records that satisfy the condition.</div>
+    <div class="ans"><span class="qn">10</span><b class="a">False.</b> Only <b>equi-joins</b> and <b>two-way</b> joins are covered.</div>
+    <div class="ans"><span class="qn">11</span><b class="a">True.</b> First R ⋈ S is stored as an intermediate result, then joined with T.</div>
+    <div class="ans"><span class="qn">12</span><b class="a">False.</b> It is the fallback used when <b>no index</b> is available.</div>
+    <div class="ans"><span class="qn">13</span><b class="a">False.</b> The <b>smaller</b> relation should be outer: fewer chunks means fewer scans of the inner file.</div>
+    <div class="ans"><span class="qn">14</span><b class="a">True.</b> Cost b<sub>R</sub> + b<sub>S</sub>, plus the output.</div>
+    <div class="ans"><span class="qn">15</span><b class="a">True.</b> That is a Cartesian product, where every pair survives.</div>
+  </div>
+  <h3>Part B · Multiple choice</h3>
+  <div class="ans-grid">
+<div><b>16</b> B</div><div><b>17</b> C</div><div><b>18</b> B</div><div><b>19</b> B</div><div><b>20</b> B</div><div><b>21</b> C</div><div><b>22</b> C</div><div><b>23</b> B</div><div><b>24</b> A</div><div><b>25</b> B</div><div><b>26</b> B</div><div><b>27</b> B</div><div><b>28</b> C</div><div><b>29</b> A</div><div><b>30</b> C</div><div><b>31</b> B</div><div><b>32</b> B</div><div><b>33</b> B</div><div><b>34</b> B</div><div><b>35</b> C</div><div><b>36</b> A</div><div><b>37</b> A</div><div><b>38</b> A</div><div><b>39</b> B</div><div><b>40</b> B</div><div><b>41</b> B</div><div><b>42</b> B</div><div><b>43</b> B</div><div><b>44</b> C</div><div><b>45</b> D</div>
+  </div>
+  <div style="font-size:13.5px;margin-top:10px">
+    <div class="ans"><span class="qn">16</span><b class="a">B)</b> The number of records is a catalog statistic.</div>
+    <div class="ans"><span class="qn">17</span><b class="a">C)</b> The smallest key is at the far left.</div>
+    <div class="ans"><span class="qn">18</span><b class="a">B)</b> Nothing narrows the search, so every block is read.</div>
+    <div class="ans"><span class="qn">19</span><b class="a">B)</b> The first and last records hold them.</div>
+    <div class="ans"><span class="qn">20</span><b class="a">B)</b> Sort so that equal values become neighbours.</div>
+    <div class="ans"><span class="qn">21</span><b class="a">C)</b> Full-relation unary operators: duplicate elimination and grouping.</div>
+    <div class="ans"><span class="qn">22</span><b class="a">C)</b> They must see the tuples of both relations.</div>
+    <div class="ans"><span class="qn">23</span><b class="a">B)</b> Selections (σ) and joins (⋈).</div>
+    <div class="ans"><span class="qn">24</span><b class="a">A)</b> Non-key equality: sl = 1/i with i = 5.</div>
+    <div class="ans"><span class="qn">25</span><b class="a">B)</b> The fraction of the Cartesian product that survives.</div>
+    <div class="ans"><span class="qn">26</span><b class="a">B)</b> js times the size of the Cartesian product.</div>
+    <div class="ans"><span class="qn">27</span><b class="a">B)</b> Result records divided by the result blocking factor.</div>
+    <div class="ans"><span class="qn">28</span><b class="a">C)</b> Sort-merge reads each file once.</div>
+    <div class="ans"><span class="qn">29</span><b class="a">A)</b> Probe the index once per record of the other relation.</div>
+    <div class="ans"><span class="qn">30</span><b class="a">C)</b> Nested-loop always works.</div>
+    <div class="ans"><span class="qn">31</span><b class="a">B)</b> Each file once, plus writing the output.</div>
+    <div class="ans"><span class="qn">32</span><b class="a">B)</b> The index is used for lookups, not scans.</div>
+    <div class="ans"><span class="qn">33</span><b class="a">B)</b> R once, plus one full scan of S per chunk.</div>
+    <div class="ans"><span class="qn">34</span><b class="a">B)</b> One input buffer for S, one output buffer, the rest for the outer chunk.</div>
+    <div class="ans"><span class="qn">35</span><b class="a">C)</b> 7 + ⌈7/2⌉ × 3 = 7 + 4 × 3 = 19.</div>
+    <div class="ans"><span class="qn">36</span><b class="a">A)</b> 3 + ⌈3/2⌉ × 7 = 3 + 2 × 7 = 17.</div>
+    <div class="ans"><span class="qn">37</span><b class="a">A)</b> ⌈13/13⌉ = 1 scan of EMPLOYEE: 13 + 2,000 = 2,013 (then add 2,500 output).</div>
+    <div class="ans"><span class="qn">38</span><b class="a">A)</b> x index blocks plus one data block.</div>
+    <div class="ans"><span class="qn">39</span><b class="a">B)</b> Pointer block plus up to s scattered data blocks.</div>
+    <div class="ans"><span class="qn">40</span><b class="a">B)</b> Each record has its own join value to look up.</div>
+    <div class="ans"><span class="qn">41</span><b class="a">B)</b> Bigger chunks mean fewer inner scans, with a floor once everything fits.</div>
+    <div class="ans"><span class="qn">42</span><b class="a">B)</b> R is behind; move its pointer forward.</div>
+    <div class="ans"><span class="qn">43</span><b class="a">B)</b> J1 nested-loop, J2 single-loop, J3 sort-merge.</div>
+    <div class="ans"><span class="qn">44</span><b class="a">C)</b> The smaller the sl, the fewer records pass: 0.0001 keeps only 0.01% of the table.</div>
+    <div class="ans"><span class="qn">45</span><b class="a">D)</b> Only 125 probes: about 12,888 blocks, the minimum of the four.</div>
+  </div>
+  <h3>Part C · Written (model answers)</h3>
+  <div style="font-size:13.5px">
+    <div class="ans"><span class="qn">46</span><b>MAX</b> follows the right-most key; <b>MIN</b> the left-most; both cost only the tree height because keys are ordered. <b>SUM</b> and <b>AVG</b> must add every value, so they visit <b>all keys</b> (the whole leaf level); there is no shortcut. <b>COUNT</b> is usually a catalog statistic and is found directly. So MIN/MAX are cheap because they need one end of an ordered structure, SUM/AVG need all of it.</div>
+    <div class="ans"><span class="qn">47</span>(1) Sort the relation on the grouping attributes, so equal values are adjacent; (2) partition the sorted relation into groups, cutting whenever the grouping value changes; (3) apply the aggregate (AVG, SUM…) to each group in the same pass. The sort is the expensive step. With a <b>clustering index</b> on the grouping attribute the file is already ordered by it, so the data is already grouped and the sort is skipped: one pass suffices.</div>
+    <div class="ans"><span class="qn">48</span>The outer relation is read once: <b>b<sub>R</sub></b> blocks. Of n<sub>B</sub> buffers, one holds the current inner block and one is the output buffer, leaving <b>n<sub>B</sub> − 2</b> for the outer chunk, so there are ⌈b<sub>R</sub>/(n<sub>B</sub>−2)⌉ chunks. Each chunk requires a full scan of S (<b>b<sub>S</sub></b> blocks). Total = b<sub>R</sub> + ⌈b<sub>R</sub>/(n<sub>B</sub>−2)⌉ × b<sub>S</sub>. The outer relation is read once whichever it is; the number of chunks, which multiplies the inner scan, is smaller when the outer relation is small. Example: 7 + 4×3 = 19 versus 3 + 2×7 = 17.</div>
+    <div class="ans"><span class="qn">49</span>When R(i)[A] = S(j)[B] a match is output. Pointer <b>l</b> looks ahead in S from j + 1 and outputs R(i) with every following S record having the same value. Pointer <b>k</b> looks ahead in R from i + 1 and outputs every following R record with that value paired with S(j). After the group, i is set to k and j to l so both files jump past the run of equal values, and every record is visited essentially once. (If both files hold runs of equal values, a complete join must output <b>all pairs</b> of the two runs.)</div>
+    <div class="ans"><span class="qn">50</span>The cost is dominated by <b>|R| × (probe cost)</b>. With EMPLOYEE outer there are 10,000 probes at x + 1 = 2 blocks each: 20,000. With DEPARTMENT outer there are only 125 probes, each costing x + 1 + s = 83 blocks through the non-key secondary index on Dno: 10,375. Fewer outer records beats cheaper probes. Totals: 24,500 versus about 12,888.</div>
+  </div>
+  <h3>Part D · Practical (worked solutions)</h3>
+  <div style="font-size:13.5px">
+    <div class="ans"><span class="qn">51</span>sl = 1/40 = 0.025. s = sl × r = 0.025 × 20,000 = <b>500</b> records.</div>
+    <div class="ans"><span class="qn">52</span>Chunk = n<sub>B</sub> − 2 = 1. R outer: 10 + ⌈10/1⌉ × 4 = 10 + 40 = <b>50</b>. S outer: 4 + ⌈4/1⌉ × 10 = 4 + 40 = <b>44</b>. S (the smaller) outer is better.</div>
+    <div class="ans"><span class="qn">53</span>Chunk = 4. R outer: 20 + ⌈20/4⌉ × 6 = 20 + 30 = <b>50</b>. S outer: 6 + ⌈6/4⌉ × 20 = 6 + 40 = <b>46</b>. S outer is cheaper.</div>
+    <div class="ans"><span class="qn">54</span>Records = js × |R| × |S| = (1/200) × 1,000 × 200 = <b>1,000</b>. Blocks = 1,000 / 10 = <b>100</b>.</div>
+    <div class="ans"><span class="qn">55</span>50 + 500 × (2 + 1) + 40 = 50 + 1,500 + 40 = <b>1,590</b> blocks.</div>
+    <div class="ans"><span class="qn">56</span>20 + 100 × (2 + 1 + 5) + 30 = 20 + 800 + 30 = <b>850</b> blocks.</div>
+    <div class="ans"><span class="qn">57</span>300 + 500 + 100 = <b>900</b> blocks.</div>
+    <div class="ans"><span class="qn">58</span>i=1 (1) &lt; S(1)=2, so i → 2. R2=2 = S1=2: output (R2,S1); l=2: S2=2, output (R2,S2); l=3: 3 ≠ 2 stop; k=3: R3=5 ≠ 2 stop; i=3, j=3. R3=5 &gt; S3=3, so j → 4. R3=5 = S4=5: output (R3,S4); l=5: S5=5, output (R3,S5); l=6: 8 ≠ 5 stop; k=4: 7 ≠ 5 stop; i=4, j=6. R4=7 &lt; S6=8, so i → 5 &gt; n and the loop ends. Output: 2 + 2 = <b>4</b> tuples.</div>
+    <div class="ans"><span class="qn">59</span>Chunk = 2. Nested R outer: 100 + ⌈100/2⌉ × 40 + 60 = 100 + 2,000 + 60 = <b>2,160</b>. Nested S outer: 40 + ⌈40/2⌉ × 100 + 60 = 40 + 2,000 + 60 = <b>2,100</b>. Single-loop R outer: 100 + 2,000 × (1 + 1) + 60 = <b>4,160</b>. <b>Nested-loop with S outer (2,100) is cheapest</b>: an index does not automatically win when there are many outer records.</div>
+    <div class="ans"><span class="qn">60</span>Sorted on Dno: (A,10), (A,30), (A,50), (B,20), (B,50). Groups: A = {10, 30, 50}, B = {20, 50}. AVG(A) = 90/3 = <b>30</b>; AVG(B) = 70/2 = <b>35</b>.</div>
+  </div>
+<div class="box key" style="margin-top:26px"><span class="tag">You made it</span>If you can explain <b>why</b> MIN/MAX are cheap and SUM/AVG are not, <b>how</b> GROUP BY uses sorting, <b>how</b> to estimate a join result, <b>which</b> join fits which situation, and <b>how</b> to write and evaluate the cost formula for each, you understand join processing.</div>
+</section>
+</main>
+
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  function showAll(){ els.forEach(function(e){ e.classList.add('in'); }); }
+  if (!('IntersectionObserver' in window)) { showAll(); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, {threshold: 0.12});
+  els.forEach(function(e){ io.observe(e); });
+  window.addEventListener('beforeprint', showAll);
+  if (window.matchMedia) { var mq = window.matchMedia('print'); if (mq.addEventListener) mq.addEventListener('change', function(m){ if (m.matches) showAll(); }); }
+})();
+</script>
+
+<div class="scorebar no-print" id="scorebar" aria-live="polite">
+  <div>Score <b id="sc">0</b> / <span id="st">45</span><div class="muted" style="font-size:12px"><span id="sa">0</span> of 45 auto-marked answered</div></div>
+  <div class="meter"><i id="sm"></i></div>
+  <button type="button" id="sreset">Reset quiz</button>
+</div>
+<script>
+(function(){
+  var quiz=document.getElementById('quiz'); if(!quiz) return;
+  var STORE='qp-join-quiz-v1', state={};
+  try{ state=JSON.parse(localStorage.getItem(STORE)||'{}')||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+
+  // answer letters from the key grids
+  var key={};
+  document.querySelectorAll('#key .ans-grid div').forEach(function(d){
+    var n=parseInt(d.querySelector('b').textContent,10);
+    key[n]=d.textContent.replace(/^\s*\d+\s*/,'').trim().toLowerCase();
+  });
+  // explanations / model answers
+  var expl={};
+  document.querySelectorAll('.ans').forEach(function(a){
+    var q=a.querySelector('.qn'); if(!q) return;
+    var m=q.textContent.match(/(\d+)(?:\s*[–-]\s*(\d+))?/); if(!m) return;
+    var c=a.cloneNode(true); c.querySelector('.qn').remove();
+    for(var i=+m[1]; i<=(m[2]?+m[2]:+m[1]); i++) expl[i]=c.innerHTML;
+  });
+
+  document.documentElement.classList.add('quiz-on');
+  var intro=document.createElement('div');
+  intro.className='quiz-intro no-print';
+  intro.innerHTML='<b>Interactive mode.</b> Click an answer for True/False and multiple-choice questions to mark it right away. For the written and practical questions, write your answer, then reveal the model answer and mark yourself. Your progress is saved in this browser. Printing still gives the clean paper version.';
+  var lead=quiz.querySelector('.lead'); lead.parentNode.insertBefore(intro, lead.nextSibling);
+
+  function fb(cls, html){ var d=document.createElement('div'); d.className='fb '+cls; d.innerHTML=html; return d; }
+  var auto=[];
+
+  quiz.parentNode.querySelectorAll('.q').forEach(function(q){
+    var n=parseInt(q.querySelector('.qn').textContent,10);
+    var box=document.createElement('div'); box.className='qi no-print'; q.appendChild(box);
+
+    if(n<=45){
+      auto.push(n);
+      var correct=key[n];
+      var show=function(choice, initial){
+        q.classList.add('done');
+        var ok=(choice===correct);
+        var exp=expl[n]?' '+expl[n]:'';
+        var label=(n<=15)?(correct==='t'?'True':'False'):correct.toUpperCase()+')';
+        box.querySelectorAll('.fb').forEach(function(x){x.remove();});
+        box.appendChild(fb(ok?'ok':'bad', ok?'<b>Correct!</b>'+exp:'<b>Not quite.</b> The answer is <b>'+label+'</b>.'+exp));
+        if(!initial){ state[n]=choice; save(); score(); }
+      };
+      if(n<=15){
+        var row=document.createElement('div'); row.className='tfb';
+        ['t','f'].forEach(function(v){
+          var b=document.createElement('button'); b.type='button'; b.textContent=v==='t'?'True':'False'; b.dataset.v=v;
+          b.onclick=function(){ if(q.classList.contains('done')) return; mark(v); };
+          row.appendChild(b);
+        });
+        box.appendChild(row);
+        var mark=function(v, initial){
+          row.querySelectorAll('button').forEach(function(b){ b.disabled=true;
+            if(b.dataset.v===key[n]) b.classList.add('ok'); else if(b.dataset.v===v) b.classList.add('bad'); });
+          show(v, initial);
+        };
+        if(state[n]) mark(state[n], true);
+      } else {
+        var lis=q.querySelectorAll('ol.opts li');
+        var pick=function(v, initial){
+          lis.forEach(function(li){ li.setAttribute('aria-disabled','true');
+            if(li.dataset.l===correct) li.classList.add('ok'); else if(li.dataset.l===v) li.classList.add('bad'); });
+          show(v, initial);
+        };
+        lis.forEach(function(li){
+          li.tabIndex=0; li.setAttribute('role','button');
+          li.onclick=function(){ if(!q.classList.contains('done')) pick(li.dataset.l); };
+          li.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); li.onclick(); } };
+        });
+        if(state[n]) pick(state[n], true);
+      }
+    } else {
+      var ta=document.createElement('textarea');
+      ta.placeholder=n<=50?'Write your answer here…':'Show your working here…';
+      ta.value=state['t'+n]||'';
+      var tmr; ta.oninput=function(){ clearTimeout(tmr); tmr=setTimeout(function(){ state['t'+n]=ta.value; save(); },300); };
+      var row2=document.createElement('div'); row2.className='row';
+      var btn=document.createElement('button'); btn.type='button'; btn.textContent='Show model answer';
+      var self=document.createElement('span'); self.className='self';
+      var model=null;
+      btn.onclick=function(){
+        if(model){ model.remove(); model=null; btn.textContent='Show model answer'; return; }
+        model=fb('model','<b>Model answer:</b> '+(expl[n]||'')); box.appendChild(model);
+        btn.textContent='Hide model answer';
+      };
+      var good=document.createElement('button'); good.type='button'; good.textContent='I got it ✓';
+      var nope=document.createElement('button'); nope.type='button'; nope.textContent='Not yet ✗';
+      var setSelf=function(v){ state['s'+n]=v; save();
+        good.classList.toggle('ok', v==='y'); nope.classList.toggle('bad', v==='n');
+        self.textContent=v==='y'?'Marked as understood':'Marked for review'; };
+      good.onclick=function(){ setSelf('y'); }; nope.onclick=function(){ setSelf('n'); };
+      if(state['s'+n]) setSelf(state['s'+n]);
+      row2.appendChild(btn); row2.appendChild(good); row2.appendChild(nope); row2.appendChild(self);
+      box.appendChild(ta); box.appendChild(row2);
+    }
+  });
+
+  var bar=document.getElementById('scorebar');
+  function score(){
+    var c=0,a=0; auto.forEach(function(n){ if(state[n]){ a++; if(state[n]===key[n]) c++; } });
+    document.getElementById('sc').textContent=c; document.getElementById('sa').textContent=a;
+    document.getElementById('sm').style.width=(c/45*100)+'%';
+  }
+  score();
+  if('IntersectionObserver' in window){
+    var start=quiz, end=document.getElementById('key');
+    new IntersectionObserver(function(){
+      var r1=start.getBoundingClientRect(), r2=end.getBoundingClientRect();
+      bar.classList.toggle('show', r1.top<innerHeight && r2.top>0);
+    }).observe(start);
+    addEventListener('scroll', function(){
+      var r1=start.getBoundingClientRect(), r2=end.getBoundingClientRect();
+      bar.classList.toggle('show', r1.top<innerHeight*0.6 && r2.top>innerHeight*0.4);
+    }, {passive:true});
+  } else { bar.classList.add('show'); }
+  document.getElementById('sreset').onclick=function(){
+    if(!confirm('Clear all your quiz answers?')) return;
+    state={}; save(); location.reload();
+  };
+})();
+</script>
+</body>
+</html>

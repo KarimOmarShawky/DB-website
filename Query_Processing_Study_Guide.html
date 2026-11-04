@@ -1,0 +1,1786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Query Processing &amp; Selection Algorithms Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1d1b26; --ink-2:#4a4658; --muted:#7a768a;
+  --paper:#fffdf8; --panel:#f6f2e9; --line:#d9d2c3;
+  --blue:#2459a8; --blue-soft:#e3ecfa;
+  --green:#1f7a4d; --green-soft:#e0f3e8;
+  --red:#b8322a; --red-soft:#fbe5e2;
+  --amber:#b5770c; --amber-soft:#fff1d1;
+  --violet:#6a3fb5; --violet-soft:#ece5fa;
+  --note:#fff4a8;
+  --hand:'Caveat', 'Comic Sans MS', cursive;
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, Consolas, monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:#e9e4d8;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62}
+.doc{max-width:900px;margin:0 auto;background:var(--paper);box-shadow:0 0 40px rgba(0,0,0,.12)}
+.sheet{padding:56px 64px;position:relative}
+.chapter{border-top:1px dashed var(--line)}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0 0 .4em}
+h2{font-size:34px;font-weight:800;letter-spacing:-.01em}
+h3{font-size:22px;font-weight:700;margin-top:1.6em;color:var(--blue)}
+h4{font-size:17px;font-family:var(--sans);font-weight:700;margin-top:1.2em}
+p{margin:.55em 0}
+ul,ol{padding-left:1.3em;margin:.5em 0}
+li{margin:.2em 0}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--panel);padding:1px 5px;border-radius:4px}
+b,strong{font-weight:700}
+.kicker{display:inline-block;font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--ink);padding:4px 10px;border-radius:3px;margin-bottom:12px}
+.lead{font-size:17px;color:var(--ink-2)}
+.hand{font-family:var(--hand);font-size:1.35em;line-height:1.1}
+.muted{color:var(--muted)}
+.c-blue{color:var(--blue)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-amber{color:var(--amber)} .c-violet{color:var(--violet)}
+.src{font-size:11.5px;color:var(--muted);font-style:italic}
+
+/* ---------- cover ---------- */
+.cover{min-height:1060px;display:flex;flex-direction:column;justify-content:space-between;background:
+ radial-gradient(circle at 85% 10%, #ffe9a8 0, transparent 40%),
+ radial-gradient(circle at 10% 90%, #d9e6fb 0, transparent 45%), var(--paper)}
+.cover h1{font-size:68px;font-weight:800;letter-spacing:-.02em;margin:10px 0 6px}
+.cover h1 span{color:var(--blue)}
+.cover .sub{font-size:19px;color:var(--ink-2);max-width:620px}
+.cover .badge{font-family:var(--hand);font-size:28px;color:var(--red);transform:rotate(-4deg);display:inline-block;margin-top:14px}
+.cover-tree{margin:20px auto 0;width:100%;max-width:720px}
+.cover-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;font-size:13px}
+.cover-meta div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.cover-meta b{display:block;font-family:var(--serif);font-size:24px}
+
+/* ---------- TOC ---------- */
+.toc{columns:2;column-gap:36px;padding:0;list-style:none;counter-reset:t}
+.toc li{break-inside:avoid;display:flex;gap:10px;padding:7px 0;border-bottom:1px dotted var(--line)}
+.toc li span.n{font-family:var(--serif);font-weight:800;color:var(--blue);min-width:28px}
+.toc a{color:inherit;text-decoration:none}
+
+/* ---------- boxes (Head-First style) ---------- */
+.box{border-radius:12px;padding:16px 20px;margin:18px 0;position:relative;break-inside:avoid}
+.box > .tag{position:absolute;top:-13px;left:16px;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;color:#fff}
+.brain{background:var(--violet-soft);border:2px solid var(--violet)} .brain>.tag{background:var(--violet)}
+.watch{background:var(--red-soft);border:2px solid var(--red)} .watch>.tag{background:var(--red)}
+.key{background:var(--green-soft);border:2px solid var(--green)} .key>.tag{background:var(--green)}
+.example{background:var(--blue-soft);border:2px solid var(--blue)} .example>.tag{background:var(--blue)}
+.lecture{background:var(--amber-soft);border:2px solid var(--amber)} .lecture>.tag{background:var(--amber)}
+.nodumb{background:#fff;border:2px dashed var(--ink-2)} .nodumb>.tag{background:var(--ink-2)}
+.nodumb dt{font-weight:700;margin-top:10px}
+.nodumb dt::before{content:"Q: ";color:var(--red);font-family:var(--serif)}
+.nodumb dd{margin:2px 0 0 0}
+.nodumb dd::before{content:"A: ";font-weight:700;color:var(--green);font-family:var(--serif)}
+.sticky{background:var(--note);font-family:var(--hand);font-size:22px;line-height:1.15;padding:14px 18px;box-shadow:2px 4px 10px rgba(0,0,0,.15);transform:rotate(-1.5deg);width:fit-content;max-width:330px;margin:14px 0;break-inside:avoid}
+.sticky.r{transform:rotate(1.8deg);margin-left:auto}
+.bubble{position:relative;background:#fff;border:2px solid var(--ink);border-radius:18px;padding:10px 14px;font-family:var(--hand);font-size:21px;line-height:1.15;width:fit-content;max-width:300px}
+.bubble::after{content:"";position:absolute;left:24px;bottom:-12px;border:6px solid transparent;border-top:8px solid var(--ink)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;break-inside:avoid}
+.card h4{margin-top:0}
+.figure{margin:20px 0;padding:16px;background:#fff;border:1.5px solid var(--line);border-radius:14px;break-inside:avoid}
+.figure figcaption,.caption{font-size:13px;color:var(--ink-2);margin-top:8px;text-align:center}
+svg{max-width:100%;height:auto;display:block;margin:0 auto}
+svg text{font-family:var(--sans)}
+svg .hand{font-family:var(--hand)}
+
+table.t{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;break-inside:avoid}
+table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+table.t th{background:var(--panel);font-weight:700}
+table.t.center td,table.t.center th{text-align:center}
+
+pre.code{font-family:var(--mono);font-size:13px;background:#1f1d2b;color:#f3efe2;padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.5;break-inside:avoid}
+pre.code .k{color:#ffb86b} pre.code .c{color:#8c88a3} pre.code .s{color:#a8e6a1}
+
+.formula{font-family:var(--serif);font-size:22px;text-align:center;background:#fff;border:2px solid var(--ink);border-radius:12px;padding:14px;margin:16px auto;max-width:560px}
+.formula small{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-2)}
+
+/* mini data blocks */
+.blk{display:inline-flex;flex-direction:column;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:#fff;min-width:70px;vertical-align:top}
+.blk .h{background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:2px 6px;text-align:center}
+.blk span{padding:2px 8px;border-top:1px solid var(--line);font-family:var(--mono);font-size:13px;text-align:center}
+.blk span.hit{background:#ffe17a;font-weight:700}
+
+/* flow */
+.flow{display:flex;flex-direction:column;gap:0;align-items:stretch;max-width:560px}
+.flow .step{display:flex;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 14px}
+.flow .step b.n{font-family:var(--serif);font-size:20px;color:var(--blue);min-width:26px}
+.flow .arrow{text-align:center;color:var(--muted);line-height:1;font-size:18px;padding:3px 0}
+
+/* bars */
+.bar{height:22px;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+
+/* quiz */
+.q{break-inside:avoid;margin:10px 0 14px;padding-left:38px;position:relative}
+.q .qn{position:absolute;left:0;top:0;font-family:var(--serif);font-weight:800;color:var(--blue);font-size:17px}
+.q ol.opts{list-style:none;padding:0;margin:6px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:3px 22px}
+.q ol.opts li::before{content:attr(data-l) ") ";font-weight:700;color:var(--ink-2)}
+.q .tf{font-weight:700;color:var(--ink-2);font-size:13px;margin-left:6px}
+.q .lines{border-bottom:1px solid var(--line);height:26px}
+.ans{break-inside:avoid;margin:8px 0;padding:8px 0 8px 38px;position:relative;border-bottom:1px dotted var(--line)}
+.ans .qn{position:absolute;left:0;top:8px;font-family:var(--serif);font-weight:800;color:var(--green)}
+.ans b.a{color:var(--green)}
+.ans-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-size:14px}
+.ans-grid div{background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.ans-grid b{color:var(--blue)}
+
+/* ---------- animation ---------- */
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes dash{to{stroke-dashoffset:-24}}
+@keyframes glow{0%,100%{fill:#fff}50%{fill:#ffe17a}}
+@keyframes pulseR{0%,100%{box-shadow:0 0 0 0 rgba(184,50,42,.35)}50%{box-shadow:0 0 0 8px rgba(184,50,42,0)}}
+@keyframes drop{0%{transform:translateY(-30px);opacity:0}60%{transform:translateY(4px);opacity:1}100%{transform:none;opacity:1}}
+@keyframes wiggle{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1deg)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes path1{0%,100%{fill:#fff}8%,30%{fill:#ffe17a}}
+@keyframes path2{0%,25%,100%{fill:#fff}33%,55%{fill:#ffe17a}}
+@keyframes path3{0%,50%,100%{fill:#fff}58%,80%{fill:#ffe17a}}
+@keyframes path4{0%,75%,100%{fill:#fff}83%,97%{fill:#b8f0c8}}
+
+html.js .reveal{opacity:0}
+html.js .reveal.in{animation:up .7s cubic-bezier(.2,.7,.2,1) both}
+.pop{animation:pop .6s cubic-bezier(.2,.7,.2,1) both}
+.flowline{stroke-dasharray:6 6;animation:dash 1.2s linear infinite}
+.sticky{animation:wiggle 5s ease-in-out infinite}
+.sticky.r{animation:none}
+.bar.anim{transform-origin:left;animation:grow 1.4s cubic-bezier(.2,.7,.2,1) both}
+.dropin{animation:drop 1s ease-out 0.4s both}
+.s1{animation:path1 4s infinite}.s2{animation:path2 4s infinite}.s3{animation:path3 4s infinite}.s4{animation:path4 4s infinite}
+.hit-pulse{animation:pulseR 1.8s infinite}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1}
+}
+
+/* ---------- small screens ---------- */
+@media (max-width:720px){
+  .sheet{padding:28px 16px}
+  .grid2,.grid3,.cover-meta{grid-template-columns:1fr}
+  .toc{columns:1}
+  .cover h1{font-size:44px}
+  h2{font-size:28px}
+  .q ol.opts{grid-template-columns:1fr}
+  .ans-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ---------- print ---------- */
+@page{size:A4;margin:13mm 12mm 14mm}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  .doc{box-shadow:none;max-width:none}
+  .sheet{padding:0 2mm}
+  .chapter{border-top:none;break-before:page}
+  .cover{min-height:265mm;padding-top:10mm}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1!important;transform:none!important}
+  .sticky{transform:rotate(-1.5deg)}
+  .sticky.r{transform:rotate(1.8deg)}
+  .flowline{stroke-dasharray:6 6}
+  .s1,.s2,.s3{fill:#ffe17a}.s4{fill:#b8f0c8}
+  h2,h3,h4{break-after:avoid}
+  .box,.figure,.card,table,pre,.q,.ans{break-inside:avoid}
+  .no-print{display:none!important}
+  .sheet{padding-top:3mm}
+  .box{padding-top:30px;margin-top:12px}
+  .box > .tag{top:8px}
+  pre.code{white-space:pre-wrap;word-break:break-word}
+  a{color:inherit;text-decoration:none}
+}
+.print-btn{position:fixed;right:18px;bottom:18px;z-index:9;background:var(--ink);color:#fff;border:0;border-radius:30px;padding:12px 18px;font:600 14px var(--sans);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.print-btn:hover{background:var(--blue)}
+
+/* ---------- interactive quiz (screen only; print output unchanged) ---------- */
+@media screen{
+  .quiz-on .q .tf{display:none}
+  .quiz-on .q ol.opts li{cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:5px 10px;background:#fff;transition:background .2s,border-color .2s,transform .15s}
+  .quiz-on .q:not(.done) ol.opts li:hover,.quiz-on .q:not(.done) ol.opts li:focus-visible{border-color:var(--blue);background:var(--blue-soft);outline:none;transform:translateX(3px)}
+  .quiz-on .q.done ol.opts li{cursor:default}
+  .quiz-on .q ol.opts li.ok{background:var(--green-soft);border-color:var(--green);font-weight:600}
+  .quiz-on .q ol.opts li.bad{background:var(--red-soft);border-color:var(--red);text-decoration:line-through;text-decoration-color:var(--red)}
+  .qi{margin-top:8px}
+  .qi .tfb{display:flex;gap:8px}
+  .qi button{font:600 13px var(--sans);border:1.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:20px;padding:5px 14px;cursor:pointer;transition:background .2s,color .2s}
+  .qi button:hover:not(:disabled){background:var(--ink);color:#fff}
+  .qi button:disabled{cursor:default;opacity:.55}
+  .qi button.ok{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+  .qi button.bad{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+  .qi .fb{margin-top:8px;padding:8px 12px;border-radius:8px;font-size:14px;animation:up .4s ease both}
+  .qi .fb.ok{background:var(--green-soft);border-left:4px solid var(--green)}
+  .qi .fb.bad{background:var(--red-soft);border-left:4px solid var(--red)}
+  .qi .fb.model{background:var(--amber-soft);border-left:4px solid var(--amber)}
+  .qi .fb pre.code{margin:8px 0 0}
+  .qi textarea{width:100%;min-height:90px;font:14px/1.5 var(--sans);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink);resize:vertical}
+  .qi textarea:focus{outline:none;border-color:var(--blue)}
+  .qi .row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center}
+  .qi .self{font-size:13px;color:var(--ink-2)}
+  .quiz-intro{background:var(--blue-soft);border:2px solid var(--blue);border-radius:12px;padding:12px 16px;margin:14px 0;font-size:14px}
+  .scorebar{position:fixed;left:18px;bottom:18px;z-index:9;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px 14px;font:14px var(--sans);box-shadow:0 6px 18px rgba(0,0,0,.18);display:none;gap:12px;align-items:center}
+  .scorebar.show{display:flex}
+  .scorebar b{font-family:var(--serif);font-size:20px;color:var(--blue)}
+  .scorebar .meter{width:120px;height:8px;background:var(--panel);border-radius:5px;overflow:hidden}
+  .scorebar .meter i{display:block;height:100%;background:var(--green);width:0;transition:width .4s}
+  .scorebar button{font:600 12px var(--sans);border:1.5px solid var(--ink);background:#fff;border-radius:16px;padding:4px 10px;cursor:pointer}
+  .scorebar button:hover{background:var(--ink);color:#fff}
+}
+@media (max-width:720px){ .scorebar{left:8px;right:8px;bottom:70px;justify-content:space-between} }
+</style>
+<link rel="stylesheet" href="study-site.css">
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d1b26"/></marker>
+    <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2459a8"/></marker>
+    <marker id="ahR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b8322a"/></marker>
+    <marker id="ahG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f7a4d"/></marker>
+  </defs>
+</svg>
+
+<header class="study-nav">
+  <nav class="study-nav-inner" aria-label="Primary navigation">
+    <a class="study-brand" href="index.html">
+      <span class="study-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5.5" rx="7.5" ry="3"></ellipse>
+          <path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13"></path>
+          <path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"></path>
+        </svg>
+      </span>
+      Database Engineering
+    </a>
+    <a class="back-home" href="index.html">
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11.5 4 5.5 10l6 6M6 10h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to Home
+    </a>
+  </nav>
+</header>
+
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<main class="doc">
+<!-- =================== COVER =================== -->
+<section class="sheet cover">
+  <div>
+    <span class="kicker">Database Management Engineering · Lecture 3</span>
+    <h1>How Queries<br><span>Get Answered</span></h1>
+    <p class="sub">A friendly, picture-first guide to query processing and optimization: the journey from English to SQL to relational algebra to a query tree, then the algorithms behind selection (S1–S6), conjunctive and disjunctive conditions, projection with duplicate elimination, and set operations. Ends with a 100-question exam and a full answer key.</p>
+    <span class="badge">Every algorithm traced with real numbers.</span>
+  </div>
+
+  <svg class="cover-tree" viewBox="0 0 720 300" role="img" aria-label="Pipeline: English, SQL, relational algebra, query tree, execution plan, result">
+    <g font-size="13" font-weight="700" text-anchor="middle">
+      <g class="pop" style="animation-delay:.1s"><rect x="10" y="20" width="100" height="44" rx="8" fill="#1d1b26"/><text x="60" y="47" fill="#fff">English</text></g>
+      <g class="pop" style="animation-delay:.3s"><rect x="130" y="20" width="100" height="44" rx="8" fill="#2459a8"/><text x="180" y="47" fill="#fff">SQL</text></g>
+      <g class="pop" style="animation-delay:.5s"><rect x="250" y="20" width="110" height="44" rx="8" fill="#2459a8"/><text x="305" y="47" fill="#fff">Rel. algebra</text></g>
+      <g class="pop" style="animation-delay:.7s"><rect x="380" y="20" width="100" height="44" rx="8" fill="#1f7a4d"/><text x="430" y="47" fill="#fff">Query tree</text></g>
+      <g class="pop" style="animation-delay:.9s"><rect x="500" y="20" width="110" height="44" rx="8" fill="#b5770c"/><text x="555" y="47" fill="#fff">Exec. plan</text></g>
+      <g class="pop" style="animation-delay:1.1s"><rect x="630" y="20" width="80" height="44" rx="8" fill="#b8322a"/><text x="670" y="47" fill="#fff">Result</text></g>
+    </g>
+    <g stroke="#1d1b26" stroke-width="2" fill="none" class="flowline">
+      <path d="M110 42 L128 42" marker-end="url(#ah)"/><path d="M230 42 L248 42" marker-end="url(#ah)"/><path d="M360 42 L378 42" marker-end="url(#ah)"/><path d="M480 42 L498 42" marker-end="url(#ah)"/><path d="M610 42 L628 42" marker-end="url(#ah)"/>
+    </g>
+    <g class="pop" style="animation-delay:1.3s" text-anchor="middle" font-size="22" font-weight="700">
+      <circle cx="430" cy="170" r="22" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="430" y="178" fill="#2459a8">π</text>
+      <circle cx="360" cy="230" r="22" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="360" y="238" fill="#2459a8">⋈</text>
+      <circle cx="500" cy="230" r="22" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="500" y="238" fill="#1f7a4d">σ</text>
+      <rect x="290" y="268" width="60" height="26" rx="6" fill="#f6f2e9" stroke="#1d1b26"/><rect x="470" y="268" width="60" height="26" rx="6" fill="#f6f2e9" stroke="#1d1b26"/>
+      <text x="320" y="286" font-size="12">EMP</text><text x="500" y="286" font-size="12">PROJ</text>
+    </g>
+    <g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M420 191 L372 211"/><path d="M440 191 L490 211"/><path d="M350 250 L325 268"/><path d="M500 252 L500 268"/></g>
+    <text x="40" y="190" class="hand" font-size="26" fill="#b8322a">one question,</text><text x="40" y="220" class="hand" font-size="26" fill="#b8322a">six transformations</text>
+  </svg>
+
+  <div class="cover-meta">
+    <div><b>17</b>illustrated lessons</div>
+    <div><b>100</b>exam questions</div>
+    <div><b>100%</b>of the lecture covered</div>
+  </div>
+</section>
+
+<!-- =================== TOC =================== -->
+<section class="sheet chapter">
+  <span class="kicker">Start here</span>
+  <h2>What's inside</h2>
+  <ol class="toc">
+    <li><span class="n">01</span><a href="#c1">The big picture: the problem and the vocabulary</a></li>
+    <li><span class="n">02</span><a href="#c2">The life of a query: from text to result</a></li>
+    <li><span class="n">03</span><a href="#c3">The pipeline: English → SQL → algebra → tree</a></li>
+    <li><span class="n">04</span><a href="#c4">Query trees and how they are executed</a></li>
+    <li><span class="n">05</span><a href="#c5">Query blocks and nested queries</a></li>
+    <li><span class="n">06</span><a href="#c6">The currency of cost: counting block reads</a></li>
+    <li><span class="n">07</span><a href="#c7">The select operator σ and its conditions</a></li>
+    <li><span class="n">08</span><a href="#c8">Access paths and the index families</a></li>
+    <li><span class="n">09</span><a href="#c9">The six selection algorithms at a glance</a></li>
+    <li><span class="n">10</span><a href="#c10">S1 linear search and S2 binary search</a></li>
+    <li><span class="n">11</span><a href="#c11">S3a primary index and S4 ordering index</a></li>
+    <li><span class="n">12</span><a href="#c12">S5 clustering index and S6 secondary index</a></li>
+    <li><span class="n">13</span><a href="#c13">Conjunctive conditions (AND)</a></li>
+    <li><span class="n">14</span><a href="#c14">Disjunctive conditions (OR)</a></li>
+    <li><span class="n">15</span><a href="#c15">Projection and duplicate elimination</a></li>
+    <li><span class="n">16</span><a href="#c16">Set operations: ∪, ∩, − and ×</a></li>
+    <li><span class="n">17</span><a href="#c17">The full story, key ideas &amp; dictionary</a></li>
+    <li><span class="n">Q</span><a href="#quiz">Final exam: 100 questions</a></li>
+    <li><span class="n">A</span><a href="#key">Answer key</a></li>
+  </ol>
+
+  <h3>How to use this guide</h3>
+  <p>Read the lessons in order: each one builds on the one before. Along the way you'll meet a few kinds of boxes, plus <span style="background:var(--note);padding:0 4px;font-family:var(--hand);font-size:1.25em">yellow sticky notes</span>: hints in the margin, like a friend scribbling on your book.</p>
+  <div class="grid2">
+    <div class="box key"><span class="tag">Key point</span>The idea you must remember. If you only re-read one thing before the exam, read these.</div>
+    <div class="box watch"><span class="tag">Watch it!</span>A common mistake or trap. Exams love these.</div>
+    <div class="box brain"><span class="tag">Brain power</span>Stop and think for a minute before reading on. Thinking beats re-reading.</div>
+    <div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Is it okay to ask "obvious" questions?</dt><dd>Yes. These boxes answer the questions most students are afraid to ask.</dd></dl></div>
+    <div class="box example"><span class="tag">Example</span>A worked example with real numbers.</div>
+    <div class="box lecture"><span class="tag">From the lecture</span>A definition or statement taken straight from your lecture slides, so you know the exact wording your teacher used.</div>
+  </div>
+</section>
+
+<!-- =================== CH 1 =================== -->
+<section class="sheet chapter" id="c1">
+  <span class="kicker">Lesson 01</span>
+  <h2>The big picture: the problem and the vocabulary</h2>
+  <p class="lead">Before any algorithm, let's understand what a database is actually being asked to do, and why that is harder than it looks.</p>
+
+  <h3>The problem in one sentence</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>
+    <b>Problem:</b> efficiently answering a given query.
+  </div>
+  <p>A user (or an application) sends a <b>query</b>. The DBMS runs <b>query processing</b> and sends back a <b>result</b>. Simple, right? The catch is the word <b>efficiently</b>. A query over a table of millions of rows can be answered in a few milliseconds or in several minutes, depending entirely on <i>how</i> the DBMS decides to do the work.</p>
+
+  <figure class="figure reveal">
+    <svg viewBox="0 0 760 200" role="img" aria-label="User sends a query to query processing and gets a result back">
+      <g font-size="15" font-weight="700" text-anchor="middle">
+        <circle cx="90" cy="80" r="34" fill="#fff1d1" stroke="#b5770c" stroke-width="3"/><circle cx="90" cy="70" r="12" fill="#b5770c"/><path d="M62 105 Q90 80 118 105" fill="#2459a8"/>
+        <text x="90" y="150">User / App</text>
+        <rect x="270" y="45" width="140" height="40" rx="8" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="340" y="71">Query</text>
+        <rect x="270" y="105" width="140" height="40" rx="8" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="340" y="131">Result</text>
+        <rect x="520" y="45" width="200" height="100" rx="14" fill="#1d1b26"/><text x="620" y="88" fill="#fff" font-size="18">Query</text><text x="620" y="112" fill="#fff" font-size="18">Processing</text>
+      </g>
+      <g stroke="#1d1b26" stroke-width="2.5" fill="none">
+        <path d="M140 65 L262 65" marker-end="url(#ah)" class="flowline"/><path d="M412 65 L512 80" marker-end="url(#ah)" class="flowline"/>
+        <path d="M518 112 L414 125" marker-end="url(#ahG)" class="flowline"/><path d="M268 125 L140 105" marker-end="url(#ahG)" class="flowline"/>
+      </g>
+    </svg>
+    <figcaption>The problem from slide 2: a query goes in, a result comes out, and the box in the middle must be <b>fast</b>.</figcaption>
+  </figure>
+
+  <h3>Four terms from the lecture</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>
+    <ul>
+      <li>The DBMS has <b>algorithms</b> to implement <b>relational algebra</b> expressions.</li>
+      <li><b>SQL</b> is a different kind of high-level language: you specify <b>what</b> is wanted, not <b>how</b> it is obtained.</li>
+      <li><b>Optimization</b> is not necessarily "optimal", but <b>reasonably efficient</b>. Techniques: <b>heuristic rules</b> + <b>cost estimation</b>.</li>
+      <li><b>Query optimization</b> = the process of choosing a suitable <b>execution strategy</b> for processing a query.</li>
+    </ul>
+  </div>
+
+  <h4>1. "What, not how": declarative language</h4>
+  <p>Imagine ordering food in a restaurant. You say <i>"one grilled chicken, no onions"</i> (<b>what</b> you want). You do <b>not</b> tell the chef which pan to use, in which order to chop things, or how hot the stove should be (<b>how</b>). SQL works the same way:</p>
+  <pre class="code"><span class="k">SELECT</span> Lname <span class="k">FROM</span> EMPLOYEE <span class="k">WHERE</span> Dno = 5;   <span class="c">-- WHAT: last names of department 5</span></pre>
+  <p>Nothing in this statement says "scan the file" or "use the index on Dno". Choosing that is the DBMS's job. Relational algebra, in contrast, is <b>procedural</b>: an expression like <code>σ Dno=5 (EMPLOYEE)</code> is already an ordered recipe of operations. Query processing is the translation from the "what" language to a "how" recipe.</p>
+
+  <h4>2. "Algorithms to implement relational algebra"</h4>
+  <p>Every relational algebra operator (select σ, project π, join ⋈, union ∪, …) must be implemented by a real piece of code that reads blocks from disk. For one operator there are usually <b>several</b> algorithms (selection alone has six in this lecture). Which one is best depends on what indexes exist and how the file is stored.</p>
+
+  <h4>3. "Not necessarily optimal"</h4>
+  <p>Think of a GPS app. Finding the <i>mathematically best</i> route among billions of possibilities would take so long that you would have arrived by car already. So the GPS settles for a <i>very good</i> route, fast. A DBMS does the same: the number of possible execution plans grows quickly, and the time spent searching for the perfect plan must not exceed the time saved. So the goal is <b>reasonably efficient</b>, not perfect.</p>
+
+  <h4>4. The two techniques</h4>
+  <div class="grid2">
+    <div class="card"><h4 class="c-blue">Heuristic rules</h4>Rules of thumb that almost always help, e.g. "do selections <b>early</b>, so later operations see fewer rows". They cost nothing to apply because no numbers are needed.</div>
+    <div class="card"><h4 class="c-green">Cost estimation</h4>Use statistics (number of rows, blocks, available indexes) to <b>estimate</b> how many block reads each candidate plan needs, then pick the cheapest.</div>
+  </div>
+
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>If SQL doesn't say how, who decides?</dt><dd>The <b>query optimizer</b>, a component inside the DBMS. You will meet it in Lesson 02.</dd>
+    <dt>Can two different plans give the same answer?</dt><dd>Yes, always. Plans differ only in <b>speed</b>, never in the answer. That is exactly what makes optimization legal: the DBMS may pick any equivalent plan.</dd>
+    <dt>Why should I care as a student or developer?</dt><dd>Because the plan the DBMS can build depends on what <i>you</i> gave it: indexes, sensible conditions, sorted files. This lecture shows which structure unlocks which algorithm.</dd>
+  </dl></div>
+
+  <div class="box brain"><span class="tag">Brain power</span>A table has 1,000,000 rows and you ask for the one row with <code>Ssn = '123'</code>. Name two very different ways the DBMS could find it. Which needs more disk reads, and why can't SQL tell the DBMS which to use?</div>
+  <div class="sticky">SQL = WHAT<br>Optimizer = HOW</div>
+</section>
+
+<!-- =================== CH 2 =================== -->
+<section class="sheet chapter" id="c2">
+  <span class="kicker">Lesson 02</span>
+  <h2>The life of a query: from text to result</h2>
+  <p class="lead">A SQL string is just text. Before a single block is read from disk, it passes through a small assembly line.</p>
+
+  <div class="box lecture"><span class="tag">From the lecture</span>
+    <b>Query evaluation process (typical steps when processing a high-level query):</b>
+    Query in a high-level language → scanning, parsing and validating → intermediate form of query → query optimizer → execution plan → query code generator → code to execute the query → runtime database processor → result of query.
+    <br><b>The code can be</b> executed directly (<i>interpreted mode</i>) or stored and executed later whenever needed (<i>compiled mode</i>).
+  </div>
+
+  <figure class="figure reveal">
+    <div class="grid2" style="grid-template-columns:1.3fr 1fr;align-items:center">
+      <svg viewBox="0 0 400 560" role="img" aria-label="Seven-step query evaluation assembly line">
+        <g text-anchor="middle" font-size="14" font-weight="700">
+          <rect x="60" y="10" width="280" height="44" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="200" y="37">Query in a high-level language</text>
+          <rect x="60" y="85" width="280" height="44" rx="8" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="200" y="112">Scanning, parsing, validating</text>
+          <rect x="60" y="160" width="280" height="44" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="200" y="187">Intermediate form of query</text>
+          <rect x="60" y="235" width="280" height="44" rx="8" fill="#2459a8"/><text x="200" y="262" fill="#fff">Query optimizer</text>
+          <rect x="60" y="310" width="280" height="44" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="200" y="337">Execution plan</text>
+          <rect x="60" y="385" width="280" height="44" rx="8" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="200" y="412">Query code generator</text>
+          <rect x="60" y="460" width="280" height="44" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="200" y="487">Code to execute the query</text>
+          <rect x="60" y="520" width="280" height="34" rx="8" fill="#1d1b26"/><text x="200" y="542" fill="#fff">Runtime DB processor → Result</text>
+        </g>
+        <g stroke="#1d1b26" stroke-width="2" fill="none">
+          <path d="M200 54 L200 83" marker-end="url(#ah)"/><path d="M200 129 L200 158" marker-end="url(#ah)"/><path d="M200 204 L200 233" marker-end="url(#ah)"/><path d="M200 279 L200 308" marker-end="url(#ah)"/><path d="M200 354 L200 383" marker-end="url(#ah)"/><path d="M200 429 L200 458" marker-end="url(#ah)"/><path d="M200 504 L200 518" marker-end="url(#ah)"/>
+        </g>
+      </svg>
+      <div>
+        <div class="card" style="margin-bottom:10px"><h4 class="c-blue">Front end</h4>Steps 1–3. Understand the text: is it valid SQL, are the tables real?</div>
+        <div class="card" style="margin-bottom:10px"><h4 class="c-red">The brain</h4>Step 4–5. The <b>optimizer</b> picks the strategy and produces an <b>execution plan</b>.</div>
+        <div class="card"><h4 class="c-green">Back end</h4>Steps 6–8. Turn the plan into runnable code and run it against the data.</div>
+      </div>
+    </div>
+    <figcaption>The lecture's figure, redrawn. Boxes with a blue outline are <i>programs</i> (doers); plain boxes are <i>things</i> (data passed along).</figcaption>
+  </figure>
+
+  <h3>Stage by stage</h3>
+  <ol>
+    <li><b>Scanning</b> breaks the text into tokens: <code>SELECT</code>, <code>Lname</code>, <code>FROM</code>, <code>EMPLOYEE</code>… This is like splitting a sentence into words.</li>
+    <li><b>Parsing</b> checks the <i>grammar</i>: is the order of keywords right? <code>SELECT FROM WHERE EMPLOYEE</code> fails here.</li>
+    <li><b>Validating</b> checks the <i>meaning</i> against the catalog (meta data): does table <code>EMPLOYEE</code> exist? Does it have a column <code>Lname</code>? Are types compatible?</li>
+    <li><b>Intermediate form</b>: the validated query is stored as an internal structure, normally a <b>query tree</b> (Lesson 04) or an equivalent graph.</li>
+    <li><b>Query optimizer</b>: uses heuristic rules + cost estimates to choose an <b>execution plan</b>: which algorithm to use for each operator.</li>
+    <li><b>Query code generator</b>: converts the plan into code the DBMS engine can run.</li>
+    <li><b>Runtime database processor</b>: runs that code, reads blocks, and produces the <b>result</b>.</li>
+  </ol>
+
+  <h3>Interpreted or compiled?</h3>
+  <div class="grid2">
+    <div class="card"><h4 class="c-amber">Interpreted mode</h4>The generated code is <b>executed directly</b>, right now, once. Typical of an ad-hoc query you just typed into a console.</div>
+    <div class="card"><h4 class="c-violet">Compiled mode</h4>The code is <b>stored</b> and run <b>whenever needed</b>, again and again, without redoing steps 1–6. Typical of a query embedded in an application (a stored procedure or prepared statement).</div>
+  </div>
+  <div class="box example"><span class="tag">Example</span>
+    A banking app runs <code>SELECT Balance FROM Account WHERE AccNo = ?</code> a million times a day. Optimizing it <b>once</b> and storing the plan (compiled) saves a million repetitions of parsing and optimizing. A one-off report you type once is simply interpreted.
+  </div>
+
+  <div class="box watch"><span class="tag">Watch it!</span>Errors are caught at different stages. A misspelled keyword (<code>SELCT</code>) is a <b>parsing</b> error. A correct statement that names a table that doesn't exist (<code>FROM EMPLOYE</code>) is a <b>validation</b> error. Neither ever reaches the optimizer.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>The lecture shows this figure twice with different numbers (15.1 and 19.1). Are they different?</dt><dd>No. Same figure, taken from different editions of the textbook. Only the caption number changes.</dd>
+    <dt>Is the optimizer part of the DBMS or of my application?</dt><dd>Part of the DBMS. Your application only sends the SQL text.</dd>
+  </dl></div>
+  <div class="sticky r">Parse = grammar<br>Validate = meaning</div>
+</section>
+
+<!-- =================== CH 3 =================== -->
+<section class="sheet chapter" id="c3">
+  <span class="kicker">Lesson 03</span>
+  <h2>The pipeline: English → SQL → algebra → tree</h2>
+  <p class="lead">The lecture follows one running example all the way down. Let's meet the database first.</p>
+
+  <h3>The COMPANY database</h3>
+  <table class="t">
+    <tr><th>Table</th><th>Columns</th></tr>
+    <tr><td><b>EMPLOYEE</b></td><td>Fname, Minit, Lname, <u>Ssn</u>, Bdate, Address, Sex, Salary, Super_ssn, Dno</td></tr>
+    <tr><td><b>DEPARTMENT</b></td><td>Dname, <u>Dnumber</u>, Mgr_ssn, Mgr_start_date</td></tr>
+    <tr><td><b>DEPT_LOCATIONS</b></td><td><u>Dnumber, Dlocation</u></td></tr>
+    <tr><td><b>PROJECT</b></td><td>Pname, <u>Pnumber</u>, Plocation, Dnum</td></tr>
+    <tr><td><b>WORKS_ON</b></td><td><u>Essn, Pno</u>, Hours</td></tr>
+    <tr><td><b>DEPENDENT</b></td><td><u>Essn, Dependent_name</u>, Sex, Bdate, Relationship</td></tr>
+  </table>
+  <p class="muted">Underlined = key (the column or columns that identify a row). The links you need today: <code>PROJECT.Dnum → DEPARTMENT.Dnumber</code> (which department runs the project) and <code>DEPARTMENT.Mgr_ssn → EMPLOYEE.Ssn</code> (who manages it).</p>
+
+  <h3>The five stages</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>English → SQL → relational algebra → query tree → execution plan. Execution starts at the leaves; each internal node is replaced by its result relation, and the root produces the answer.</div>
+  <div class="flow reveal" style="max-width:640px">
+    <div class="step"><b class="n">1</b><span><b>English</b>: what the user actually wants.</span></div><div class="arrow">▼</div>
+    <div class="step"><b class="n">2</b><span><b>SQL</b>: parsed and validated against the catalog.</span></div><div class="arrow">▼</div>
+    <div class="step"><b class="n">3</b><span><b>Relational algebra</b>: a procedural expression over operators.</span></div><div class="arrow">▼</div>
+    <div class="step"><b class="n">4</b><span><b>Query tree</b>: leaves are relations; internal nodes are operators.</span></div><div class="arrow">▼</div>
+    <div class="step"><b class="n">5</b><span><b>Execution plan</b>: a tree with an <u>algorithm chosen for every node</u>.</span></div>
+  </div>
+
+  <h3>Step 1 → 2: English to SQL</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>"For every project in Stafford, list the project number, the department number and the department manager's last name, address and DOB."</div>
+  <p>Read the sentence slowly and extract three things:</p>
+  <div class="grid3">
+    <div class="card"><h4 class="c-blue">What to show</h4>Pnumber, Dnum, Lname, Address, Bdate → the <code>SELECT</code> list.</div>
+    <div class="card"><h4 class="c-green">Where from</h4>Project (location), Department (its manager id), Employee (manager's personal data) → the <code>FROM</code> list, three tables.</div>
+    <div class="card"><h4 class="c-red">Which rows</h4>Plocation = 'Stafford' (a filter) and two links that glue the tables together → the <code>WHERE</code> clause.</div>
+  </div>
+<pre class="code"><span class="k">SELECT</span> Pnumber, Dnum, Lname, Address, Bdate
+<span class="k">FROM</span>   Project <span class="k">AS</span> P, Department <span class="k">AS</span> D, Employee <span class="k">AS</span> E
+<span class="k">WHERE</span>  P.Plocation = <span class="s">'Stafford'</span>
+  <span class="k">AND</span> P.Dnum      = D.Dnumber      <span class="c">-- project → its department</span>
+  <span class="k">AND</span> D.Mgr_ssn   = E.Ssn;          <span class="c">-- department → its manager</span></pre>
+  <div class="box watch"><span class="tag">Watch it!</span>On the slides the English sentence says <b>Stafford</b>, but the relational algebra slide types <b>Stanford</b> (and one slide's heading too). It is a typo: the data value in the company database is <b>Stafford</b>. A condition with a different spelling would match zero rows.</div>
+
+  <h3>Step 2 → 3: SQL to relational algebra</h3>
+  <p>Relational algebra builds the answer in steps, naming each intermediate result:</p>
+<pre class="code">StaffordOnly <span class="k">←</span> σ Plocation='Stafford' (Project)
+PjD          <span class="k">←</span> StaffordOnly ⋈ Dnum=Dnumber Department
+PjDjE        <span class="k">←</span> PjD ⋈ Mgr_ssn=Ssn Employee
+Result       <span class="k">←</span> π Pnumber, Dnum, Lname, Address, Bdate (PjDjE)</pre>
+  <table class="t">
+    <tr><th>SQL piece</th><th>Algebra operator</th></tr>
+    <tr><td><code>WHERE P.Plocation='Stafford'</code></td><td>σ (select): keeps some <b>rows</b></td></tr>
+    <tr><td><code>P.Dnum = D.Dnumber</code> and <code>D.Mgr_ssn = E.Ssn</code></td><td>⋈ (join): glues two tables on matching values</td></tr>
+    <tr><td><code>SELECT Pnumber, …</code></td><td>π (project): keeps some <b>columns</b></td></tr>
+  </table>
+  <div class="box key"><span class="tag">Key point</span>Select (σ) removes <b>rows</b>. Project (π) removes <b>columns</b>. Join (⋈) <b>combines</b> two tables. Almost every query is some arrangement of these three.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why does the algebra put the select first and the project last?</dt><dd>Because that order wastes the least work. Filtering rows early means fewer rows to join; dropping columns last keeps the join columns available until they've been used.</dd>
+    <dt>Are the temporary names (StaffordOnly, PjD…) real tables?</dt><dd>No. They are just labels for intermediate results so the expression is readable.</dd>
+  </dl></div>
+  <div class="sticky">σ = rows<br>π = columns<br>⋈ = glue</div>
+</section>
+
+<!-- =================== CH 4 =================== -->
+<section class="sheet chapter" id="c4">
+  <span class="kicker">Lesson 04</span>
+  <h2>Query trees and how they are executed</h2>
+  <p class="lead">An algebra expression becomes a picture: a tree. Reading the tree bottom-up tells you exactly what happens, in what order.</p>
+
+  <div class="box lecture"><span class="tag">From the lecture</span><b>Query tree</b> corresponds to a relational algebra expression.
+    <ul><li>Input relations (tables) → <b>leaf nodes</b></li><li>Relational algebra operations → <b>internal nodes</b></li>
+    <li>Execution (evaluation): starts at the leaf nodes; internal nodes are replaced by the result relation; ends at the root node.</li></ul></div>
+
+  <figure class="figure reveal">
+    <svg viewBox="0 0 700 440" role="img" aria-label="Query tree with projection at root, two joins, a selection and three leaf tables">
+      <g text-anchor="middle" font-size="13" font-weight="700">
+        <rect x="195" y="10" width="310" height="40" rx="8" fill="#6a3fb5"/><text x="350" y="35" fill="#fff">π Pnumber, Dnum, Lname, Address, Bdate</text>
+        <rect x="235" y="90" width="230" height="40" rx="8" fill="#2459a8"/><text x="350" y="115" fill="#fff">(3) ⋈ D.Mgr_ssn = E.Ssn</text>
+        <rect x="150" y="175" width="230" height="40" rx="8" fill="#2459a8"/><text x="265" y="200" fill="#fff">(2) ⋈ P.Dnum = D.Dnumber</text>
+        <rect x="60" y="260" width="230" height="40" rx="8" fill="#1f7a4d"/><text x="175" y="285" fill="#fff">(1) σ P.Plocation = 'Stafford'</text>
+        <rect x="440" y="175" width="160" height="40" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="520" y="200">E  EMPLOYEE</text>
+        <rect x="300" y="260" width="170" height="40" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="385" y="285">D  DEPARTMENT</text>
+        <rect x="95" y="345" width="160" height="40" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="175" y="370">P  PROJECT</text>
+      </g>
+      <g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M350 50 L350 90"/><path d="M320 130 L265 175"/><path d="M380 130 L510 175"/><path d="M215 215 L190 260"/><path d="M315 215 L370 260"/><path d="M175 300 L175 345"/></g>
+      <g class="hand" fill="#b8322a" font-size="20"><text x="10" y="372">200 rows</text><text x="20" y="320">4 rows</text><text x="40" y="238">4 rows</text><text x="262" y="160">4 rows</text><text x="560" y="250">10,000 rows</text><text x="470" y="290">20 rows</text></g>
+      <g class="hand" fill="#2459a8" font-size="26" font-weight="700"><text x="205" y="125">③</text><text x="120" y="215">②</text><text x="105" y="290">①</text></g>
+    </svg>
+    <figcaption>The slide's query tree with row counts added (red, invented but realistic). Evaluate in the order ① → ② → ③ → π. Notice how few rows travel upward.</figcaption>
+  </figure>
+
+  <h3>How to run a tree: bottom-up replacement</h3>
+  <ol>
+    <li>Find a node whose children are all <b>leaves</b> (already-existing tables). Here: node ① σ (child: PROJECT).</li>
+    <li>Execute it; <b>replace the node by its result</b>. Now ① is a small temporary relation of 4 projects.</li>
+    <li>Move up: node ② now has two available inputs (the 4 projects and DEPARTMENT). Execute, replace.</li>
+    <li>Same for ③ with EMPLOYEE. Finally the root π keeps five columns. That output is the answer.</li>
+  </ol>
+
+  <div class="box example"><span class="tag">Example</span>
+    <b>Row counts, step by step</b> (PROJECT 200 rows, 4 in Stafford; DEPARTMENT 20; EMPLOYEE 10,000; each project belongs to exactly 1 department and each department has exactly 1 manager):
+    <table class="t center"><tr><th>Step</th><th>Operation</th><th>Rows in</th><th>Rows out</th></tr>
+    <tr><td>①</td><td>σ Plocation='Stafford' (PROJECT)</td><td>200</td><td>4</td></tr>
+    <tr><td>②</td><td>⋈ with DEPARTMENT</td><td>4 + 20</td><td>4</td></tr>
+    <tr><td>③</td><td>⋈ with EMPLOYEE</td><td>4 + 10,000</td><td>4</td></tr>
+    <tr><td>π</td><td>keep 5 columns</td><td>4</td><td>4</td></tr></table>
+    Contrast with a careless plan: compute <b>PROJECT × DEPARTMENT × EMPLOYEE</b> first = 200 × 20 × 10,000 = <b>40,000,000</b> combined rows, <i>then</i> filter. Same answer, millions of times more work.
+  </div>
+
+  <div class="box key"><span class="tag">Key point</span>The tree is not just a drawing. Different but <b>equivalent</b> trees (e.g. select pushed down vs. select at the top) give the same result with very different cost. Optimizers rewrite trees using heuristic rules, the classic rule being: <b>apply selections (and projections) as early as possible</b>.</div>
+
+  <div class="box brain"><span class="tag">Brain power</span>In the tree above, what would happen to the 4-row intermediate results if the select σ were moved <i>above</i> node ③ instead of staying at ①? Count how many rows node ② would then have to produce.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why are tables always at the bottom?</dt><dd>Tables are your <b>inputs</b>; nothing produces them. Operators consume inputs and produce outputs, so data flows <b>upward</b> from leaves to root.</dd>
+    <dt>What do the numbers (1), (2), (3) on the slide mean?</dt><dd>The order of execution among operators. Smaller number = executed earlier.</dd>
+    <dt>What is the difference between a query tree and an execution plan?</dt><dd>The tree says <i>which operations</i>; the plan also says <i>which algorithm</i> carries out each one (e.g. "σ via index S6", "⋈ via nested loops").</dd>
+  </dl></div>
+  <div class="sticky r">Leaves = tables<br>Nodes = operators<br>Root = answer</div>
+</section>
+
+<!-- =================== CH 5 =================== -->
+<section class="sheet chapter" id="c5">
+  <span class="kicker">Lesson 05</span>
+  <h2>Query blocks and nested queries</h2>
+  <p class="lead">Real SQL often has a query <i>inside</i> a query. The optimizer can't optimize a whole nested monster at once, so it cuts it into pieces.</p>
+
+  <div class="box lecture"><span class="tag">From the lecture</span>A <b>query block</b> contains a single <b>SELECT-FROM-WHERE</b> expression (along with ORDER BY, GROUP BY and HAVING, if any).</div>
+
+  <h3>The lecture's example</h3>
+<pre class="code"><span class="k">SELECT</span> LNAME, FNAME
+<span class="k">FROM</span>   EMPLOYEE
+<span class="k">WHERE</span>  SALARY &gt; ( <span class="k">SELECT MAX</span>(SALARY)
+                 <span class="k">FROM</span>   EMPLOYEE
+                 <span class="k">WHERE</span>  DNO = 5 );</pre>
+  <p>In English: <i>"List the employees who earn more than the best-paid employee of department 5."</i> This text contains <b>two query blocks</b>, because there are two SELECT-FROM-WHERE units.</p>
+
+  <figure class="figure reveal">
+    <div class="grid2" style="align-items:stretch">
+      <div class="card" style="border-color:var(--red)"><h4 class="c-red">Inner block (runs first)</h4>
+<pre class="code"><span class="k">SELECT MAX</span>(SALARY)
+<span class="k">FROM</span> EMPLOYEE
+<span class="k">WHERE</span> DNO = 5</pre>
+        <p><b>Algebra:</b> <code>ℱ MAX Salary ( σ Dno=5 (EMPLOYEE) )</code></p>
+        <p>The symbol <b>ℱ</b> is the <i>aggregate function</i> operator. It produces <b>one number</b>, call it <b>C</b>.</p></div>
+      <div class="card" style="border-color:var(--blue)"><h4 class="c-blue">Outer block (runs second)</h4>
+<pre class="code"><span class="k">SELECT</span> LNAME, FNAME
+<span class="k">FROM</span> EMPLOYEE
+<span class="k">WHERE</span> SALARY &gt; C</pre>
+        <p><b>Algebra:</b> <code>π Lname, Fname ( σ Salary&gt;C (EMPLOYEE) )</code></p>
+        <p>C is just a <b>constant</b> by now, so this is an ordinary select + project.</p></div>
+    </div>
+    <svg viewBox="0 0 700 70" style="margin-top:10px"><g font-size="14" font-weight="700" text-anchor="middle">
+      <rect x="40" y="15" width="170" height="40" rx="8" fill="#fbe5e2" stroke="#b8322a" stroke-width="2"/><text x="125" y="40">Inner block</text>
+      <rect x="270" y="15" width="150" height="40" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="345" y="40">C = 40,000</text>
+      <rect x="480" y="15" width="180" height="40" rx="8" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="570" y="40">Outer block</text></g>
+      <g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M212 35 L268 35" marker-end="url(#ah)" class="flowline"/><path d="M422 35 L478 35" marker-end="url(#ah)" class="flowline"/></g></svg>
+    <figcaption>The inner block feeds a single value into the outer block.</figcaption>
+  </figure>
+
+  <div class="box example"><span class="tag">Example</span>
+    Department 5 salaries: 30,000 · 38,000 · 25,000 · 40,000. The inner block returns <b>C = 40,000</b>. The outer block then keeps every employee in <i>any</i> department with Salary &gt; 40,000. If three employees earn 43,000, 55,000 and 40,000, the answer lists the first two; the one earning exactly 40,000 is <b>not</b> included because the condition is strictly "&gt;".
+  </div>
+
+  <h3>Why does the optimizer split queries into blocks?</h3>
+  <ul>
+    <li><b>A block is the unit of optimization.</b> The optimizer chooses an execution plan <i>for each block separately</i>. Each block is small enough that its plan can be searched sensibly.</li>
+    <li>The blocks are linked: results of an inner block are fed to the outer one, as above.</li>
+  </ul>
+  <div class="box watch"><span class="tag">Watch it!</span>Count blocks by counting <b>SELECT … FROM … WHERE</b> units, not by counting tables or keywords. The example uses the table EMPLOYEE twice, yet it is still exactly <b>two</b> blocks. And a plain query with GROUP BY and HAVING is still <b>one</b> block.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Is the inner block always run once?</dt><dd>Here yes: it doesn't mention anything from the outer query, so its answer C never changes. (Nested queries that <i>do</i> refer to the outer row are called correlated and are costlier; the optimizer tries to rewrite them. That topic goes beyond this lecture.)</dd>
+    <dt>Why the funny F symbol?</dt><dd>ℱ is the algebra operator for aggregates (MAX, MIN, SUM, COUNT, AVG). Plain σ and π cannot compute a maximum.</dd>
+  </dl></div>
+  <div class="box brain"><span class="tag">Brain power</span>Which index would make the <i>inner</i> block fast? Which would help the <i>outer</i> block? (Hint: look at the columns in each WHERE.)</div>
+  <div class="sticky">1 SELECT-FROM-WHERE<br>= 1 query block</div>
+</section>
+
+<!-- =================== CH 6 =================== -->
+<section class="sheet chapter" id="c6">
+  <span class="kicker">Lesson 06</span>
+  <h2>The currency of cost: counting block reads</h2>
+  <p class="lead">To compare algorithms we need a ruler. In databases the ruler is the <b>number of blocks transferred between disk and memory</b>.</p>
+
+  <h3>The questions evaluation must answer</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span><b>Query evaluation:</b>
+    <ul><li>How to evaluate an individual relational operation? <i>Selection</i>: find a subset of rows in a table. <i>Join</i>: connect tuples from two tables. Others: union, projection…</li>
+    <li>How to <b>estimate the cost</b> of an individual operation?</li>
+    <li>How does the <b>available buffer</b> affect the cost?</li>
+    <li>How to evaluate a whole relational algebraic expression?</li></ul></div>
+  <p>The rest of the lecture answers the first question for σ, π and set operations. This lesson gives the tools for the second and third.</p>
+
+  <h3>Why block reads?</h3>
+  <p>Reading a block from disk takes milliseconds; the CPU can compare millions of values in the same time. So a plan that reads 12 blocks beats one that reads 3,000, even if the 12-block plan does more computing. You already know the unit of transfer is a <b>block</b> (page), holding several records.</p>
+
+  <h3>The symbols we will use</h3>
+  <table class="t">
+    <tr><th>Symbol</th><th>Meaning</th><th>How to get it</th></tr>
+    <tr><td><b>r</b></td><td>number of records in the file</td><td>given</td></tr>
+    <tr><td><b>bfr</b></td><td>blocking factor: records per block</td><td>⌊block size ÷ record size⌋ (round <b>down</b>)</td></tr>
+    <tr><td><b>b</b></td><td>number of data blocks</td><td>⌈r ÷ bfr⌉ (round <b>up</b>)</td></tr>
+    <tr><td><b>x</b></td><td>number of index levels</td><td>how many index blocks we climb before reaching the data</td></tr>
+    <tr><td><b>s</b></td><td>selection cardinality: how many records match</td><td>1 for a key; more for a non-key</td></tr>
+  </table>
+  <div class="sticky">records per block: round DOWN.<br>blocks needed: round UP.</div>
+
+  <h3>One file, five prices</h3>
+  <div class="box example"><span class="tag">Example</span>
+    EMPLOYEE has <b>r = 30,000</b> records and <b>bfr = 10</b>, so <b>b = ⌈30,000 ÷ 10⌉ = 3,000 blocks</b>. We search for <b>one</b> employee by Ssn (a key, s = 1). The file is sorted on Ssn and has a sparse primary index with 3,000 entries; 100 entries fit per index block, so the first index level has 3,000 ÷ 100 = <b>30 blocks</b>, and a second level of ⌈30 ÷ 100⌉ = 1 block tops it. Thus <b>x = 2</b>.
+    <table class="t center"><tr><th>Strategy</th><th>Formula</th><th>Block reads</th></tr>
+    <tr><td>Linear search (S1), found on average</td><td>b ÷ 2</td><td>1,500</td></tr>
+    <tr><td>Linear search (S1), worst case / not found</td><td>b</td><td>3,000</td></tr>
+    <tr><td>Binary search on the data file (S2)</td><td>⌈log₂ b⌉</td><td>12</td></tr>
+    <tr><td>Primary index (S3a)</td><td>x + 1</td><td>3</td></tr></table>
+    <div style="margin-top:8px">
+      <div style="display:flex;align-items:center;gap:10px;margin:4px 0"><span style="width:90px;font-size:13px">Linear (worst)</span><div class="bar anim reveal" style="width:100%;background:var(--red)">3,000</div></div>
+      <div style="display:flex;align-items:center;gap:10px;margin:4px 0"><span style="width:90px;font-size:13px">Linear (avg)</span><div class="bar anim reveal" style="width:50%;background:var(--amber)">1,500</div></div>
+      <div style="display:flex;align-items:center;gap:10px;margin:4px 0"><span style="width:90px;font-size:13px">Binary</span><div class="bar" style="width:12px;background:var(--blue);padding:0"></div><span style="font-size:12px">12</span></div>
+      <div style="display:flex;align-items:center;gap:10px;margin:4px 0"><span style="width:90px;font-size:13px">Primary idx</span><div class="bar" style="width:4px;background:var(--green);padding:0"></div><span style="font-size:12px">3 (bars not to scale for the small ones)</span></div>
+    </div>
+  </div>
+  <p class="src">These cost formulas are standard textbook extras that the slides only hint at ("cost estimation"). They are included so that you can see <i>why</i> the lecture ranks the algorithms the way it does.</p>
+
+  <h3>How the buffer changes the picture</h3>
+  <p>The DBMS keeps a <b>buffer pool</b> in main memory: a set of slots, each able to hold one disk block. If a block you need is already in a slot, reading it costs <b>nothing</b> from disk. Consequences:</p>
+  <ul>
+    <li>Index blocks (small, used by every query) tend to <b>stay in the buffer</b>, so the top index levels are practically free. The lecture says it directly later: <i>index blocks are small and often already in memory</i>.</li>
+    <li>A table that fits entirely in the buffer can be scanned without disk reads after the first pass, which can make a linear scan cheap.</li>
+    <li>More buffer slots → fewer disk reads → lower real cost than the formulas predict. The formulas are therefore <b>worst-case-ish estimates</b>.</li>
+  </ul>
+  <div class="box watch"><span class="tag">Watch it!</span>Rounding is a favourite exam trap: <b>bfr is rounded down</b> (a record cannot be split across two blocks in this model) and <b>b is rounded up</b> (a partly-filled last block still occupies a whole block).</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why is "found on average" half of b?</dt><dd>For a <i>key</i> the target exists once. It could be in the first block or the last, so on average the scan reads half the file before stopping. For a <i>non-key</i>, or when the value doesn't exist, the whole file must be read.</dd>
+    <dt>Does the DBMS really know r, b and x?</dt><dd>Yes: they are <b>statistics</b> kept in the catalog (meta data). They are what the optimizer plugs into cost formulas.</dd>
+  </dl></div>
+</section>
+
+<!-- =================== CH 7 =================== -->
+<section class="sheet chapter" id="c7">
+  <span class="kicker">Lesson 07</span>
+  <h2>The select operator σ and its conditions</h2>
+  <p class="lead">Selection is the star of today's lecture: "find a subset of rows in a table". Everything depends on <i>what kind of condition</i> you wrote.</p>
+
+  <div class="box lecture"><span class="tag">From the lecture</span>The select operator σ produces a table containing a subset of the rows of the argument table that satisfy a condition. Same columns, fewer rows. Form: <b>σ &lt;condition&gt; ( relation )</b>.</div>
+
+  <figure class="figure reveal">
+    <div class="grid2" style="align-items:center">
+      <div><h4 style="margin-top:0">Person</h4>
+        <table class="t"><tr><th>Id</th><th>Name</th><th>Address</th><th>Hobby</th></tr>
+        <tr style="background:#ffe17a"><td>1123</td><td>John</td><td>123 Main</td><td>stamps</td></tr>
+        <tr><td>1123</td><td>John</td><td>123 Main</td><td>coins</td></tr>
+        <tr><td>5556</td><td>Mary</td><td>7 Lake Dr</td><td>hiking</td></tr>
+        <tr style="background:#ffe17a"><td>9876</td><td>Bart</td><td>5 Pine St</td><td>stamps</td></tr></table></div>
+      <div><h4 style="margin-top:0" class="c-green">σ Hobby='stamps' (Person)</h4>
+        <table class="t"><tr><th>Id</th><th>Name</th><th>Address</th><th>Hobby</th></tr>
+        <tr><td>1123</td><td>John</td><td>123 Main</td><td>stamps</td></tr>
+        <tr><td>9876</td><td>Bart</td><td>5 Pine St</td><td>stamps</td></tr></table>
+        <p class="muted">Same 4 columns. 2 of 4 rows survive.</p></div>
+    </div>
+  </figure>
+
+  <h3>Three shapes of condition</h3>
+  <table class="t">
+    <tr><th>Kind</th><th>Meaning</th><th>Example</th></tr>
+    <tr><td><b>Simple</b></td><td>one comparison</td><td><code>σ Dno=5 (EMPLOYEE)</code></td></tr>
+    <tr><td><b>Conjunctive</b></td><td>comparisons joined by <b>AND</b></td><td><code>σ Dno=5 AND Salary&gt;30000 (EMPLOYEE)</code></td></tr>
+    <tr><td><b>Disjunctive</b></td><td>comparisons joined by <b>OR</b></td><td><code>σ Dno=5 OR Salary&gt;30000 (EMPLOYEE)</code></td></tr>
+  </table>
+  <div class="box lecture"><span class="tag">From the lecture</span><b>Selection condition.</b> Operators: &lt;, ≤, ≥, &gt;, =, ≠. A simple condition is <code>&lt;attribute&gt; operator &lt;constant&gt;</code> or <code>&lt;attribute&gt; operator &lt;attribute&gt;</code>. Conditions can be combined: <code>&lt;condition&gt; AND &lt;condition&gt;</code>, <code>&lt;condition&gt; OR &lt;condition&gt;</code>, <code>NOT &lt;condition&gt;</code>.</div>
+
+  <h3>Equality vs. non-equality comparisons</h3>
+  <div class="grid2">
+    <div class="card"><h4 class="c-green">Equality</h4><code>Pnumber = 10</code><br>Finds records with <b>exactly</b> one value. Most index types handle this well.</div>
+    <div class="card"><h4 class="c-blue">Non-equality</h4><code>Salary &gt; 30000</code>, <code>Salary &lt; 30000</code>, <code>Salary != 30000</code><br>Finds a <b>range</b> of values (or everything except one). Fewer structures handle this efficiently.</div>
+  </div>
+  <p>Each comparison has a <b>comparison attribute</b> (the column, e.g. Salary) and a <b>comparison value</b> (the constant, e.g. 30000). The lecture classifies every selection algorithm by three questions: <i>which comparison type? which attribute (what access structure does it have)? how does the algorithm work?</i></p>
+
+  <h3>Evaluating the lecture's examples by hand</h3>
+  <div class="box example"><span class="tag">Example</span>On the Person table above:
+    <table class="t"><tr><th>Condition</th><th>Rows kept</th><th>Why</th></tr>
+    <tr><td><code>Id&gt;3000 OR Hobby='hiking'</code></td><td>Mary, Bart</td><td>Mary: 5556&gt;3000 (and hiking). Bart: 9876&gt;3000. John's Id 1123 fails both.</td></tr>
+    <tr><td><code>Id&gt;3000 AND Id&lt;3999</code></td><td><b>none</b></td><td>No Id lies between 3000 and 3999 (5556 and 9876 are too big, 1123 too small).</td></tr>
+    <tr><td><code>NOT(Hobby='hiking')</code></td><td>John, John, Bart</td><td>Everyone except the hiker.</td></tr>
+    <tr><td><code>Hobby ≠ 'hiking'</code></td><td>John, John, Bart</td><td>Same as the NOT version.</td></tr></table></div>
+
+  <div class="box watch"><span class="tag">Watch it!</span>Two traps. (1) <code>NOT(Hobby='hiking')</code> and <code>Hobby ≠ 'hiking'</code> are the same condition written two ways. (2) A condition like <code>≠</code> usually matches <b>almost every row</b>, so even with an index the DBMS typically falls back to scanning. An index shines when the result is a <b>small fraction</b> of the table.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Can a condition compare two columns?</dt><dd>Yes: <code>&lt;attribute&gt; operator &lt;attribute&gt;</code>, e.g. <code>Salary &gt; Bonus</code> in the same row. Such conditions cannot use a simple index on one column.</dd>
+    <dt>Is Id=1123 simple or conjunctive?</dt><dd>Simple: one comparison, no AND/OR.</dd>
+  </dl></div>
+  <div class="sticky r">σ never changes columns,<br>only removes rows</div>
+</section>
+
+<!-- =================== CH 8 =================== -->
+<section class="sheet chapter" id="c8">
+  <span class="kicker">Lesson 08</span>
+  <h2>Access paths and the index families</h2>
+  <p class="lead">A short refresher from the previous lecture: the lecture slides start the selection algorithms with this vocabulary.</p>
+
+  <div class="box lecture"><span class="tag">From the lecture</span><b>Access path:</b> a structure that makes searching for particular records efficient: <b>indexes</b>.<br>
+  <b>An index</b> is a collection of (field value, pointer) entries.
+  <ul><li><b>Primary:</b> ordered file · ordering <u>key</u> · block pointer</li>
+  <li><b>Clustered:</b> ordered file · ordering <u>field</u> (non-key) · block pointer</li>
+  <li><b>Secondary:</b> <u>any</u> file · <u>any</u> field · block or record pointer</li>
+  <li><b>B-Tree</b> is the usual physical structure.</li></ul></div>
+
+  <h3>Think of a book</h3>
+  <p>A <b>file</b> without an access path is a book without an index: to find "B-tree" you read every page. An <b>index</b> is the alphabetical list at the back: <i>(term, page number)</i>. That's exactly an index entry: <i>(field value, pointer)</i>. Whether you search the printed list quickly depends on whether it is sorted (it is) and short (it is, compared to the book).</p>
+
+  <h3>Which index fits which file?</h3>
+  <table class="t center">
+    <tr><th></th><th>Data file <b>sorted</b> on the field</th><th>Data file <b>not sorted</b> on the field</th></tr>
+    <tr><th>Field is a <b>key</b> (unique)</th><td style="background:var(--green-soft)"><b>Primary index</b><br>one entry per block</td><td style="background:var(--violet-soft)"><b>Secondary index</b><br>one entry per record</td></tr>
+    <tr><th>Field is a <b>non-key</b> (repeats)</th><td style="background:var(--blue-soft)"><b>Clustering index</b><br>one entry per distinct value</td><td style="background:var(--violet-soft)"><b>Secondary index</b><br>pointers to every matching record</td></tr>
+  </table>
+
+  <figure class="figure reveal">
+    <svg viewBox="0 0 760 250" role="img" aria-label="Index entries pointing to data blocks">
+      <g font-size="12" font-weight="700" text-anchor="middle">
+        <text x="120" y="18" font-size="14">Index file (&lt;K, P&gt;)</text><text x="520" y="18" font-size="14">Data file (blocks)</text>
+        <rect x="40" y="30" width="160" height="30" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="120" y="50">Aaron, Ed → B1</text>
+        <rect x="40" y="60" width="160" height="30" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="120" y="80">Adams, John → B2</text>
+        <rect x="40" y="90" width="160" height="30" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="120" y="110">Alexander, Ed → B3</text>
+        <rect x="40" y="120" width="160" height="30" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="120" y="140">Allen, Troy → B4</text>
+        <rect x="360" y="30" width="320" height="30" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="520" y="50">B1: Aaron, Abbot, Acosta</text>
+        <rect x="360" y="60" width="320" height="30" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="520" y="80">B2: Adams J, Adams R, Akers</text>
+        <rect x="360" y="90" width="320" height="30" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="520" y="110">B3: Alexander, Alfred, Allen S</text>
+        <rect x="360" y="120" width="320" height="30" fill="#ffe17a" stroke="#1d1b26" stroke-width="2"/><text x="520" y="140">B4: Allen T, Anders, Anderson R</text>
+      </g>
+      <g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M202 45 L358 45"/><path d="M202 75 L358 75"/><path d="M202 105 L358 105"/><path d="M202 135 L358 135" stroke="#b8322a" marker-end="url(#ahR)"/></g>
+      <text x="40" y="190" class="hand" font-size="22" fill="#b8322a">Search "Allen, Troy": last index entry whose key is ≤ it → B4 → look inside the block.</text>
+      <text x="40" y="218" class="hand" font-size="20" fill="#1f7a4d">Only the first record of each block (the block anchor) appears in the index → sparse.</text>
+    </svg>
+    <figcaption>A primary index on an employee file sorted by name (a simplified version of the slide's picture: one entry per block).</figcaption>
+  </figure>
+
+  <div class="box key"><span class="tag">Key point</span>Two questions decide the index type: <b>(1)</b> is the file <i>sorted</i> on this field? <b>(2)</b> is the field a <i>key</i> (unique)? A file can be physically sorted in only <b>one</b> way, so it has at most one primary <i>or</i> clustering index, but any number of secondary ones.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>What's a "block pointer" vs. a "record pointer"?</dt><dd>A block pointer says "go to block 7" (then you search inside it). A record pointer says "block 7, slot 3": exact address. Primary and clustering indexes need only block pointers because they are sparse; secondary indexes use record pointers when they point to individual records.</dd>
+    <dt>Why does the slide say "B-Tree" under secondary?</dt><dd>Because a secondary index has one entry per record, it can be huge; the standard physical structure to store and search it (multilevel) is the B-Tree/B⁺-tree.</dd>
+  </dl></div>
+  <div class="sticky">Sorted + key = Primary<br>Sorted + non-key = Clustering<br>Not sorted = Secondary</div>
+</section>
+
+<!-- =================== CH 9 =================== -->
+<section class="sheet chapter" id="c9">
+  <span class="kicker">Lesson 09</span>
+  <h2>The six selection algorithms at a glance</h2>
+  <p class="lead">Given σ condition (R), the DBMS must pick <b>how</b> to find the matching records. The lecture offers six options, named S1 to S6.</p>
+
+  <div class="box lecture"><span class="tag">From the lecture</span>
+    <table class="t">
+    <tr><th>Algorithm</th><th>When it applies</th><th>What it does</th></tr>
+    <tr><td><b>S1</b> Linear search</td><td>Always: no structure needed</td><td>Scan every block, testing each record</td></tr>
+    <tr><td><b>S2</b> Binary search</td><td>File sorted on the field, equality</td><td>Halve the file repeatedly</td></tr>
+    <tr><td><b>S3a</b> Primary index</td><td>Ordering key, equality</td><td>Walk the index, then read one block</td></tr>
+    <tr><td><b>S4</b> Ordering index, non-equality</td><td>&gt;, &lt;, ≥, ≤ on the ordering key</td><td>Find the boundary block, then scan onward</td></tr>
+    <tr><td><b>S5</b> Clustering index</td><td>Ordering non-key field, equality</td><td>Find the first block, read the following ones</td></tr>
+    <tr><td><b>S6</b> Secondary index (B⁺-tree)</td><td>Any field with a secondary index</td><td>Walk the index; on a non-key, follow every pointer</td></tr></table>
+    <b>S1 always works and is always the baseline the optimizer has to beat.</b></div>
+
+  <h3>A decision guide</h3>
+  <figure class="figure reveal">
+    <svg viewBox="0 0 760 360" role="img" aria-label="Decision tree for choosing a selection algorithm">
+      <g font-size="13" font-weight="700" text-anchor="middle">
+        <rect x="270" y="8" width="220" height="40" rx="8" fill="#1d1b26"/><text x="380" y="33" fill="#fff">Condition on field A</text>
+        <rect x="250" y="84" width="260" height="44" rx="22" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="380" y="111">Is there an index on A?</text>
+        <rect x="20" y="170" width="230" height="44" rx="22" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="135" y="197">Is the FILE sorted on A?</text>
+        <rect x="520" y="170" width="220" height="44" rx="22" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="630" y="190" font-size="12">Primary / clustering / </text><text x="630" y="206" font-size="12">secondary index?</text>
+        <rect x="10" y="270" width="110" height="60" rx="8" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="65" y="296">S2 binary</text><text x="65" y="314" font-size="11">equality only</text>
+        <rect x="140" y="270" width="110" height="60" rx="8" fill="#fbe5e2" stroke="#b8322a" stroke-width="2"/><text x="195" y="296">S1 linear</text><text x="195" y="314" font-size="11">last resort</text>
+        <rect x="400" y="270" width="100" height="60" rx="8" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="450" y="294">S3a / S4</text><text x="450" y="312" font-size="11">primary index</text>
+        <rect x="515" y="270" width="100" height="60" rx="8" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="565" y="294">S5</text><text x="565" y="312" font-size="11">clustering</text>
+        <rect x="630" y="270" width="120" height="60" rx="8" fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"/><text x="690" y="294">S6</text><text x="690" y="312" font-size="11">secondary</text>
+      </g>
+      <g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M380 48 L380 84"/><path d="M330 128 L170 170" marker-end="url(#ah)"/><path d="M430 128 L610 170" marker-end="url(#ah)"/><path d="M90 214 L70 270" marker-end="url(#ah)"/><path d="M180 214 L195 270" marker-end="url(#ah)"/><path d="M590 214 L470 270" marker-end="url(#ah)"/><path d="M610 214 L565 270" marker-end="url(#ah)"/><path d="M660 214 L690 270" marker-end="url(#ah)"/></g>
+      <g class="hand" font-size="20" fill="#b8322a"><text x="215" y="140">no</text><text x="540" y="140">yes</text><text x="20" y="250">yes</text><text x="200" y="250">no</text></g>
+    </svg>
+    <figcaption>A mental flowchart. (Left: no index. Right: pick the algorithm that matches the index type.)</figcaption>
+  </figure>
+
+  <div class="box key"><span class="tag">Key point</span>The <b>same</b> condition can be answered by several algorithms. The optimizer picks the cheapest <i>applicable</i> one. S1 is always applicable; the others need a matching <b>file organization or index</b>, and often a matching <b>comparison type</b> (equality vs. non-equality).</div>
+  <div class="box brain"><span class="tag">Brain power</span>For each condition, list every algorithm that could be used, then say which you'd expect to win: (a) <code>Ssn = '123'</code> on a file sorted by Ssn with a primary index; (b) <code>Salary &gt; 30000</code> where the file is heap and Salary has a secondary index; (c) <code>Fname = 'Ed'</code> with no index.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why is there no S3b, and why "3a"?</dt><dd>In the original textbook S3 has two variants (a: primary index, b: hash key). This lecture only uses the primary-index version, so the "a" label is left over.</dd>
+    <dt>Do I need to memorize the numbers S1–S6?</dt><dd>Know what each does and when it applies; the numbering is just labeling. But the table above is likely exam material.</dd>
+  </dl></div>
+  <div class="sticky r">S1 never fails,<br>but never wins</div>
+</section>
+
+<!-- =================== CH 10 =================== -->
+<section class="sheet chapter" id="c10">
+  <span class="kicker">Lesson 10</span>
+  <h2>S1 linear search and S2 binary search</h2>
+  <p class="lead">The two algorithms that need <b>no index at all</b>. One always works; the other works only if the file is sorted.</p>
+
+  <h3>S1: linear search (brute force)</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span><b>Simple condition algorithms.</b> Comparison type: equality and non-equality. Comparison attribute: any (without any access structure). <b>How:</b> scan the data file, block by block, looking for records satisfying the comparison. <b>aka:</b> linear search / brute force.<br>S1 works on a heap file, on any field, for equality and non-equality alike. <i>Any file, any condition, and always the slowest.</i></div>
+  <p>Linear search is what you do when you look for a name in an unsorted pile of paper forms: pick up form 1, check, put down, pick up form 2… The DBMS reads <b>block 1</b>, tests <i>every record in it</i> against the condition, keeps the matches, discards the rest, then reads <b>block 2</b>, and so on to the end of the file.</p>
+
+  <div class="box example"><span class="tag">Example</span>
+    A tiny heap file of 12 records in 3 blocks (4 records per block). Condition: <code>Dept_number = 3</code>.
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0">
+      <span class="blk"><span class="h">Block 1</span><span>9</span><span>5</span><span>13</span><span>8</span></span>
+      <span class="blk"><span class="h">Block 2</span><span>6</span><span>15</span><span class="hit">3</span><span>17</span></span>
+      <span class="blk"><span class="h">Block 3</span><span>21</span><span>11</span><span>16</span><span>2</span></span>
+    </div>
+    <ol><li>Read block 1: test 9, 5, 13, 8: no match.</li><li>Read block 2: test 6, 15, <b>3</b> ✓. Found one.</li>
+    <li>If Dept_number is a <b>key</b> (unique), stop: <b>2 block reads</b>. If it's a <b>non-key</b>, there might be more 3s, so you must keep going: read block 3 too: <b>3 block reads</b>, the whole file.</li></ol>
+    Scaled up to the 3,000-block EMPLOYEE file: 1,500 reads on average for a key, 3,000 for a non-key or a value that doesn't exist.</div>
+
+  <div class="box key"><span class="tag">Key point</span>S1 is the <b>baseline</b>: it needs nothing, works for any comparison, and every other algorithm must beat it to be worth using. For small tables, or when a large fraction of rows match anyway, S1 is often the right choice.</div>
+
+  <h3>S2: binary search</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>Comparison type: <b>equality</b>. Comparison attribute: <b>ordering key without an index</b>. <b>How:</b> navigate the data file using binary search to locate the data block. Jump to the middle block, compare, discard half. Repeat. <i>Requires the file to be physically sorted on the search field, so it helps for exactly one field.</i></div>
+  <p>It's the "guess the number" game: a friend thinks of a number from 1 to 100; you ask "higher or lower than 50?" and halve the range each time. A sorted file lets the DBMS do the same with <b>blocks</b>: look at the middle block; because the file is sorted, the target must be either entirely before or entirely after it, so half the file is eliminated with <b>one</b> read.</p>
+
+  <figure class="figure reveal">
+<svg viewBox="0 0 760 270" role="img" aria-label="Binary search over 16 blocks finds block 11 in four probes">
+<g font-size="11" font-weight="700" text-anchor="middle">
+<rect x="20" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="40" y="27" fill="#1d1b26">1</text>
+<rect x="64" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="84" y="27" fill="#1d1b26">2</text>
+<rect x="108" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="128" y="27" fill="#1d1b26">3</text>
+<rect x="152" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="172" y="27" fill="#1d1b26">4</text>
+<rect x="196" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="216" y="27" fill="#1d1b26">5</text>
+<rect x="240" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="260" y="27" fill="#1d1b26">6</text>
+<rect x="284" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="304" y="27" fill="#1d1b26">7</text>
+<rect x="328" y="10" width="40" height="26" rx="4" fill="#ffe17a" stroke="#1d1b26" stroke-width="2"/><text x="348" y="27" fill="#1d1b26">8</text>
+<rect x="372" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="392" y="27" fill="#1d1b26">9</text>
+<rect x="416" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="436" y="27" fill="#1d1b26">10</text>
+<rect x="460" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="480" y="27" fill="#1d1b26">11</text>
+<rect x="504" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="524" y="27" fill="#1d1b26">12</text>
+<rect x="548" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="568" y="27" fill="#1d1b26">13</text>
+<rect x="592" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="612" y="27" fill="#1d1b26">14</text>
+<rect x="636" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="656" y="27" fill="#1d1b26">15</text>
+<rect x="680" y="10" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="700" y="27" fill="#1d1b26">16</text>
+<text x="20" y="56" text-anchor="start" font-size="13" fill="#b8322a" class="hand" style="font-size:19px">1. Probe block 8: target is higher → keep blocks 9–16</text>
+<rect x="20" y="72" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="40" y="89" fill="#aaa">1</text>
+<rect x="64" y="72" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="84" y="89" fill="#aaa">2</text>
+<rect x="108" y="72" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="128" y="89" fill="#aaa">3</text>
+<rect x="152" y="72" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="172" y="89" fill="#aaa">4</text>
+<rect x="196" y="72" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="216" y="89" fill="#aaa">5</text>
+<rect x="240" y="72" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="260" y="89" fill="#aaa">6</text>
+<rect x="284" y="72" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="304" y="89" fill="#aaa">7</text>
+<rect x="328" y="72" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="348" y="89" fill="#aaa">8</text>
+<rect x="372" y="72" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="392" y="89" fill="#1d1b26">9</text>
+<rect x="416" y="72" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="436" y="89" fill="#1d1b26">10</text>
+<rect x="460" y="72" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="480" y="89" fill="#1d1b26">11</text>
+<rect x="504" y="72" width="40" height="26" rx="4" fill="#ffe17a" stroke="#1d1b26" stroke-width="2"/><text x="524" y="89" fill="#1d1b26">12</text>
+<rect x="548" y="72" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="568" y="89" fill="#1d1b26">13</text>
+<rect x="592" y="72" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="612" y="89" fill="#1d1b26">14</text>
+<rect x="636" y="72" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="656" y="89" fill="#1d1b26">15</text>
+<rect x="680" y="72" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="700" y="89" fill="#1d1b26">16</text>
+<text x="20" y="118" text-anchor="start" font-size="13" fill="#b8322a" class="hand" style="font-size:19px">2. Probe block 12: target is lower → keep blocks 9–11</text>
+<rect x="20" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="40" y="151" fill="#aaa">1</text>
+<rect x="64" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="84" y="151" fill="#aaa">2</text>
+<rect x="108" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="128" y="151" fill="#aaa">3</text>
+<rect x="152" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="172" y="151" fill="#aaa">4</text>
+<rect x="196" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="216" y="151" fill="#aaa">5</text>
+<rect x="240" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="260" y="151" fill="#aaa">6</text>
+<rect x="284" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="304" y="151" fill="#aaa">7</text>
+<rect x="328" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="348" y="151" fill="#aaa">8</text>
+<rect x="372" y="134" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="392" y="151" fill="#1d1b26">9</text>
+<rect x="416" y="134" width="40" height="26" rx="4" fill="#ffe17a" stroke="#1d1b26" stroke-width="2"/><text x="436" y="151" fill="#1d1b26">10</text>
+<rect x="460" y="134" width="40" height="26" rx="4" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="480" y="151" fill="#1d1b26">11</text>
+<rect x="504" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="524" y="151" fill="#aaa">12</text>
+<rect x="548" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="568" y="151" fill="#aaa">13</text>
+<rect x="592" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="612" y="151" fill="#aaa">14</text>
+<rect x="636" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="656" y="151" fill="#aaa">15</text>
+<rect x="680" y="134" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="700" y="151" fill="#aaa">16</text>
+<text x="20" y="180" text-anchor="start" font-size="13" fill="#b8322a" class="hand" style="font-size:19px">3. Probe block 10: target is higher → keep 11</text>
+<rect x="20" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="40" y="213" fill="#aaa">1</text>
+<rect x="64" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="84" y="213" fill="#aaa">2</text>
+<rect x="108" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="128" y="213" fill="#aaa">3</text>
+<rect x="152" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="172" y="213" fill="#aaa">4</text>
+<rect x="196" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="216" y="213" fill="#aaa">5</text>
+<rect x="240" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="260" y="213" fill="#aaa">6</text>
+<rect x="284" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="304" y="213" fill="#aaa">7</text>
+<rect x="328" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="348" y="213" fill="#aaa">8</text>
+<rect x="372" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="392" y="213" fill="#aaa">9</text>
+<rect x="416" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="436" y="213" fill="#aaa">10</text>
+<rect x="460" y="196" width="40" height="26" rx="4" fill="#b8f0c8" stroke="#1f7a4d" stroke-width="2"/><text x="480" y="213" fill="#1d1b26">11</text>
+<rect x="504" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="524" y="213" fill="#aaa">12</text>
+<rect x="548" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="568" y="213" fill="#aaa">13</text>
+<rect x="592" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="612" y="213" fill="#aaa">14</text>
+<rect x="636" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="656" y="213" fill="#aaa">15</text>
+<rect x="680" y="196" width="40" height="26" rx="4" fill="#f6f2e9" stroke="#d9d2c3" stroke-width="2"/><text x="700" y="213" fill="#aaa">16</text>
+<text x="20" y="242" text-anchor="start" font-size="13" fill="#b8322a" class="hand" style="font-size:19px">4. Probe block 11: FOUND (4 reads = log₂16)</text>
+</g></svg>
+
+    <figcaption>A sorted file of 16 blocks, target in block 11. Yellow = block probed; blue = still possible; grey = eliminated. Four reads instead of up to sixteen.</figcaption>
+  </figure>
+
+  <div class="formula">cost(S2) ≈ ⌈ log₂ b ⌉ block reads<small>b = 3,000 blocks → ⌈log₂ 3000⌉ = ⌈11.55⌉ = 12 reads, versus 1,500 on average for S1.</small></div>
+
+  <div class="box watch"><span class="tag">Watch it!</span>Binary search needs a file <b>physically sorted</b> on the very field you search. A file sorted by Ssn can't be binary-searched on Lname. That's why the lecture says it "helps for exactly one field". On a heap file binary search is meaningless: nothing guarantees that the target lies on one side of the middle.</div>
+  <div class="box brain"><span class="tag">Brain power</span>If the file is sorted <i>and</i> has a primary index, the index lookup costs about 3 reads (b = 3,000) while binary search on the data costs 12. Why is the index cheaper, given both use the same sorted data?</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why does S2 apply only to equality in the lecture?</dt><dd>The lecture's S2 locates one exact value. (A sorted file can in principle serve range queries too: locate the boundary, then read onward. That idea is formalized as S4 once an index exists.)</dd>
+    <dt>Is a "heap file" the same as an "unsorted file"?</dt><dd>Yes: records are stored in arrival order, with no organization.</dd>
+  </dl></div>
+  <div class="sticky">S1: no rules,<br>no speed.<br>S2: needs sorted file.</div>
+</section>
+
+<!-- =================== CH 11 =================== -->
+<section class="sheet chapter" id="c11">
+  <span class="kicker">Lesson 11</span>
+  <h2>S3a primary index and S4 ordering index</h2>
+  <p class="lead">Now we add an index on a file that is sorted on a <b>key</b>: the best case in the whole lecture.</p>
+
+  <h3>S3a: primary index, equality</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>Comparison type: equality. Comparison attribute: <b>key with primary index</b>. Example: <code>σ Name='Allen, Troy' (EMPLOYEE)</code>. <b>How:</b> navigate the index to locate the index record with the comparison value.</div>
+
+  <p>The data file is sorted by Name. The primary index is <b>sparse</b>: it keeps one entry per <b>block</b>, namely the first record of that block (the <b>block anchor</b>). The six anchors in the lecture's picture:</p>
+  <table class="t center">
+    <tr><th>Block anchor key K(i)</th><td>Aaron, Ed</td><td>Adams, John</td><td>Alexander, Ed</td><td>Allen, Troy</td><td>Anderson, Zach</td><td>Arnold, Mack</td></tr>
+    <tr><th>Block pointer P(i)</th><td>→ B1</td><td>→ B2</td><td>→ B3</td><td>→ B4</td><td>→ B5</td><td>→ B6</td></tr>
+  </table>
+
+  <div class="box example"><span class="tag">Example</span>
+    <b>Search 1: "Allen, Troy".</b> Binary-search the index. The entry "Allen, Troy" exists → pointer B4. Read block 4 (index read(s) + <b>1</b> data block) and pick the record. Done.<br>
+    <b>Search 2: "Allen, Sam".</b> No entry has exactly this key. Rule: take the <b>last anchor ≤ the target</b>. Alphabetically Alexander &lt; Allen, Sam &lt; Allen, Troy, so the anchor is <b>Alexander, Ed → B3</b>. Read block 3: it contains Alexander, Alfred, …, Allen Sam ✓. (Everything before block 4's anchor must live in block 3 or earlier, because the file is sorted.)<br>
+    <b>Search 3: "Allen, Tim".</b> Same rule: Tim &lt; Troy, so anchor = Alexander → B3. Read block 3, scan it: no "Allen, Tim" → <b>not found</b>, at the same cost as a hit.
+  </div>
+
+  <div class="formula">cost(S3a) = x + 1<small>x = number of index levels you walk; +1 for the single data block. With b = 3,000: single-level binary search ≈ ⌈log₂ 30⌉ + 1 = 6 reads; two-level index: 2 + 1 = 3 reads.</small></div>
+
+  <div class="box key"><span class="tag">Key point</span>An index search returns <b>one block pointer</b>. The DBMS then reads that <b>one</b> data block and looks inside it. That's why a primary-index equality search on a key is the fastest selection there is: about <b>one data block</b> read, however big the table.</div>
+  <div class="box watch"><span class="tag">Watch it!</span>Sparse ≠ "only some records are findable". Every record is still reachable; the index just points to the <i>block</i> where the record must be if it exists. And the whole scheme is valid <b>only because the file is sorted</b> on the same key.</div>
+
+  <h3>S4: ordering index, non-equality</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>Comparison type: <b>non-equality</b>. Comparison attribute: <b>key with primary index</b>. Example: <code>σ empno&gt;100 (EMPLOYEE)</code>. <b>How:</b> navigate the index to locate the data block with the corresponding equality condition, then retrieve preceding or subsequent records.</div>
+  <p>Because the file is sorted, all records with <code>empno &gt; 100</code> sit <b>together at the end</b>, and all with <code>empno &lt; 100</code> sit at the beginning. So: use the index to find where 100 lives, then walk the file in one direction.</p>
+
+  <figure class="figure reveal">
+    <svg viewBox="0 0 760 200" role="img" aria-label="File sorted on empno with the boundary at 100">
+      <g font-size="12" font-weight="700" text-anchor="middle">
+        <rect x="20" y="40" width="720" height="40" fill="#fff" stroke="#1d1b26" stroke-width="2"/>
+        <rect x="20" y="40" width="190" height="40" fill="#fbe5e2" stroke="#b8322a" stroke-width="2"/><text x="115" y="65">blocks 1–10: empno 1…100</text>
+        <rect x="210" y="40" width="530" height="40" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="475" y="65">blocks 11–3,000: empno 101…30,000  ← all match "&gt; 100"</text>
+        <path d="M210 95 L210 130" stroke="#2459a8" stroke-width="3" marker-start="url(#ahB)"/>
+        <text x="210" y="148" fill="#2459a8" font-size="14">index finds the boundary (record 100 is in block 10)</text>
+        <path d="M222 100 L735 100" stroke="#1f7a4d" stroke-width="3" marker-end="url(#ahG)" class="flowline"/><text x="480" y="118" fill="#1f7a4d">then read everything after it</text>
+      </g>
+      <text x="20" y="25" class="hand" font-size="22" fill="#b8322a">file sorted on empno (10 records per block)</text>
+      <text x="20" y="190" class="hand" font-size="20" fill="#6a3fb5">For "empno ≤ 100" you need no index: just read blocks 1–10 from the start.</text>
+    </svg>
+  </figure>
+
+  <div class="box example"><span class="tag">Example</span>
+    EMPLOYEE: empno = 1…30,000 (unique), 10 per block → 3,000 blocks.
+    <ul><li><code>empno &gt; 100</code>: index → block 10 (holds 91–100). Matches start at block 11 and run to the end: <b>2,990 data blocks</b> + the index reads. Result: 29,900 records.</li>
+    <li><code>empno ≤ 100</code>: read blocks 1–10 only: <b>10 blocks</b>, no index needed. Result: 100 records.</li></ul></div>
+  <div class="box watch"><span class="tag">Watch it!</span>S4's cost depends on <b>how many records match</b>, not on the index. If the range returns 99% of the file (as in "empno &gt; 100"), S4 reads nearly as much as S1. Indexes help most when the answer is a small part of the table.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why isn't "!=" listed under S4?</dt><dd>"≠ 100" matches records on <i>both</i> sides of 100, i.e. nearly everything, so there's nothing for an index to skip. Treat it like S1.</dd>
+    <dt>What if the value 100 doesn't exist?</dt><dd>The same rule applies: find the block where it <i>would</i> be (largest anchor ≤ 100) and read from there, discarding any records that don't qualify.</dd>
+  </dl></div>
+  <div class="sticky r">Find the boundary,<br>then walk one way.</div>
+</section>
+
+<!-- =================== CH 12 =================== -->
+<section class="sheet chapter" id="c12">
+  <span class="kicker">Lesson 12</span>
+  <h2>S5 clustering index and S6 secondary index</h2>
+  <p class="lead">What if the field repeats (non-key), or the file isn't sorted on it at all?</p>
+
+  <h3>S5: clustering index, equality</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>Comparison type: equality. Comparison attribute: <b>non-key with clustering index</b>. Example: <code>σ Dept_number=3 (Student)</code>. <b>How:</b> navigate the index to locate the <b>first data block</b> satisfying the condition and then retrieve <b>subsequent blocks</b>. <i>All matches are adjacent.</i></div>
+  <p>The file is sorted on <code>Dept_number</code>, which repeats. The clustering index has <b>one entry per distinct value</b>, pointing to the <b>first block</b> that contains it. Using 24 records in 6 blocks (4 per block), like the lecture's picture:</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin:10px 0">
+    <span class="blk"><span class="h">B1</span><span>1</span><span>1</span><span>1</span><span>2</span></span>
+    <span class="blk"><span class="h">B2</span><span>2</span><span class="hit">3</span><span class="hit">3</span><span class="hit">3</span></span>
+    <span class="blk"><span class="h">B3</span><span class="hit">3</span><span class="hit">3</span><span>4</span><span>4</span></span>
+    <span class="blk"><span class="h">B4</span><span>5</span><span>5</span><span>5</span><span>5</span></span>
+    <span class="blk"><span class="h">B5</span><span>6</span><span>6</span><span>6</span><span>6</span></span>
+    <span class="blk"><span class="h">B6</span><span>6</span><span>8</span><span>8</span><span>8</span></span>
+  </div>
+  <table class="t center"><tr><th>Index entry (value)</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>8</td></tr><tr><th>Points to</th><td>B1</td><td>B1</td><td>B2</td><td>B3</td><td>B4</td><td>B5</td><td>B6</td></tr></table>
+  <div class="box example"><span class="tag">Example</span><code>Dept_number = 3</code>. (1) Index → entry 3 → <b>B2</b>. (2) Read B2: three 3s (after the leading 2). (3) Next block B3: two more 3s, then a 4 → matches have ended, <b>stop</b>. Result: 5 records, <b>2 data blocks</b> (+ the index read). We never touch B1, B4, B5, B6.</div>
+  <div class="formula">cost(S5) = x + ⌈ s ÷ bfr ⌉<small>s = matching records (5), bfr = records per block (4): ⌈5÷4⌉ = 2 data blocks.</small></div>
+
+  <div class="box watch"><span class="tag">Watch it!</span>The clustering index has <b>one entry per distinct value</b>, not one per block and not one per record. Here: 7 values → 7 entries, even though there are 6 blocks.</div>
+
+  <h3>S6: secondary index (B⁺-tree)</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>Comparison type: equality. Comparison attribute: <b>key or non-key with secondary index</b>. Example: <code>σ DNUMBER=5 (DEPARTMENT)</code>. <b>How:</b> navigate the index to locate the index record with the comparison value. On a non-key, follow every pointer.</div>
+  <p>Here the file is <b>not</b> sorted on the field. The values are scattered through the file, so the index must list <b>every value individually</b> (dense): one entry per record. The lecture's data file holds 24 department numbers in random order; the index lists 1 to 24:</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin:10px 0">
+    <span class="blk"><span class="h">B1</span><span>9</span><span class="hit">5</span><span>13</span><span>8</span></span>
+    <span class="blk"><span class="h">B2</span><span>6</span><span>15</span><span>3</span><span>17</span></span>
+    <span class="blk"><span class="h">B3</span><span>21</span><span>11</span><span>16</span><span>2</span></span>
+    <span class="blk"><span class="h">B4</span><span>24</span><span>10</span><span>20</span><span>1</span></span>
+    <span class="blk"><span class="h">B5</span><span>4</span><span>23</span><span>18</span><span>14</span></span>
+    <span class="blk"><span class="h">B6</span><span>12</span><span>7</span><span>19</span><span>22</span></span>
+  </div>
+  <div class="box example"><span class="tag">Example</span><b>Key field:</b> <code>DNUMBER = 5</code>. Index entry "5" → B1. Read B1, pick the record: <b>1 data block</b>.<br>
+  <b>Non-key field:</b> suppose employees' <code>Dno = 5</code> matches 20 employees, scattered because the file isn't sorted by Dno. The index entry for 5 holds <b>20 pointers</b>, and following them may hit up to <b>20 different blocks</b>: cost ≈ x + 20.<br>
+  Compare S5 (clustering) for the same 20 records at 10 per block: x + ⌈20 ÷ 10⌉ = x + 2. Sorting the matches together saves 18 reads.</div>
+  <div class="formula">cost(S6): key → x + 1 &nbsp;|&nbsp; non-key → x + s (worst case)</div>
+
+  <div class="box watch"><span class="tag">Watch it!</span>A secondary index on a <b>non-key</b> can be <i>worse than S1</i>. If 20,000 of the 30,000 employees match, following 20,000 scattered record pointers could cost up to 20,000 block reads, while a plain scan reads just 3,000. That's why the optimizer needs statistics on how many rows a condition matches before trusting an index.</div>
+  <div class="box brain"><span class="tag">Brain power</span>One file can have <i>one</i> primary or clustering index but <i>many</i> secondary indexes. Why? (Think about what "sorted" means for a file on disk.)</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why does the lecture name B⁺-tree here?</dt><dd>A dense index on millions of records is itself huge. A B⁺-tree (a multilevel index with linked leaves) keeps it searchable in 3–4 steps, and its linked leaves also support range conditions.</dd>
+    <dt>Which is cheaper for the same equality on a non-key: S5 or S6?</dt><dd>S5, because the matches are adjacent; but S5 is only possible if the file is sorted on that field.</dd>
+  </dl></div>
+  <div class="sticky">Adjacent matches = cheap<br>Scattered matches = costly</div>
+</section>
+
+<!-- =================== CH 13 =================== -->
+<section class="sheet chapter" id="c13">
+  <span class="kicker">Lesson 13</span>
+  <h2>Conjunctive conditions (AND)</h2>
+  <p class="lead">Real queries rarely have a single condition. With AND, <b>you only need to find a way to satisfy one of them cheaply</b>; the rest can be checked afterwards.</p>
+
+  <p>Our running query: <code>σ DNO=5 AND SALARY&gt;30000 AND Gender='F' (EMPLOYEE)</code>. A record qualifies only if <b>all three</b> hold. Logic gives us a gift: any record in the answer <i>must</i> satisfy <code>DNO=5</code>. So we can use a fast path for that one condition and throw everything else away afterwards.</p>
+
+  <h3>Strategy A: one index, then filter</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span><b>When:</b> a comparison attribute with an index. Example: DNO=5 AND SALARY&gt;30000 AND Gender=F; assume an index on DNO. <b>How:</b> use the index to retrieve satisfying records; apply the remaining comparisons.</div>
+  <div class="box example"><span class="tag">Example</span>
+    The file is sorted on Dno with a clustering index (the lecture's picture). Index → the block holding Dno = 5 → four records:
+    <table class="t center"><tr><th>Name</th><th>Dno</th><th>Salary</th><th>Gender</th><th>Salary&gt;30000?</th><th>Gender=F?</th><th>Kept?</th></tr>
+    <tr><td>Hoda</td><td>5</td><td>42,000</td><td>F</td><td>✔</td><td>✔</td><td><b>YES</b></td></tr>
+    <tr><td>Karim</td><td>5</td><td>28,000</td><td>M</td><td>✘</td><td>✘</td><td>no</td></tr>
+    <tr><td>Mona</td><td>5</td><td>35,000</td><td>F</td><td>✔</td><td>✔</td><td><b>YES</b></td></tr>
+    <tr><td>Sami</td><td>5</td><td>52,000</td><td>M</td><td>✔</td><td>✘</td><td>no</td></tr></table>
+    One block read; two results. We never looked at employees from other departments. The other two tests were done <b>in memory</b>, which is free compared to a disk read.</div>
+  <div class="box key"><span class="tag">Key point</span>If several conjuncts have an access path, choose the <b>most selective</b> one (the one that returns the fewest records), because that leaves the least to filter. The optimizer uses statistics to decide.</div>
+
+  <h3>Strategy B: a composite index</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span><b>When:</b> a group of comparison attributes with a composite index appears in <b>equality</b> comparisons. Example: DNO=5 AND SALARY&gt;30000 AND Gender=F; assume a composite index on (DNO, GENDER). <b>How:</b> use the composite index to retrieve satisfying records; apply the remaining comparisons.</div>
+  <p>A composite index is sorted by Dno first and, inside each Dno, by Gender, like a phone book sorted by last name then first name. The pair (5, 'F') is found directly. Only Salary&gt;30000 is left to check, and only on records already known to satisfy the other two.</p>
+  <div class="box watch"><span class="tag">Watch it!</span>The composite index here helps because <b>both</b> indexed columns are compared with <b>equality</b>. It can't serve a condition on Salary at all (not part of the index), and column order matters: an index on (Dno, Gender) can't efficiently answer "Gender='F'" alone.</div>
+
+  <h3>Strategy C: intersection of record pointers</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span><b>When:</b> comparison attribute(s) with secondary index(es) with <b>record pointers</b>. <b>How:</b> use the secondary index(es) to retrieve the record pointers; <b>intersect</b> the record pointers; retrieve the records and apply the rest of the comparisons.</div>
+  <figure class="figure reveal">
+    <svg viewBox="0 0 760 270" role="img" aria-label="Two pointer lists are intersected and only two data records are fetched">
+      <g font-size="14" font-weight="700" text-anchor="middle">
+        <text x="130" y="22">Index on Dno → Dno=5</text><text x="380" y="22">Index on Gender → F</text>
+        <g fill="#e3ecfa" stroke="#2459a8" stroke-width="2"><rect x="30" y="35" width="50" height="30" rx="5"/><rect x="85" y="35" width="50" height="30" rx="5"/><rect x="140" y="35" width="50" height="30" rx="5"/><rect x="195" y="35" width="50" height="30" rx="5"/></g>
+        <text x="55" y="56">r2</text><text x="110" y="56">r5</text><text x="165" y="56">r7</text><text x="220" y="56">r9</text>
+        <g fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"><rect x="280" y="35" width="50" height="30" rx="5"/><rect x="335" y="35" width="50" height="30" rx="5"/><rect x="390" y="35" width="50" height="30" rx="5"/><rect x="445" y="35" width="50" height="30" rx="5"/></g>
+        <text x="305" y="56">r1</text><text x="360" y="56">r5</text><text x="415" y="56">r7</text><text x="470" y="56">r8</text>
+        <text x="270" y="120" font-size="26">∩</text>
+        <rect x="190" y="140" width="160" height="36" rx="8" fill="#ffe17a" stroke="#1d1b26" stroke-width="2"/><text x="270" y="164">r5 , r7</text>
+        <rect x="520" y="90" width="220" height="140" rx="10" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="630" y="112">Data file</text>
+        <rect x="535" y="125" width="190" height="24" fill="#f6f2e9" stroke="#d9d2c3"/><text x="630" y="142" fill="#aaa">block … (not read)</text>
+        <rect x="535" y="155" width="190" height="24" fill="#b8f0c8" stroke="#1f7a4d" stroke-width="2"/><text x="630" y="172">block of r5 ✔ read</text>
+        <rect x="535" y="185" width="190" height="24" fill="#b8f0c8" stroke="#1f7a4d" stroke-width="2"/><text x="630" y="202">block of r7 ✔ read</text>
+      </g>
+      <g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M140 66 L240 138" marker-end="url(#ah)"/><path d="M390 66 L300 138" marker-end="url(#ah)"/><path d="M352 160 L532 168" marker-end="url(#ahG)" class="flowline"/><path d="M352 165 L532 198" marker-end="url(#ahG)" class="flowline"/></g>
+      <text x="30" y="225" class="hand" font-size="22" fill="#b8322a">r2, r9, r1, r8 qualify for only ONE condition → never fetched.</text>
+      <text x="30" y="255" class="hand" font-size="20" fill="#1f7a4d">Only the 2 records that satisfy BOTH are read from the data file.</text>
+    </svg>
+    <figcaption>The lecture's picture: intersect the two pointer lists first, and only touch the data blocks of the survivors.</figcaption>
+  </figure>
+  <div class="box lecture"><span class="tag">From the lecture</span><b>Why this wins:</b> index blocks are small and often already in memory; data blocks are large and on disk. Intersecting the pointer sets first means you only ever touch data blocks that satisfy every condition. <b>Requires record pointers, not block pointers.</b></div>
+
+  <div class="box example"><span class="tag">Example</span>30,000 employees. Dno=5 matches 1,000; Gender='F' matches 15,000; both together ≈ 500.
+    <ul><li><b>Strategy A</b> with only the Dno index: fetch up to <b>1,000</b> records (possibly 1,000 data-block reads), then filter.</li>
+    <li><b>Strategy C</b>: read the pointer lists (1,000 pointers ≈ 10 index blocks; 15,000 pointers ≈ 150 index blocks at 100 per block), intersect in memory, then fetch only the <b>500</b> survivors: ≈ 160 index + 500 data reads ≈ <b>660</b> vs ≈ 1,010. It pays off when <i>each</i> condition alone matches a lot but <i>together</i> they match few.</li></ul></div>
+  <div class="box watch"><span class="tag">Watch it!</span>Why <b>record</b> pointers? A block pointer says "somewhere in block 3". If Dno=5 has a record in block 3 and Gender='F' has a (different) record in block 3, the block pointers "match" but no single record satisfies both. Only exact record addresses prove it's the <i>same</i> record.</div>
+  <div class="box brain"><span class="tag">Brain power</span>With the AND query on three conditions, you have an index on Dno and a composite index on (Dno, Gender). Which strategy would you expect the optimizer to prefer, and what statistic would you want to know before deciding?</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Is the leftover filter step expensive?</dt><dd>No. The records are already in memory, so testing Salary&gt;30000 costs a comparison, not a disk read.</dd>
+    <dt>What if none of the AND conditions has an index?</dt><dd>Then S1 (linear search) tests all conditions on every record.</dd>
+  </dl></div>
+  <div class="sticky r">AND: pick ONE good path,<br>filter the rest.</div>
+</section>
+
+<!-- =================== CH 14 =================== -->
+<section class="sheet chapter" id="c14">
+  <span class="kicker">Lesson 14</span>
+  <h2>Disjunctive conditions (OR)</h2>
+  <p class="lead">With OR, logic works against us: a record qualifies if it satisfies <b>any one</b> condition, so you must find all of them.</p>
+
+  <div class="box lecture"><span class="tag">From the lecture</span><b>Disjunctive conditions (OR):</b>
+    <ul><li>Every disjunct must be evaluated: a record satisfying <i>any one</i> of them belongs in the result.</li>
+    <li>So: run a simple-condition algorithm on each disjunct, <b>union</b> the results, and <b>remove duplicates</b>.</li>
+    <li>If even one disjunct has no access path, the whole query falls back to a linear scan.</li>
+    <li>AND lets you pick the best index. OR forces you to use them all, or none.</li></ul></div>
+
+  <h3>Why can't we just use one index?</h3>
+  <p>Take <code>Dno=5 OR Salary&gt;30000</code>. An index on Dno finds the Dno=5 people. But a department-7 employee earning 50,000 also qualifies, and no Dno index will ever find them. Each disjunct contributes records the others miss, so every disjunct must be searched.</p>
+
+  <figure class="figure reveal">
+    <svg viewBox="0 0 760 210" role="img" aria-label="Two disjuncts run separately, results are unioned and duplicates removed">
+      <g font-size="13" font-weight="700" text-anchor="middle">
+        <rect x="20" y="20" width="200" height="50" rx="8" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="120" y="40">Dno = 5</text><text x="120" y="58" font-size="11">S5 clustering index</text>
+        <rect x="20" y="110" width="200" height="50" rx="8" fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"/><text x="120" y="130">Ssn = '123'</text><text x="120" y="148" font-size="11">S3a primary index</text>
+        <rect x="280" y="20" width="170" height="50" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="365" y="50">{r12, r13, r14, r15}</text>
+        <rect x="280" y="110" width="170" height="50" rx="8" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="365" y="140">{r14}</text>
+        <rect x="520" y="55" width="120" height="70" rx="10" fill="#1d1b26"/><text x="580" y="85" fill="#fff" font-size="16">UNION</text><text x="580" y="106" fill="#fff" font-size="11">+ drop duplicates</text>
+        <rect x="660" y="65" width="90" height="50" rx="8" fill="#b8f0c8" stroke="#1f7a4d" stroke-width="2"/><text x="705" y="86" font-size="12">r12 r13</text><text x="705" y="104" font-size="12">r14 r15</text>
+      </g>
+      <g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M222 45 L278 45" marker-end="url(#ah)"/><path d="M222 135 L278 135" marker-end="url(#ah)"/><path d="M452 45 L518 80" marker-end="url(#ah)"/><path d="M452 135 L518 100" marker-end="url(#ah)"/><path d="M642 90 L658 90" marker-end="url(#ah)"/></g>
+      <text x="280" y="195" class="hand" font-size="21" fill="#b8322a">r14 was found twice → kept only once</text>
+    </svg>
+  </figure>
+
+  <div class="box example"><span class="tag">Example</span>
+    <code>σ Dno=5 OR Ssn='123' (EMPLOYEE)</code>. Dno=5 returns 4 records (r12–r15); Ssn='123' returns r14, which happens to live in department 5 as well. Union with duplicates would list r14 twice. After <b>duplicate removal</b>, the answer has 4 records. In a relation, a record is either in the result or not; it can't appear twice.<br>
+    <b>Now change it:</b> <code>Dno=5 OR Salary&gt;30000</code> where Salary has no index. Disjunct 2 has no access path, so you'd have to scan the whole file anyway to evaluate it, and while scanning you might as well test <i>both</i> conditions at once. Result: one S1 pass; the Dno index is never used.</div>
+
+  <table class="t center">
+    <tr><th></th><th>AND (conjunctive)</th><th>OR (disjunctive)</th></tr>
+    <tr><th>Record qualifies if</th><td>satisfies <b>all</b> conditions</td><td>satisfies <b>at least one</b></td></tr>
+    <tr><th>Index strategy</th><td>use the <b>best one</b>, filter the rest</td><td>need <b>every</b> disjunct to have a path, else S1</td></tr>
+    <tr><th>Extra step</th><td>filter the fetched records</td><td>union + remove duplicates</td></tr>
+    <tr><th>More conditions →</th><td>fewer results, easier</td><td>more results, harder</td></tr>
+  </table>
+  <div class="box watch"><span class="tag">Watch it!</span>"All disjuncts must have an access path" is the rule. One un-indexed OR branch silently ruins the index on all the others. When people say "my index isn't being used", an OR with an un-indexed column is a classic reason.</div>
+  <div class="box brain"><span class="tag">Brain power</span>The conjunctive algorithms save work by <i>shrinking</i> the set of records you touch. Explain in one sentence why the disjunctive algorithm cannot do the same.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why "disjunct" and "conjunct"?</dt><dd>They're the pieces of a condition: the parts joined by OR are <b>disjuncts</b>; the parts joined by AND are <b>conjuncts</b>.</dd>
+    <dt>How are duplicates detected?</dt><dd>By comparing the record's pointer (address): the same record has the same pointer. Sorting the pointers makes duplicates adjacent, which is exactly the idea reused in the next lesson.</dd>
+  </dl></div>
+  <div class="sticky">AND = pick the best.<br>OR = use them all<br>(or none).</div>
+</section>
+
+<!-- =================== CH 15 =================== -->
+<section class="sheet chapter" id="c15">
+  <span class="kicker">Lesson 15</span>
+  <h2>Projection and duplicate elimination</h2>
+  <p class="lead">Select removes rows. <b>Project</b> removes columns. Sounds trivial, until duplicates appear.</p>
+
+  <div class="box lecture"><span class="tag">From the lecture</span>The project operator produces a table containing a <b>subset of the columns</b> of its argument table: <b>π &lt;attribute list&gt; (relation)</b>. The result is a table, so <b>tuples are unique</b> (no duplicates). Example: <code>π Name,Hobby (Person)</code> ≡ <code>SELECT Name, Hobby FROM Person</code>.</div>
+
+  <figure class="figure reveal"><div class="grid2" style="align-items:center">
+    <div><h4 style="margin-top:0">Person</h4><table class="t"><tr><th>Id</th><th>Name</th><th>Address</th><th>Hobby</th></tr>
+    <tr><td>1123</td><td>John</td><td>123 Main</td><td>stamps</td></tr><tr><td>1133</td><td>John</td><td>123 Main</td><td>coins</td></tr>
+    <tr><td>5556</td><td>Mary</td><td>7 Lake Dr</td><td>hiking</td></tr><tr><td>9876</td><td>Bart</td><td>5 Pine St</td><td>stamps</td></tr></table></div>
+    <div><h4 style="margin-top:0" class="c-green">π Name, Address (Person)</h4><table class="t"><tr><th>Name</th><th>Address</th></tr>
+    <tr style="background:#ffe17a"><td>John</td><td>123 Main</td></tr><tr><td>Mary</td><td>7 Lake Dr</td></tr><tr><td>Bart</td><td>5 Pine St</td></tr></table>
+    <p class="muted">4 rows in, <b>3</b> rows out: the two John rows became identical after dropping Id and Hobby, so one disappeared.</p></div></div></figure>
+
+  <h3>Two jobs hidden in one operator</h3>
+  <ol><li><b>Remove unwanted columns</b> "on the fly": as each record is read, just copy the wanted fields. Easy.</li>
+  <li><b>Eliminate duplicate tuples</b> that this creates. <i>"This step is the difficult one!"</i></li></ol>
+
+  <h3>When is duplicate elimination needed?</h3>
+  <table class="t center"><tr><th>Query</th><th>Attribute list contains a key?</th><th>Duplicates?</th><th>Work</th></tr>
+    <tr><td>no DISTINCT</td><td>any</td><td>kept (SQL allows them)</td><td><b>None</b>: just remove columns</td></tr>
+    <tr><td>DISTINCT</td><td><b>Yes</b> (key ∈ list)</td><td>impossible: the key is unique per row</td><td><b>None</b></td></tr>
+    <tr><td>DISTINCT</td><td><b>No</b> (key ∉ list)</td><td>possible</td><td><b>Duplicate elimination</b>: sort → eliminate</td></tr></table>
+  <div class="box watch"><span class="tag">Watch it!</span>Pure relational algebra says "no duplicates" always, but real SQL keeps duplicates <i>unless you write DISTINCT</i>. That's why the lecture's rules start with "is there a DISTINCT?" The expensive algorithm below runs only when DISTINCT is present and no key is in the list.</div>
+
+  <h3>The algorithm: sort → eliminate</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>(b) create a tuple t[&lt;attribute list&gt;] in T′ for each tuple t in R; if &lt;attribute list&gt; includes a key of R then T ← T′ else { sort the tuples in T′; set i ← 1, j ← 2; while i ≤ n do { output the tuple T′[i] to T; while T′[i] = T′[j] and j ≤ n do j ← j + 1; i ← j; j ← i + 1 } }</div>
+  <p><b>Idea:</b> once rows are sorted, identical rows are neighbours. So one pass with two fingers does the job: finger <b>i</b> marks the first row of a group; finger <b>j</b> runs ahead past every copy. Output the first of each group, then jump <b>i</b> to where <b>j</b> stopped.</p>
+
+  <div class="box example"><span class="tag">Example</span>
+    T′ (7 rows, after projecting) <b>sorted on all columns</b>:
+    <table class="t center"><tr><th>#</th><th>DeptName</th><th>Salary</th><th>Address</th><th>EmpName</th></tr>
+    <tr><td>1</td><td>CS</td><td>4000</td><td>Giza</td><td>Nemin</td></tr><tr><td>2</td><td>CS</td><td>4000</td><td>Giza</td><td>Nemin</td></tr><tr><td>3</td><td>CS</td><td>4000</td><td>Giza</td><td>Nemin</td></tr>
+    <tr><td>4</td><td>CS</td><td>4000</td><td>October</td><td>Nemin</td></tr><tr><td>5</td><td>IS</td><td>2000</td><td>Cairo</td><td>Nemin</td></tr><tr><td>6</td><td>IS</td><td>2000</td><td>Giza</td><td>Randa</td></tr><tr><td>7</td><td>OR</td><td>3000</td><td>Cairo</td><td>Randa</td></tr></table>
+    <table class="t center"><tr><th>i</th><th>j (start)</th><th>What happens</th><th>Output to T</th><th>i, j next</th></tr>
+    <tr><td>1</td><td>2</td><td>T′[1]=T′[2] → j=3; T′[1]=T′[3] → j=4; T′[1]≠T′[4] stop</td><td>row 1 (CS Giza Nemin)</td><td>i=4, j=5</td></tr>
+    <tr><td>4</td><td>5</td><td>T′[4]≠T′[5] → no copies</td><td>row 4 (CS October Nemin)</td><td>i=5, j=6</td></tr>
+    <tr><td>5</td><td>6</td><td>T′[5]≠T′[6]</td><td>row 5 (IS Cairo Nemin)</td><td>i=6, j=7</td></tr>
+    <tr><td>6</td><td>7</td><td>T′[6]≠T′[7]</td><td>row 6 (IS Giza Randa)</td><td>i=7, j=8</td></tr>
+    <tr><td>7</td><td>8</td><td>j &gt; n → inner loop ends</td><td>row 7 (OR Cairo Randa)</td><td>i=8 &gt; n → <b>stop</b></td></tr></table>
+    <b>Result T: 5 rows</b>, with the 3 identical CS/Giza/Nemin rows collapsed into one. 7 rows in → 5 rows out.</div>
+  <div class="box watch"><span class="tag">Watch it!</span>(1) Sort on <b>all</b> remaining attributes, not just one; otherwise equal rows might not be neighbours. (2) CS/Giza/Nemin and CS/<b>October</b>/Nemin differ in one column, so both stay. (3) In the slides' sorted table the two IS rows are shown in the order Giza-Randa then Cairo-Nemin; a strict sort puts Cairo before Giza. The result is the same either way.</div>
+  <div class="box key"><span class="tag">Key point</span>The cost of this projection is dominated by the <b>sort</b> (roughly n·log n comparisons; large files use external merge sort on disk). The elimination pass itself is a single scan. That's why the lecture says <i>sorting copes with duplicate elimination</i>.</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>Why not just compare every row with every other row?</dt><dd>That's n² comparisons: 1,000,000 rows would need about 10¹² comparisons. Sorting first needs about 20 million (n·log₂ n ≈ 10⁶ × 20).</dd>
+    <dt>Is there another way besides sorting?</dt><dd>Yes: hashing (put identical rows in the same bucket). The lecture only presents sorting.</dd>
+  </dl></div>
+  <div class="sticky r">sort → neighbours<br>→ one pass<br>→ no duplicates</div>
+</section>
+
+<!-- =================== CH 16 =================== -->
+<section class="sheet chapter" id="c16">
+  <span class="kicker">Lesson 16</span>
+  <h2>Set operations: ∪, ∩, − and ×</h2>
+  <p class="lead">Union, intersection, difference and Cartesian product treat relations as sets of rows.</p>
+
+  <h3>Cartesian product: the one to avoid</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>The <b>CARTESIAN PRODUCT</b> of relations R and S includes all possible combinations of records from R and S. The attributes of the result include all attributes of R and S. If R has n records and j attributes and S has m records and k attributes, the result has <b>n × m records</b> and <b>j + k attributes</b>. It is very expensive and should be avoided if possible.</div>
+  <div class="box example"><span class="tag">Example</span>R = 1,000 employees (6 columns), S = 200 projects (4 columns). R × S = <b>1,000 × 200 = 200,000 rows</b> with <b>6 + 4 = 10 columns</b>. Add a third table of 20 departments: 4,000,000 rows. Almost all of them are meaningless pairings, which a join condition would discard. That's why the optimizer turns "× then σ" into a join.</div>
+
+  <h3>Union compatibility</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>Set operations apply to <b>type-compatible</b> relations: the same number of attributes, the same attribute names (as the lecture phrases it), and the same attribute domains. Person(SSN, Name, Address, Hobby) and Professor(Id, Name, Office, Phone) are <b>not</b> union compatible, but <b>π Name (Person)</b> and <b>π Name (Professor)</b> are, so <b>π Name (Person) − π Name (Professor)</b> makes sense.</div>
+  <div class="box watch"><span class="tag">Watch it!</span>Compatible means the <b>columns line up</b> (count and type). Compatibility is not about the number of rows. Projecting both sides to a common column list is the usual way to make two tables compatible.</div>
+
+  <h3>Sorting-based algorithms</h3>
+  <div class="box lecture"><span class="tag">From the lecture</span>
+    <b>UNION:</b> sort both relations on the same attributes; scan and merge both sorted files concurrently; when the same tuple exists in both, keep only one.<br>
+    <b>INTERSECTION:</b> sort both; scan and merge; keep only tuples that appear in both.<br>
+    <b>SET DIFFERENCE R − S:</b> keep only tuples that appear in R but not in S.</div>
+  <p>Think of merging two sorted piles of exam papers: look at the top paper of each pile, and decide by comparing. Two pointers, <b>i</b> on R and <b>j</b> on S, both only move forward, so the merge costs one pass over each (n + m reads) after the sort.</p>
+
+  <p>Use the lecture's data, already sorted on (DeptName, DeptID) by DeptID order: <b>R</b> = {Accounting 1, Research 2, HR 4, Admin 9} and <b>S</b> = {Accounting 1, Management 5, Logistics 7}.</p>
+
+  <h4 class="c-blue">Union R ∪ S</h4>
+  <table class="t center"><tr><th>Compare</th><th>Case</th><th>Action</th><th>T so far</th></tr>
+    <tr><td>R(1)=1 vs S(1)=1</td><td>equal</td><td>j++ (skip S's copy)</td><td>–</td></tr>
+    <tr><td>R(1)=1 vs S(2)=5</td><td>R &lt; S</td><td>output R(1), i++</td><td>Accounting 1</td></tr>
+    <tr><td>R(2)=2 vs S(2)=5</td><td>R &lt; S</td><td>output R(2), i++</td><td>+ Research 2</td></tr>
+    <tr><td>R(3)=4 vs S(2)=5</td><td>R &lt; S</td><td>output R(3), i++</td><td>+ HR 4</td></tr>
+    <tr><td>R(4)=9 vs S(2)=5</td><td>R &gt; S</td><td>output S(2), j++</td><td>+ Management 5</td></tr>
+    <tr><td>R(4)=9 vs S(3)=7</td><td>R &gt; S</td><td>output S(3), j++ → j &gt; m, loop ends</td><td>+ Logistics 7</td></tr>
+    <tr><td>leftover R(4)</td><td>i ≤ n</td><td>append the rest of R</td><td>+ Admin 9</td></tr></table>
+  <p><b>Result:</b> Accounting 1, Research 2, HR 4, Management 5, Logistics 7, Admin 9, sorted, with Accounting appearing <b>once</b>.</p>
+
+  <h4 class="c-green">Intersection R ∩ S</h4>
+  <p>Same walk, but output only on <b>equal</b>; when R&lt;S advance i; when R&gt;S advance j. Trace: 1=1 → output <b>Accounting 1</b>, i=2, j=2; 2&lt;5 → i=3; 4&lt;5 → i=4; 9&gt;5 → j=3; 9&gt;7 → j=4 (S exhausted, stop). <b>Result: {Accounting 1}</b>. Leftovers are <i>not</i> appended: they have no partner.</p>
+  <h4 class="c-red">Difference R − S</h4>
+  <p>Output R(i) only when it is <b>smaller</b> than S(j) (so it can't be in S). Trace: 1=1 → skip both (in S); 2&lt;5 → output <b>Research 2</b>; 4&lt;5 → output <b>HR 4</b>; 9&gt;5 → j++; 9&gt;7 → j++, S exhausted; append the leftover R(4): <b>Admin 9</b>. <b>Result: {Research 2, HR 4, Admin 9}</b>.</p>
+
+  <table class="t center"><tr><th>Operation</th><th>R&lt;S</th><th>R&gt;S</th><th>Equal</th><th>Leftover R</th><th>Leftover S</th></tr>
+    <tr><td><b>R ∪ S</b></td><td>output R, i++</td><td>output S, j++</td><td>j++ (keep one)</td><td>append</td><td>append</td></tr>
+    <tr><td><b>R ∩ S</b></td><td>i++</td><td>j++</td><td>output, i++, j++</td><td>drop</td><td>drop</td></tr>
+    <tr><td><b>R − S</b></td><td>output R, i++</td><td>j++</td><td>i++, j++</td><td>append</td><td>drop</td></tr></table>
+  <div class="box watch"><span class="tag">Watch it!</span>Both relations must be sorted on the <b>same attributes in the same order</b> before merging, otherwise the two-pointer walk gives wrong results. Also note the slide's intersection pseudo-code writes "output R(j)"; it should say <b>R(i)</b>, since R(i) = S(j) at that point and i is R's finger.</div>
+  <div class="box brain"><span class="tag">Brain power</span>Run R − S and then S − R on the example. Is difference commutative? What is the union of those two results with R ∩ S?</div>
+  <div class="box nodumb"><span class="tag">No dumb questions</span><dl>
+    <dt>What does the sorting cost?</dt><dd>As for projection: about n·log n for each relation. The merge is then linear. If a relation is already sorted (e.g. stored in order), the sort step is skipped.</dd>
+    <dt>Why does "equal" in a union only advance j?</dt><dd>R(i) is output later, when it is compared with the next S tuple, so the duplicate from S is dropped and R's copy is kept once.</dd>
+  </dl></div>
+  <div class="sticky">× is costly: n·m rows<br>∪ ∩ − : sort + merge</div>
+</section>
+
+<!-- =================== CH 17 =================== -->
+<section class="sheet chapter" id="c17">
+  <span class="kicker">Lesson 17 · Review</span>
+  <h2>The full story, key ideas &amp; dictionary</h2>
+  <p class="lead">Read from top to bottom. Each step is the reason for the next step.</p>
+  <div class="grid2" style="grid-template-columns:1.4fr 1fr;align-items:start">
+    <div class="flow reveal">
+      <div class="step"><b class="n">1</b>A user writes SQL: <i>what</i> they want</div><div class="arrow">▼</div>
+      <div class="step"><b class="n">2</b>Scan, parse, validate → intermediate form</div><div class="arrow">▼</div>
+      <div class="step"><b class="n">3</b>Translate to relational algebra → query tree</div><div class="arrow">▼</div>
+      <div class="step"><b class="n">4</b>The optimizer picks <i>how</i>: heuristics + cost estimates</div><div class="arrow">▼</div>
+      <div class="step"><b class="n">5</b>Each operator gets an algorithm (execution plan)</div><div class="arrow">▼</div>
+      <div class="step"><b class="n">6</b>Selection: S1–S6 depending on index and condition</div><div class="arrow">▼</div>
+      <div class="step"><b class="n">7</b>AND: best index + filter; OR: all paths or scan</div><div class="arrow">▼</div>
+      <div class="step"><b class="n">8</b>π needs sort → eliminate; ∪ ∩ − need sort → merge</div><div class="arrow">▼</div>
+      <div class="step"><b class="n">9</b>Code is generated and run; the result returns</div>
+    </div>
+    <div>
+      <div class="sticky">Fewer block reads<br>= faster query.</div>
+      <div class="box key"><span class="tag">Key point</span>Optimization is <b>"reasonably efficient"</b>, not "optimal". The same answer can be reached by many plans; the optimizer picks a cheap one.</div>
+    </div>
+  </div>
+
+  <h3>Selection cheat sheet</h3>
+  <table class="t center">
+    <tr><th>Alg.</th><th>Needs</th><th>Comparison</th><th>Cost (block reads)</th></tr>
+    <tr><td><b>S1</b> linear</td><td>nothing</td><td>any</td><td>b (key found: ≈ b/2)</td></tr>
+    <tr><td><b>S2</b> binary</td><td>file sorted on field</td><td>equality</td><td>⌈log₂ b⌉</td></tr>
+    <tr><td><b>S3a</b> primary</td><td>sorted on key + primary index</td><td>equality</td><td>x + 1</td></tr>
+    <tr><td><b>S4</b> ordering</td><td>sorted on key + primary index</td><td>&gt; &lt; ≥ ≤</td><td>boundary lookup + blocks of the range</td></tr>
+    <tr><td><b>S5</b> clustering</td><td>sorted on non-key + clustering index</td><td>equality</td><td>x + ⌈s/bfr⌉</td></tr>
+    <tr><td><b>S6</b> secondary</td><td>any file + secondary index</td><td>equality (also ranges via B⁺-tree)</td><td>key: x + 1; non-key: x + s</td></tr>
+  </table>
+  <p class="src">Costs are the standard textbook estimates, added for understanding. The lecture states the algorithms and conditions (first three columns).</p>
+
+  <h3>Compound conditions &amp; other operators</h3>
+  <table class="t">
+    <tr><th>Case</th><th>Approach</th></tr>
+    <tr><td>AND, one indexed conjunct</td><td>Use the index, then test the remaining conjuncts on the fetched records</td></tr>
+    <tr><td>AND, composite index</td><td>Equality on the composite's attributes → fetch via it, test the rest</td></tr>
+    <tr><td>AND, several secondary indexes</td><td>Intersect <b>record pointers</b>, fetch survivors, test the rest</td></tr>
+    <tr><td>OR</td><td>Evaluate every disjunct, union, remove duplicates; one un-indexed disjunct → S1</td></tr>
+    <tr><td>π with DISTINCT, key not in list</td><td>Sort → eliminate duplicates (i, j fingers)</td></tr>
+    <tr><td>∪, ∩, −</td><td>Sort both on the same attributes, then merge with two pointers</td></tr>
+    <tr><td>×</td><td>n × m rows, j + k columns: avoid</td></tr>
+  </table>
+
+  <h3>Dictionary</h3>
+  <div class="grid2">
+    <div class="card"><b>Query optimization</b>: choosing a suitable execution strategy.<br><b>Query tree</b>: tree of an algebra expression; leaves = tables, internal nodes = operators.<br><b>Execution plan</b>: tree + an algorithm per node.<br><b>Query block</b>: one SELECT-FROM-WHERE unit.<br><b>Interpreted mode</b>: run directly. <b>Compiled mode</b>: store, run later.</div>
+    <div class="card"><b>Access path</b>: structure making search efficient (index).<br><b>Block anchor</b>: first record of a block.<br><b>Conjunct / disjunct</b>: part of an AND / OR condition.<br><b>Record pointer</b>: exact record address.<br><b>Union compatible</b>: same number and types of columns.<br><b>bfr, b, x, s</b>: records per block, data blocks, index levels, matching records.</div>
+  </div>
+  <div class="box brain"><span class="tag">Brain power</span>Without looking back: draw the five-stage pipeline, then list the six selection algorithms with the one condition that makes each applicable.</div>
+</section>
+
+<!-- =================== EXAM =================== -->
+<section class="sheet chapter" id="quiz">
+  <span class="kicker">Final exam</span>
+  <h2>100 questions</h2>
+  <p class="lead">20 True/False · 50 Multiple choice · 10 Written · 20 Practical. Try them all before you look at the answer key.</p>
+  <div class="grid2"><div class="card"><b>Part A</b> True / False: Q1–Q20<br><b>Part B</b> Multiple choice: Q21–Q70</div><div class="card"><b>Part C</b> Long-form written: Q71–Q80<br><b>Part D</b> Practical: Q81–Q100</div></div>
+
+  <h3>Part A · True or False</h3>
+  <p class="muted">Write T or F. If false, try to say what would make it true.</p>
+  <div class="q"><span class="qn">1</span>SQL tells the DBMS <b>how</b> to retrieve the data, step by step; the optimizer only decides <b>what</b> is wanted.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">2</span>Query optimization always finds the truly optimal execution strategy.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">3</span>The techniques used in query optimization are heuristic rules and cost estimation.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">4</span>In a query tree, the input relations (tables) are the leaf nodes.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">5</span>Execution of a query tree starts at the root node.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">6</span>In interpreted mode, the generated code is stored and executed later whenever needed.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">7</span>A query block contains a single SELECT-FROM-WHERE expression, together with ORDER BY, GROUP BY and HAVING if present.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">8</span>The query <code>SELECT … WHERE SALARY &gt; (SELECT MAX(SALARY) … WHERE DNO=5)</code> consists of two query blocks.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">9</span>Linear search can evaluate any selection condition on any field, even with no access structure.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">10</span>Binary search on the data file can be used for an equality condition on any field of the file.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">11</span>With a primary index, an equality search on the key needs the index navigation plus reading one data block.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">12</span>For the condition <code>empno &gt; 100</code> on a file sorted by empno, the DBMS must scan from the first block even if a primary index exists.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">13</span>In a clustering-index search, all the matching records are adjacent in the file.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">14</span>A secondary index on a non-key field may need to follow pointers into many different data blocks.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">15</span>Intersection of record pointers works just as well with block pointers.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">16</span>In a disjunctive condition, if one disjunct has no access path, the whole selection falls back to a linear scan.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">17</span>For a conjunctive condition, the DBMS may use an index on one conjunct and test the other conjuncts on the retrieved records.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">18</span>A projection with DISTINCT whose attribute list includes a key of the relation requires sorting to remove duplicates.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">19</span>Sorting-based UNION and INTERSECTION require both relations to be sorted on the same attributes.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">20</span>The Cartesian product of R (n records, j attributes) and S (m records, k attributes) has n + m records and j × k attributes.<span class="tf">T / F</span></div>
+
+  <h3>Part B · Multiple choice</h3>
+  <p class="muted">Choose the one best answer.</p>
+  <div class="q"><span class="qn">21</span>In SQL the user specifies:<ol class="opts"><li data-l="a">how to retrieve it</li><li data-l="b">what result is wanted</li><li data-l="c">which index to use</li><li data-l="d">which algorithm to run</li></ol></div>
+  <div class="q"><span class="qn">22</span>The problem addressed at the start of the lecture is:<ol class="opts"><li data-l="a">storing data compactly</li><li data-l="b">normalizing tables</li><li data-l="c">encrypting data on disk</li><li data-l="d">efficiently answering a given query</li></ol></div>
+  <div class="q"><span class="qn">23</span>The optimization techniques named in the lecture are:<ol class="opts"><li data-l="a">sorting and hashing only</li><li data-l="b">heuristic rules and cost estimation</li><li data-l="c">random plan selection</li><li data-l="d">index creation only</li></ol></div>
+  <div class="q"><span class="qn">24</span>Which is <b>not</b> a step in the typical query-processing figure?<ol class="opts"><li data-l="a">table normalization</li><li data-l="b">scanning, parsing and validating</li><li data-l="c">query optimizer</li><li data-l="d">query code generator</li></ol></div>
+  <div class="q"><span class="qn">25</span>Which component chooses the execution plan?<ol class="opts"><li data-l="a">the query code generator</li><li data-l="b">the runtime database processor</li><li data-l="c">the query optimizer</li><li data-l="d">the parser</li></ol></div>
+  <div class="q"><span class="qn">26</span>Code that is stored and executed whenever needed is run in:<ol class="opts"><li data-l="a">interpreted mode</li><li data-l="b">compiled mode</li><li data-l="c">validation mode</li><li data-l="d">parsing mode</li></ol></div>
+  <div class="q"><span class="qn">27</span>The misspelled statement <code>SELCT Lname FROM EMPLOYEE</code> is rejected at the:<ol class="opts"><li data-l="a">parsing stage</li><li data-l="b">optimization stage</li><li data-l="c">code generation stage</li><li data-l="d">runtime stage</li></ol></div>
+  <div class="q"><span class="qn">28</span>In a query tree the internal nodes are:<ol class="opts"><li data-l="a">input tables</li><li data-l="b">index structures</li><li data-l="c">relational algebra operations</li><li data-l="d">result records</li></ol></div>
+  <div class="q"><span class="qn">29</span>The result of a query tree is produced by:<ol class="opts"><li data-l="a">the first leaf</li><li data-l="b">all leaves together</li><li data-l="c">the root node</li><li data-l="d">the leftmost operator</li></ol></div>
+  <div class="q"><span class="qn">30</span>The correct order of the lecture's pipeline is English → SQL → ? → query tree.<ol class="opts"><li data-l="a">relational algebra</li><li data-l="b">execution plan</li><li data-l="c">machine code</li><li data-l="d">statistics</li></ol></div>
+  <div class="q"><span class="qn">31</span>Which operator removes <b>columns</b> from a table?<ol class="opts"><li data-l="a">selection σ</li><li data-l="b">join ⋈</li><li data-l="c">union ∪</li><li data-l="d">projection π</li></ol></div>
+  <div class="q"><span class="qn">32</span><code>σ Plocation='Stafford' (PROJECT)</code> returns:<ol class="opts"><li data-l="a">fewer columns with the same rows</li><li data-l="b">one row per column</li><li data-l="c">a join of two tables</li><li data-l="d">the same columns with fewer rows</li></ol></div>
+  <div class="q"><span class="qn">33</span>How many query blocks does the nested salary example contain?<ol class="opts"><li data-l="a">1</li><li data-l="b">2</li><li data-l="c">3</li><li data-l="d">4</li></ol></div>
+  <div class="q"><span class="qn">34</span>A query block is:<ol class="opts"><li data-l="a">a whole database</li><li data-l="b">only the FROM clause</li><li data-l="c">a single SELECT-FROM-WHERE expression</li><li data-l="d">only the WHERE clause</li></ol></div>
+  <div class="q"><span class="qn">35</span>The relational algebra operator for aggregate functions such as MAX is:<ol class="opts"><li data-l="a">σ</li><li data-l="b">ℱ</li><li data-l="c">π</li><li data-l="d">⋈</li></ol></div>
+  <div class="q"><span class="qn">36</span>A conjunctive selection condition is one whose comparisons are joined by:<ol class="opts"><li data-l="a">OR</li><li data-l="b">NOT only</li><li data-l="c">AND</li><li data-l="d">UNION</li></ol></div>
+  <div class="q"><span class="qn">37</span>Which of these is a non-equality comparison?<ol class="opts"><li data-l="a"><code>Salary &gt; 30000</code></li><li data-l="b"><code>Pnumber = 10</code></li><li data-l="c"><code>Dno = 5</code></li><li data-l="d"><code>Hobby = 'stamps'</code></li></ol></div>
+  <div class="q"><span class="qn">38</span>An access path is:<ol class="opts"><li data-l="a">a SQL statement</li><li data-l="b">a query result</li><li data-l="c">a structure that makes searching for records efficient</li><li data-l="d">a network route</li></ol></div>
+  <div class="q"><span class="qn">39</span>Which selection algorithm works for any condition on any file?<ol class="opts"><li data-l="a">S2 binary search</li><li data-l="b">S3a primary index</li><li data-l="c">S5 clustering index</li><li data-l="d">S1 linear search</li></ol></div>
+  <div class="q"><span class="qn">40</span>S2 binary search requires:<ol class="opts"><li data-l="a">the file to be physically sorted on the search field</li><li data-l="b">a secondary index</li><li data-l="c">a hash table</li><li data-l="d">a B⁺-tree</li></ol></div>
+  <div class="q"><span class="qn">41</span>S3a applies to:<ol class="opts"><li data-l="a">equality on a key with a primary index</li><li data-l="b">range on a non-key field</li><li data-l="c">any field of a heap file</li><li data-l="d">OR conditions</li></ol></div>
+  <div class="q"><span class="qn">42</span>S4 is used for:<ol class="opts"><li data-l="a">non-equality comparisons on the ordering key with a primary index</li><li data-l="b">equality on a non-key</li><li data-l="c">duplicate elimination</li><li data-l="d">Cartesian product</li></ol></div>
+  <div class="q"><span class="qn">43</span>S5 applies to equality on:<ol class="opts"><li data-l="a">any key field</li><li data-l="b">a heap file field</li><li data-l="c">a non-key ordering field with a clustering index</li><li data-l="d">a composite key only</li></ol></div>
+  <div class="q"><span class="qn">44</span>S6 applies to:<ol class="opts"><li data-l="a">only the ordering field</li><li data-l="b">any field that has a secondary index</li><li data-l="c">only sorted files</li><li data-l="d">only key fields</li></ol></div>
+  <div class="q"><span class="qn">45</span>In a primary index, the first record of each data block is called the:<ol class="opts"><li data-l="a">leaf</li><li data-l="b">root</li><li data-l="c">block anchor</li><li data-l="d">fan-out</li></ol></div>
+  <div class="q"><span class="qn">46</span>A clustering index has one entry for each:<ol class="opts"><li data-l="a">record</li><li data-l="b">distinct value of the clustering field</li><li data-l="c">table</li><li data-l="d">disk</li></ol></div>
+  <div class="q"><span class="qn">47</span>In the S5 example (Dept_number = 3), after finding the first block we:<ol class="opts"><li data-l="a">scan from the beginning of the file</li><li data-l="b">read the following blocks while matching records continue</li><li data-l="c">read only that block</li><li data-l="d">sort the file</li></ol></div>
+  <div class="q"><span class="qn">48</span>A secondary index on a non-key field can be costly mainly because:<ol class="opts"><li data-l="a">its entries are always huge</li><li data-l="b">it can't use B⁺-trees</li><li data-l="c">it works only on sorted files</li><li data-l="d">matching records may sit in many different blocks</li></ol></div>
+  <div class="q"><span class="qn">49</span>Binary search over a sorted file of 1,024 blocks needs about:<ol class="opts"><li data-l="a">32 block reads</li><li data-l="b">512 block reads</li><li data-l="c">1,024 block reads</li><li data-l="d">10 block reads</li></ol></div>
+  <div class="q"><span class="qn">50</span>A file has 100,000 records and bfr = 50. The number of blocks b is:<ol class="opts"><li data-l="a">50</li><li data-l="b">2,000</li><li data-l="c">200</li><li data-l="d">5,000</li></ol></div>
+  <div class="q"><span class="qn">51</span>Using linear search for a key on the 2,000-block file, the average number of block reads is about:<ol class="opts"><li data-l="a">500</li><li data-l="b">1,000</li><li data-l="c">2,000</li><li data-l="d">4,000</li></ol></div>
+  <div class="q"><span class="qn">52</span>For <code>DNO=5 AND SALARY&gt;30000 AND Gender='F'</code> with an index on DNO only, after retrieving the DNO=5 records the DBMS:<ol class="opts"><li data-l="a">unions them with a second index scan</li><li data-l="b">applies the remaining comparisons to them</li><li data-l="c">discards the index and rescans the file</li><li data-l="d">sorts the data file</li></ol></div>
+  <div class="q"><span class="qn">53</span>A composite index helps a conjunctive condition when:<ol class="opts"><li data-l="a">any single column has a range comparison</li><li data-l="b">the comparisons on its attributes are equalities</li><li data-l="c">the condition uses only OR</li><li data-l="d">the file is a heap with no sort</li></ol></div>
+  <div class="q"><span class="qn">54</span>Intersection of record pointers requires:<ol class="opts"><li data-l="a">record pointers from secondary indexes</li><li data-l="b">block pointers only</li><li data-l="c">no indexes at all</li><li data-l="d">a file sorted on every column</li></ol></div>
+  <div class="q"><span class="qn">55</span>The main benefit of intersecting pointer sets first is that:<ol class="opts"><li data-l="a">no index blocks are read</li><li data-l="b">the file need not be stored</li><li data-l="c">duplicates are created</li><li data-l="d">only data blocks satisfying every condition are read</li></ol></div>
+  <div class="q"><span class="qn">56</span>For a disjunctive condition the DBMS:<ol class="opts"><li data-l="a">runs a simple-condition algorithm for each disjunct, unions, and removes duplicates</li><li data-l="b">uses only the best index</li><li data-l="c">intersects the pointer lists</li><li data-l="d">sorts the data file first</li></ol></div>
+  <div class="q"><span class="qn">57</span>If one disjunct of an OR condition has no access path, the DBMS typically:<ol class="opts"><li data-l="a">uses binary search</li><li data-l="b">uses intersection of pointers</li><li data-l="c">skips that disjunct</li><li data-l="d">uses a linear scan for the whole query</li></ol></div>
+  <div class="q"><span class="qn">58</span>The "difficult step" in implementing projection is:<ol class="opts"><li data-l="a">eliminating duplicate tuples</li><li data-l="b">removing unwanted columns</li><li data-l="c">reading the first block</li><li data-l="d">naming the result</li></ol></div>
+  <div class="q"><span class="qn">59</span>A DISTINCT projection whose attribute list contains a key of R needs:<ol class="opts"><li data-l="a">no duplicate elimination</li><li data-l="b">sorting and elimination</li><li data-l="c">a Cartesian product</li><li data-l="d">a secondary index</li></ol></div>
+  <div class="q"><span class="qn">60</span>In the sort → eliminate algorithm, after sorting, identical tuples are:<ol class="opts"><li data-l="a">in different blocks</li><li data-l="b">already removed</li><li data-l="c">adjacent to each other</li><li data-l="d">stored in a hash table</li></ol></div>
+  <div class="q"><span class="qn">61</span>In the algorithm, the inner loop advances j while:<ol class="opts"><li data-l="a">T′[i] &lt; T′[j]</li><li data-l="b">T′[j] is the last row</li><li data-l="c">i = 1</li><li data-l="d">T′[i] = T′[j] (and j ≤ n)</li></ol></div>
+  <div class="q"><span class="qn">62</span>Two relations are union compatible if they have:<ol class="opts"><li data-l="a">the same number of rows</li><li data-l="b">the same primary key</li><li data-l="c">the same indexes</li><li data-l="d">the same number of attributes with matching domains</li></ol></div>
+  <div class="q"><span class="qn">63</span>R has 500 records and 3 attributes; S has 40 records and 5 attributes. R × S has:<ol class="opts"><li data-l="a">540 records and 8 attributes</li><li data-l="b">20,000 records and 15 attributes</li><li data-l="c">20,000 records and 8 attributes</li><li data-l="d">540 records and 15 attributes</li></ol></div>
+  <div class="q"><span class="qn">64</span>In the sorting-based UNION, when R(i) = S(j):<ol class="opts"><li data-l="a">both are output</li><li data-l="b">both are dropped</li><li data-l="c">only one copy is kept</li><li data-l="d">an error is raised</li></ol></div>
+  <div class="q"><span class="qn">65</span>The sorting-based INTERSECTION outputs:<ol class="opts"><li data-l="a">tuples in either relation</li><li data-l="b">tuples only in R</li><li data-l="c">only tuples that appear in both relations</li><li data-l="d">tuples only in S</li></ol></div>
+  <div class="q"><span class="qn">66</span>R − S keeps:<ol class="opts"><li data-l="a">tuples in S that are not in R</li><li data-l="b">tuples in R that are not in S</li><li data-l="c">tuples in both</li><li data-l="d">all tuples of both</li></ol></div>
+  <div class="q"><span class="qn">67</span>For R = {1, 2, 4, 9} and S = {1, 5, 7}, R − S equals:<ol class="opts"><li data-l="a">{1}</li><li data-l="b">{5, 7}</li><li data-l="c">{1, 2, 4, 5, 7, 9}</li><li data-l="d">{2, 4, 9}</li></ol></div>
+  <div class="q"><span class="qn">68</span>For the same R and S, R ∪ S contains how many tuples?<ol class="opts"><li data-l="a">6</li><li data-l="b">4</li><li data-l="c">7</li><li data-l="d">3</li></ol></div>
+  <div class="q"><span class="qn">69</span>Applying selections early in a query tree is a heuristic because it:<ol class="opts"><li data-l="a">reduces the number of rows later operators must process</li><li data-l="b">adds more columns</li><li data-l="c">increases intermediate sizes</li><li data-l="d">removes the need for joins</li></ol></div>
+  <div class="q"><span class="qn">70</span>Which statement about the optimizer is correct?<ol class="opts"><li data-l="a">It always finds the optimal plan</li><li data-l="b">The user must choose the algorithm</li><li data-l="c">It never uses statistics</li><li data-l="d">It picks the cheapest estimated plan among those it considers, not necessarily the optimal one</li></ol></div>
+
+  <h3>Part C · Long-form written questions</h3>
+  <p class="muted">Answer in full sentences. Use small drawings where they help.</p>
+  <div class="q"><span class="qn">71</span>Explain the difference between SQL and relational algebra (what vs. how). What is query optimization, which two techniques does it use, and why is the result "not necessarily optimal"?</div>
+  <div class="q"><span class="qn">72</span>Describe the query-evaluation process from the high-level query to the result, naming each step. Distinguish interpreted and compiled mode.</div>
+  <div class="q"><span class="qn">73</span>Translate into SQL, relational algebra and a query tree: "List the first and last names of employees who work in the department named 'Research'." State the order in which the tree is executed.</div>
+  <div class="q"><span class="qn">74</span>Define a query block and split this query into blocks, writing the algebra for each: <code>SELECT Lname FROM Employee WHERE Salary &gt; (SELECT AVG(Salary) FROM Employee WHERE Dno = 4)</code>.</div>
+  <div class="q"><span class="qn">75</span>Describe the six selection algorithms S1–S6: for each, state the condition under which it applies and how it works.</div>
+  <div class="q"><span class="qn">76</span>Explain the three strategies for a conjunctive condition. Why does intersection of pointers require record pointers rather than block pointers?</div>
+  <div class="q"><span class="qn">77</span>Why is evaluating a disjunctive condition harder than a conjunctive one? Describe the algorithm and the case in which it degenerates to a linear scan.</div>
+  <div class="q"><span class="qn">78</span>Explain how projection is implemented. When is duplicate elimination required, and how does the sort → eliminate algorithm work?</div>
+  <div class="q"><span class="qn">79</span>Explain the algorithms for union, intersection and set difference. What are union-compatible relations and why is the Cartesian product avoided?</div>
+  <div class="q"><span class="qn">80</span>Compare S5 and S6 for an equality condition on a non-key field. Give the cost formulas, say when S6 can be worse than a linear scan, and explain why.</div>
+</section>
+
+<section class="sheet chapter">
+  <span class="kicker">Final exam · continued</span>
+  <h3 style="margin-top:0">Part D · Practical questions</h3>
+  <p class="muted">Show your working. Round "records per block" down and "number of blocks" up.</p>
+  <div class="q"><span class="qn">81</span>A disk block is 4,096 bytes and each record is 128 bytes. What is the blocking factor bfr?</div>
+  <div class="q"><span class="qn">82</span>Using bfr from Q81, how many blocks b are needed for 50,000 records?</div>
+  <div class="q"><span class="qn">83</span>For the 1,563-block file, how many block reads does linear search need (a) on average to find a key value that exists, (b) in the worst case?</div>
+  <div class="q"><span class="qn">84</span>The file is sorted on its key. How many block reads does binary search on the data file need?</div>
+  <div class="q"><span class="qn">85</span>A sparse primary index has one entry per data block, 16 bytes per entry; index blocks are 4,096 bytes. (a) How many entries? (b) How many entries per index block? (c) How many index blocks? (d) Block reads for one equality search using binary search on the index?</div>
+  <div class="q"><span class="qn">86</span>Make the index of Q85 multilevel. How many levels x are needed, and what is the cost of S3a?</div>
+  <div class="q"><span class="qn">87</span>A dense secondary index on the same file has one 16-byte entry per record. How many entries and index blocks does it need?</div>
+  <div class="q"><span class="qn">88</span>The file is sorted on empno = 1…50,000 (unique), 32 records per block, with a primary index. Find the blocks read for (a) <code>empno &gt; 640</code> and (b) <code>empno ≤ 640</code>.</div>
+  <div class="q"><span class="qn">89</span>A file sorted on Dno has a clustering index with x = 1 level. 400 of the 50,000 records have Dno = 5 (bfr = 32). Compute the cost of (a) S5, (b) S6 in the worst case with x = 2, (c) S1. Which wins?</div>
+  <div class="q"><span class="qn">90</span>Primary index anchors: 10 → B1, 40 → B2, 70 → B3, 100 → B4. Blocks: B1 = 10 20 30; B2 = 40 50 60; B3 = 70 80 90; B4 = 100 110 120. Trace the search for (a) 80, (b) 55, (c) 5.</div>
+  <div class="q"><span class="qn">91</span>A clustering file (16 records, 4 per block): B1 = 1 1 2 2; B2 = 2 2 2 3; B3 = 3 3 3 3; B4 = 3 4 4 5. Index: 1→B1, 2→B1, 3→B2, 4→B4, 5→B4. Trace the search for (a) value 3 and (b) value 2: blocks read and records found.</div>
+  <div class="q"><span class="qn">92</span>Employees: E1 (Dno 1, 25,000, F); E2 (Dno 2, 40,000, M); E3 (Dno 2, 20,000, M); E4 (Dno 2, 35,000, F); E5 (Dno 3, 50,000, M); E6 (Dno 2, 31,000, M). Condition: Dno=2 AND Salary&gt;30000 AND Gender='M', with an index on Dno only. Which records are fetched and which are returned?</div>
+  <div class="q"><span class="qn">93</span>Index on Dno: Dno=4 → {r3, r8, r11, r15, r20}. Index on Job: 'Clerk' → {r1, r8, r9, r15, r22, r30}. Evaluate <code>Dno=4 AND Job='Clerk'</code> by intersection of record pointers. Which records are read, and how many reads do you save compared with using only the Dno index?</div>
+  <div class="q"><span class="qn">94</span>Disjuncts: A = (Dno=5) → {r2, r4, r6, r8}; B = (Ssn='X') → {r6}; C = (Lname='Smith') → {r1, r4}. Evaluate A OR B OR C. How many records are in the answer? What changes if Lname has no index?</div>
+  <div class="q"><span class="qn">95</span>T′ (already sorted) has the tuples (A,1), (A,1), (B,2), (B,2), (B,2), (C,3). Trace the sort → eliminate algorithm with i and j and give T.</div>
+  <div class="q"><span class="qn">96</span>EMPLOYEE(Ssn [key], Lname, Dno, Salary). Say whether duplicate elimination is needed: (a) SELECT DISTINCT Ssn, Lname; (b) SELECT DISTINCT Dno; (c) SELECT Lname, Dno; (d) SELECT DISTINCT Lname, Salary.</div>
+  <div class="q"><span class="qn">97</span>R = {2, 5, 7, 9, 12}, S = {3, 5, 9, 10}. Compute R ∪ S, R ∩ S, R − S and S − R.</div>
+  <div class="q"><span class="qn">98</span>R has 250 rows and 4 columns; S has 80 rows and 6 columns. (a) Size of R × S? (b) If every R row matches exactly one S row on a join condition, how many rows does the join return? (c) Why is the join preferred?</div>
+  <div class="q"><span class="qn">99</span>PROJECT: 500 rows (25 in Stafford); DEPARTMENT: 40 rows; EMPLOYEE: 20,000 rows. Compare rows built by (a) a Cartesian product of all three before filtering and (b) the plan σ first, then two joins (each project has one department with one manager).</div>
+  <div class="q"><span class="qn">100</span>Choose the best selection algorithm: (a) <code>Ssn='123'</code>, file sorted on Ssn with a primary index; (b) <code>Lname='Smith'</code>, heap file, no index; (c) <code>Ssn='123'</code>, file sorted on Ssn, no index; (d) <code>Dno=5</code>, file sorted on Dno with a clustering index; (e) <code>Salary=40000</code>, heap file with a secondary index on Salary; (f) <code>empno&gt;100</code>, file sorted on empno with a primary index.</div>
+</section>
+
+<!-- =================== ANSWER KEY =================== -->
+<section class="sheet chapter" id="key">
+  <span class="kicker">Answer key</span>
+  <h2>Answers &amp; explanations</h2>
+
+  <h3>Part A · True / False</h3>
+  <div class="ans-grid">
+    <div><b>1</b> F</div><div><b>2</b> F</div><div><b>3</b> T</div><div><b>4</b> T</div><div><b>5</b> F</div>
+    <div><b>6</b> F</div><div><b>7</b> T</div><div><b>8</b> T</div><div><b>9</b> T</div><div><b>10</b> F</div>
+    <div><b>11</b> T</div><div><b>12</b> F</div><div><b>13</b> T</div><div><b>14</b> T</div><div><b>15</b> F</div>
+    <div><b>16</b> T</div><div><b>17</b> T</div><div><b>18</b> F</div><div><b>19</b> T</div><div><b>20</b> F</div>
+  </div>
+  <div style="font-size:13.5px;margin-top:10px">
+    <div class="ans"><span class="qn">1</span><b class="a">False.</b> Reversed. SQL specifies <b>what</b> is wanted; the DBMS (optimizer) decides <b>how</b>.</div>
+    <div class="ans"><span class="qn">2</span><b class="a">False.</b> It aims for a <b>reasonably efficient</b> plan, not necessarily the optimal one.</div>
+    <div class="ans"><span class="qn">3</span><b class="a">True.</b> Exactly the two techniques named in the lecture.</div>
+    <div class="ans"><span class="qn">4</span><b class="a">True.</b> Tables are inputs, so they sit at the bottom as leaves; operators are internal nodes.</div>
+    <div class="ans"><span class="qn">5</span><b class="a">False.</b> It starts at the <b>leaves</b>, replaces each internal node by its result and ends at the root.</div>
+    <div class="ans"><span class="qn">6</span><b class="a">False.</b> That's <b>compiled</b> mode. Interpreted mode executes the code directly.</div>
+    <div class="ans"><span class="qn">7</span><b class="a">True.</b> This is the lecture's definition.</div>
+    <div class="ans"><span class="qn">8</span><b class="a">True.</b> One outer block and one inner block (two SELECT-FROM-WHERE units).</div>
+    <div class="ans"><span class="qn">9</span><b class="a">True.</b> S1 always works; it is the baseline.</div>
+    <div class="ans"><span class="qn">10</span><b class="a">False.</b> Only on the field the file is <b>physically sorted</b> on (the ordering field).</div>
+    <div class="ans"><span class="qn">11</span><b class="a">True.</b> Cost = x + 1: the index gives one block pointer.</div>
+    <div class="ans"><span class="qn">12</span><b class="a">False.</b> S4 uses the index to find the boundary block and then reads onward (for &gt; and ≥).</div>
+    <div class="ans"><span class="qn">13</span><b class="a">True.</b> The file is sorted on the clustering field, so equal values sit together.</div>
+    <div class="ans"><span class="qn">14</span><b class="a">True.</b> The file isn't sorted on that field, so the matches are scattered.</div>
+    <div class="ans"><span class="qn">15</span><b class="a">False.</b> Block pointers can't prove that one single record satisfies both conditions; <b>record</b> pointers are required.</div>
+    <div class="ans"><span class="qn">16</span><b class="a">True.</b> Every disjunct must be evaluated, so the slowest branch decides.</div>
+    <div class="ans"><span class="qn">17</span><b class="a">True.</b> Strategy A of Lesson 13.</div>
+    <div class="ans"><span class="qn">18</span><b class="a">False.</b> A key is unique per row, so duplicates are impossible. No elimination needed.</div>
+    <div class="ans"><span class="qn">19</span><b class="a">True.</b> Otherwise the two-pointer merge gives wrong results.</div>
+    <div class="ans"><span class="qn">20</span><b class="a">False.</b> It has <b>n × m</b> records and <b>j + k</b> attributes.</div>
+  </div>
+
+  <h3>Part B · Multiple choice</h3>
+  <div class="ans-grid">
+    <div><b>21</b> b</div><div><b>22</b> d</div><div><b>23</b> b</div><div><b>24</b> a</div><div><b>25</b> c</div>
+    <div><b>26</b> b</div><div><b>27</b> a</div><div><b>28</b> c</div><div><b>29</b> c</div><div><b>30</b> a</div>
+    <div><b>31</b> d</div><div><b>32</b> d</div><div><b>33</b> b</div><div><b>34</b> c</div><div><b>35</b> b</div>
+    <div><b>36</b> c</div><div><b>37</b> a</div><div><b>38</b> c</div><div><b>39</b> d</div><div><b>40</b> a</div>
+    <div><b>41</b> a</div><div><b>42</b> a</div><div><b>43</b> c</div><div><b>44</b> b</div><div><b>45</b> c</div>
+    <div><b>46</b> b</div><div><b>47</b> b</div><div><b>48</b> d</div><div><b>49</b> d</div><div><b>50</b> b</div>
+    <div><b>51</b> b</div><div><b>52</b> b</div><div><b>53</b> b</div><div><b>54</b> a</div><div><b>55</b> d</div>
+    <div><b>56</b> a</div><div><b>57</b> d</div><div><b>58</b> a</div><div><b>59</b> a</div><div><b>60</b> c</div>
+    <div><b>61</b> d</div><div><b>62</b> d</div><div><b>63</b> c</div><div><b>64</b> c</div><div><b>65</b> c</div>
+    <div><b>66</b> b</div><div><b>67</b> d</div><div><b>68</b> a</div><div><b>69</b> a</div><div><b>70</b> d</div>
+  </div>
+  <div style="font-size:13.5px;margin-top:10px">
+    <div class="ans"><span class="qn">21</span>SQL is declarative: what, not how.</div>
+    <div class="ans"><span class="qn">22</span>Query processing must answer a query efficiently.</div>
+    <div class="ans"><span class="qn">23</span>Heuristics + cost estimation.</div>
+    <div class="ans"><span class="qn">24</span>Normalization is a design step, not part of query processing.</div>
+    <div class="ans"><span class="qn">25</span>The optimizer picks the strategy; the generator only converts it to code.</div>
+    <div class="ans"><span class="qn">26</span>Compiled = store and reuse. Interpreted = execute directly.</div>
+    <div class="ans"><span class="qn">27</span>Wrong grammar is a parsing error.</div>
+    <div class="ans"><span class="qn">28</span>Leaves are tables; internal nodes are operators.</div>
+    <div class="ans"><span class="qn">29</span>Evaluation ends at the root.</div>
+    <div class="ans"><span class="qn">30</span>SQL is translated to algebra, which is drawn as a tree.</div>
+    <div class="ans"><span class="qn">31</span>σ removes rows; π removes columns.</div>
+    <div class="ans"><span class="qn">32</span>Selection filters rows only.</div>
+    <div class="ans"><span class="qn">33</span>Outer SELECT-FROM-WHERE plus inner SELECT-FROM-WHERE.</div>
+    <div class="ans"><span class="qn">34</span>The unit of optimization.</div>
+    <div class="ans"><span class="qn">35</span>ℱ is the aggregate function operator.</div>
+    <div class="ans"><span class="qn">36</span>Conjunctive = AND; disjunctive = OR.</div>
+    <div class="ans"><span class="qn">37</span>&gt;, &lt;, ≠ are non-equality.</div>
+    <div class="ans"><span class="qn">38</span>Typically an index.</div>
+    <div class="ans"><span class="qn">39</span>S1 needs no structure.</div>
+    <div class="ans"><span class="qn">40</span>Without sorted order, half the file can't be discarded.</div>
+    <div class="ans"><span class="qn">41</span>Primary index, ordering key, equality.</div>
+    <div class="ans"><span class="qn">42</span>>, <, ≥, ≤ on the ordering key.</div>
+    <div class="ans"><span class="qn">43</span>Clustering index: ordered file, non-key field.</div>
+    <div class="ans"><span class="qn">44</span>Secondary index works on any file and field.</div>
+    <div class="ans"><span class="qn">45</span>The index has one entry per block anchor.</div>
+    <div class="ans"><span class="qn">46</span>Each entry points to the first block with that value.</div>
+    <div class="ans"><span class="qn">47</span>All matches are adjacent.</div>
+    <div class="ans"><span class="qn">48</span>Cost ≈ x + s block reads.</div>
+    <div class="ans"><span class="qn">49</span>log₂ 1024 = 10.</div>
+    <div class="ans"><span class="qn">50</span>⌈100,000 ÷ 50⌉ = 2,000.</div>
+    <div class="ans"><span class="qn">51</span>b ÷ 2 for a key that exists.</div>
+    <div class="ans"><span class="qn">52</span>Strategy A: index, then filter.</div>
+    <div class="ans"><span class="qn">53</span>E.g. equality on both DNO and GENDER for an index on (DNO, GENDER).</div>
+    <div class="ans"><span class="qn">54</span>Exact record addresses are needed to know the same record satisfies both conditions.</div>
+    <div class="ans"><span class="qn">55</span>Index blocks are small; data blocks are expensive.</div>
+    <div class="ans"><span class="qn">56</span>Every disjunct must be searched.</div>
+    <div class="ans"><span class="qn">57</span>The unindexed branch forces a scan.</div>
+    <div class="ans"><span class="qn">58</span>Column removal is on-the-fly; duplicates need sorting.</div>
+    <div class="ans"><span class="qn">59</span>Keys are unique, so no duplicates can appear.</div>
+    <div class="ans"><span class="qn">60</span>This lets one pass with i and j remove them.</div>
+    <div class="ans"><span class="qn">61</span>j runs past every copy of the tuple at i.</div>
+    <div class="ans"><span class="qn">62</span>Columns must line up.</div>
+    <div class="ans"><span class="qn">63</span>n × m records, j + k attributes.</div>
+    <div class="ans"><span class="qn">64</span>Duplicates are eliminated by keeping one.</div>
+    <div class="ans"><span class="qn">65</span>Output happens only on equality.</div>
+    <div class="ans"><span class="qn">66</span>Set difference.</div>
+    <div class="ans"><span class="qn">67</span>Remove 1, which is in S.</div>
+    <div class="ans"><span class="qn">68</span>{1, 2, 4, 5, 7, 9}: the shared 1 counts once.</div>
+    <div class="ans"><span class="qn">69</span>Fewer rows flow upward.</div>
+    <div class="ans"><span class="qn">70</span>'Reasonably efficient' optimization.</div>
+  </div>
+</section>
+
+<section class="sheet chapter">
+  <span class="kicker">Answer key · continued</span>
+  <h3 style="margin-top:0">Part C · Model answers for the written questions</h3>
+  <p class="muted">A good answer covers the points below; wording can differ.</p>
+
+  <div class="ans"><span class="qn">71</span>SQL is <b>declarative</b>: it states <b>what</b> result is wanted, not <b>how</b> to get it. Relational algebra is <b>procedural</b>: an expression is an ordered recipe of operators, and the DBMS has algorithms to implement each operator. <b>Query optimization</b> is the process of choosing a suitable <b>execution strategy</b> for a query. It uses <b>heuristic rules</b> (rules of thumb such as applying selections early) and <b>cost estimation</b> (using statistics to estimate block reads of candidate plans). It is not necessarily optimal because searching all possible plans would itself cost more than it saves, so the goal is a <b>reasonably efficient</b> plan, like a GPS that gives a very good route quickly rather than the mathematically best one.</div>
+
+  <div class="ans"><span class="qn">72</span>(1) The query in a high-level language is (2) <b>scanned, parsed and validated</b> (tokens, grammar, then names and types checked against the catalog), giving (3) an <b>intermediate form</b> (e.g. a query tree). (4) The <b>query optimizer</b> chooses (5) an <b>execution plan</b>. (6) The <b>query code generator</b> produces (7) code to execute the query, which (8) the <b>runtime database processor</b> runs to produce (9) the <b>result</b>. In <b>interpreted</b> mode the code is executed directly; in <b>compiled</b> mode it is stored and executed whenever needed, avoiding repeated parsing and optimizing (useful for queries embedded in applications).</div>
+
+  <div class="ans"><span class="qn">73</span><b>SQL:</b> <code>SELECT Fname, Lname FROM Employee AS E, Department AS D WHERE D.Dname='Research' AND D.Dnumber = E.Dno;</code><br><b>Algebra:</b> ResDept ← σ Dname='Research' (Department); Joined ← ResDept ⋈ Dnumber=Dno Employee; Result ← π Fname, Lname (Joined).<br><b>Tree:</b> leaves Department and Employee; σ above Department (1), ⋈ above σ and Employee (2), π at the root. <b>Execution:</b> start at the leaves, run σ (1), replace it by its result, run ⋈ (2), then π at the root, which produces the answer. The selection is placed first so fewer rows enter the join.</div>
+
+  <div class="ans"><span class="qn">74</span>A <b>query block</b> is a single SELECT-FROM-WHERE expression (with ORDER BY, GROUP BY, HAVING if any); it is the unit the optimizer handles separately. This query has <b>two blocks</b>. <b>Inner:</b> <code>SELECT AVG(Salary) FROM Employee WHERE Dno=4</code> → ℱ AVG Salary ( σ Dno=4 (Employee) ), producing one value C. <b>Outer:</b> <code>SELECT Lname FROM Employee WHERE Salary &gt; C</code> → π Lname ( σ Salary&gt;C (Employee) ). The inner block runs first and feeds the constant C to the outer block.</div>
+
+  <div class="ans"><span class="qn">75</span><b>S1 linear search:</b> always applicable; scans every block testing each record. <b>S2 binary search:</b> file sorted on the field, equality; halves the file repeatedly (≈ log₂ b reads). <b>S3a primary index:</b> equality on the ordering key; search the sparse index for the last anchor ≤ the value, then read one data block (x + 1). <b>S4 ordering index, non-equality:</b> &gt;, &lt;, ≥, ≤ on the ordering key; find the boundary block, then read onward (or from the start for &lt;/≤). <b>S5 clustering index:</b> equality on a non-key ordering field; the index points to the first block with the value, then read the following blocks while it matches (x + ⌈s/bfr⌉). <b>S6 secondary index (B⁺-tree):</b> any field with a secondary index; walk the index; for a non-key follow every record pointer (up to x + s).</div>
+
+  <div class="ans"><span class="qn">76</span>(A) <b>One index, then filter:</b> use an index on one conjunct to fetch records, then test the remaining comparisons on them in memory; pick the most selective conjunct. (B) <b>Composite index:</b> when equality comparisons cover the composite's attributes (e.g. (DNO, GENDER)), retrieve with it and test the rest. (C) <b>Intersection of record pointers:</b> use several secondary indexes, get one pointer list per condition, intersect them (e.g. {r2,r5,r7,r9} ∩ {r1,r5,r7,r8} = {r5,r7}), and fetch only those records, then test remaining conditions. Index blocks are small and often in memory; data blocks are large and on disk, so reading only survivors saves disk I/O. <b>Record pointers</b> are needed because block pointers can't show that the <i>same</i> record satisfies both conditions: two different records may simply live in the same block.</div>
+
+  <div class="ans"><span class="qn">77</span>With AND, every answer record satisfies <i>every</i> conjunct, so one good access path finds a small candidate set that is then filtered. With OR, a record belonging to the answer may satisfy only <i>one</i> disjunct, so every disjunct must be searched: otherwise records would be missed. Algorithm: run a simple-condition algorithm (S1–S6) on each disjunct, <b>union</b> the results and <b>remove duplicates</b> (a record may satisfy several disjuncts). If even <b>one</b> disjunct has no access path, finding its matches already needs a full scan, so the whole query is answered by linear search (testing all disjuncts per record). In short: AND lets you pick the best index; OR forces you to use them all, or none.</div>
+
+  <div class="ans"><span class="qn">78</span>Projection removes unwanted columns <b>on the fly</b> and may create duplicate rows. Without DISTINCT, duplicates are kept: no extra work. With DISTINCT and a <b>key</b> in the attribute list, duplicates are impossible: no extra work. With DISTINCT and <b>no key</b> in the list, duplicates must be removed: sort T′ on all attributes so equal tuples are adjacent, then scan with two indexes: output T′[i], advance j while T′[i] = T′[j] (and j ≤ n), then set i ← j, j ← i + 1, until i &gt; n. Cost is dominated by the sort (≈ n log n).</div>
+
+  <div class="ans"><span class="qn">79</span>Relations must be <b>union compatible</b> (same number of attributes, same domains/names). Sort both on the same attributes and merge them with two pointers i (R) and j (S). <b>Union:</b> R&lt;S output R, i++; R&gt;S output S, j++; equal: keep one (j++); append leftovers. <b>Intersection:</b> output only when equal; advance the smaller; no leftovers. <b>Difference R−S:</b> output R(i) when R(i) &lt; S(j); equal: skip both; append leftover R. The merge is one pass after the sort. The <b>Cartesian product</b> yields n×m records and j+k attributes (e.g. 1,000 × 200 = 200,000 rows), very expensive, so the optimizer replaces × plus selection by a join.</div>
+
+  <div class="ans"><span class="qn">80</span><b>S5</b> (clustering, file sorted on the field): all matches are adjacent, cost x + ⌈s/bfr⌉. <b>S6</b> (secondary index, file not sorted on it): matches are scattered, so each pointer may cost a block read: up to x + s. Example: s = 20 matches, bfr = 10, x = 2: S5 = 2 + 2 = 4 reads; S6 up to 2 + 20 = 22. S6 can be worse than S1 when s is large: if 20,000 of 30,000 records (b = 3,000 blocks) match, following up to 20,000 scattered pointers could cost far more than scanning 3,000 blocks. The optimizer therefore needs statistics about how many records a condition matches.</div>
+
+</section>
+
+<section class="sheet chapter">
+  <span class="kicker">Answer key · continued</span>
+  <h3 style="margin-top:0">Part D · Practical solutions</h3>
+  <div class="ans"><span class="qn">81</span>bfr = ⌊4096 ÷ 128⌋ = <b>32 records per block</b>.</div>
+  <div class="ans"><span class="qn">82</span>b = ⌈50,000 ÷ 32⌉ = ⌈1,562.5⌉ = <b>1,563 blocks</b>.</div>
+  <div class="ans"><span class="qn">83</span>(a) b ÷ 2 = 1,563 ÷ 2 ≈ <b>782</b>. (b) <b>1,563</b> (the value is in the last block or doesn't exist).</div>
+  <div class="ans"><span class="qn">84</span>⌈log₂ 1,563⌉ = ⌈10.6⌉ = <b>11 block reads</b> (2¹⁰ = 1,024 &lt; 1,563 ≤ 2¹¹ = 2,048).</div>
+  <div class="ans"><span class="qn">85</span>(a) One per data block: <b>1,563</b>. (b) ⌊4096 ÷ 16⌋ = <b>256</b>. (c) ⌈1,563 ÷ 256⌉ = ⌈6.1⌉ = <b>7 blocks</b>. (d) ⌈log₂ 7⌉ = 3 index reads + 1 data block = <b>4 reads</b>.</div>
+  <div class="ans"><span class="qn">86</span>Level 1 has 7 blocks. A second level (one entry per level-1 block) needs ⌈7 ÷ 256⌉ = <b>1 block</b>, which fits in a block, so we stop: <b>x = 2</b>. Cost S3a = x + 1 = <b>3 block reads</b> (vs 4 with a single level, 11 with binary search, ≈782 with linear).</div>
+  <div class="ans"><span class="qn">87</span>Entries = 50,000. Per block = 256. Blocks = ⌈50,000 ÷ 256⌉ = ⌈195.3⌉ = <b>196 blocks</b>, far bigger than the sparse index (7 blocks): a secondary index must be dense.</div>
+  <div class="ans"><span class="qn">88</span>Record 640 is in block ⌈640 ÷ 32⌉ = 20 (records 609–640). (a) &gt; 640 starts at block 21 and runs to block 1,563: 1,563 − 21 + 1 = <b>1,543 blocks</b> (+ index reads to find block 20). (b) ≤ 640: read blocks 1–20 from the start: <b>20 blocks</b>, no index needed.</div>
+  <div class="ans"><span class="qn">89</span>(a) S5 = x + ⌈s ÷ bfr⌉ = 1 + ⌈400 ÷ 32⌉ = 1 + 13 = <b>14</b>. (b) S6 = x + s = 2 + 400 = <b>402</b>. (c) S1 = b = <b>1,563</b>. <b>S5 wins</b>: matches are adjacent.</div>
+  <div class="ans"><span class="qn">90</span>(a) 80: last anchor ≤ 80 is 70 → B3 → scan 70, 80 → <b>found</b>. (b) 55: last anchor ≤ 55 is 40 → B2 → scan 40, 50, 60 → 55 absent → <b>not found</b> (sorted, so nowhere else). (c) 5: no anchor ≤ 5 (the smallest is 10) → <b>not found</b> without reading any data block.</div>
+  <div class="ans"><span class="qn">91</span>(a) Index → B2 (one 3), B3 (four 3s), B4 (one 3, then a 4 → stop): <b>3 data blocks, 6 records</b>. (b) Index → B1 (two 2s), B2 (three 2s, then a 3 → stop): <b>2 data blocks, 5 records</b>.</div>
+  <div class="ans"><span class="qn">92</span>The Dno index fetches the department-2 records: <b>E2, E3, E4, E6</b>. Filter: E2 (40,000, M) ✔; E3 (20,000) ✘ salary; E4 (F) ✘ gender; E6 (31,000, M) ✔. <b>Returned: E2 and E6.</b> E1 and E5 are never read.</div>
+  <div class="ans"><span class="qn">93</span>Intersection = <b>{r8, r15}</b>: 2 data-record reads. Using only the Dno index would fetch all 5 Dno=4 records and filter: 5 reads. Saving: <b>3 data reads</b> (at the price of reading two small pointer lists).</div>
+  <div class="ans"><span class="qn">94</span>Union = {r2, r4, r6, r8} ∪ {r6} ∪ {r1, r4}; remove duplicates (r6 and r4 appear twice): <b>{r1, r2, r4, r6, r8} = 5 records</b>. If Lname has no access path, the whole query falls back to <b>linear search (S1)</b>, testing all three conditions on every record.</div>
+  <div class="ans"><span class="qn">95</span>i=1, j=2: equal → j=3; (A,1) ≠ (B,2) stop; output (A,1); i=3, j=4. i=3: equal → j=5; equal → j=6; (B,2) ≠ (C,3) stop; output (B,2); i=6, j=7. i=6: output (C,3); j=7 &gt; n; i=7 &gt; n → stop. <b>T = (A,1), (B,2), (C,3): 3 rows</b>.</div>
+  <div class="ans"><span class="qn">96</span>(a) <b>No</b>: the key Ssn is in the list. (b) <b>Yes</b>: many employees share a Dno, no key in the list. (c) <b>No</b>: no DISTINCT, duplicates are allowed. (d) <b>Yes</b>: DISTINCT and no key in the list.</div>
+  <div class="ans"><span class="qn">97</span>R ∪ S = <b>{2, 3, 5, 7, 9, 10, 12}</b>; R ∩ S = <b>{5, 9}</b>; R − S = <b>{2, 7, 12}</b>; S − R = <b>{3, 10}</b>. (Check: |R∪S| = 5 + 4 − 2 = 7.)</div>
+  <div class="ans"><span class="qn">98</span>(a) 250 × 80 = <b>20,000 rows</b>, 4 + 6 = <b>10 columns</b>. (b) <b>250 rows</b>. (c) The product builds 20,000 rows of which 19,750 are thrown away; a join algorithm avoids creating them.</div>
+  <div class="ans"><span class="qn">99</span>(a) 500 × 40 × 20,000 = <b>400,000,000 rows</b> before any filtering. (b) σ → 25 rows; join with DEPARTMENT → 25; join with EMPLOYEE → 25: about <b>25 rows per step</b>. Same answer; the early-selection plan is millions of times cheaper.</div>
+  <div class="ans"><span class="qn">100</span>(a) <b>S3a</b> primary index. (b) <b>S1</b> linear search. (c) <b>S2</b> binary search. (d) <b>S5</b> clustering index. (e) <b>S6</b> secondary index. (f) <b>S4</b> ordering index with non-equality.</div>
+
+  <div class="box key" style="margin-top:26px"><span class="tag">You made it</span>If you can explain <b>why</b> SQL says what and the optimizer decides how, <b>how</b> a query becomes a tree, <b>which</b> of S1–S6 fits each condition and index, <b>why</b> AND picks one index while OR needs all, and <b>how</b> sorting solves projection and set operations, you understand query processing.</div>
+</section>
+</main>
+
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  function showAll(){ els.forEach(function(e){ e.classList.add('in'); }); }
+  if (!('IntersectionObserver' in window)) { showAll(); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, {threshold: 0.12});
+  els.forEach(function(e){ io.observe(e); });
+  window.addEventListener('beforeprint', showAll);
+  if (window.matchMedia) { var mq = window.matchMedia('print'); if (mq.addEventListener) mq.addEventListener('change', function(m){ if (m.matches) showAll(); }); }
+})();
+</script>
+
+<div class="scorebar no-print" id="scorebar" aria-live="polite">
+  <div>Score <b id="sc">0</b> / <span id="st">70</span><div class="muted" style="font-size:12px"><span id="sa">0</span> of 70 auto-marked answered</div></div>
+  <div class="meter"><i id="sm"></i></div>
+  <button type="button" id="sreset">Reset quiz</button>
+</div>
+<script>
+(function(){
+  var quiz=document.getElementById('quiz'); if(!quiz) return;
+  var STORE='qp-quiz-v1', state={};
+  try{ state=JSON.parse(localStorage.getItem(STORE)||'{}')||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+
+  // answer letters from the key grids
+  var key={};
+  document.querySelectorAll('#key .ans-grid div').forEach(function(d){
+    var n=parseInt(d.querySelector('b').textContent,10);
+    key[n]=d.textContent.replace(/^\s*\d+\s*/,'').trim().toLowerCase();
+  });
+  // explanations / model answers
+  var expl={};
+  document.querySelectorAll('.ans').forEach(function(a){
+    var q=a.querySelector('.qn'); if(!q) return;
+    var m=q.textContent.match(/(\d+)(?:\s*[–-]\s*(\d+))?/); if(!m) return;
+    var c=a.cloneNode(true); c.querySelector('.qn').remove();
+    for(var i=+m[1]; i<=(m[2]?+m[2]:+m[1]); i++) expl[i]=c.innerHTML;
+  });
+
+  document.documentElement.classList.add('quiz-on');
+  var intro=document.createElement('div');
+  intro.className='quiz-intro no-print';
+  intro.innerHTML='<b>Interactive mode.</b> Click an answer for True/False and multiple-choice questions to mark it right away. For the written and practical questions, write your answer, then reveal the model answer and mark yourself. Your progress is saved in this browser. Printing still gives the clean paper version.';
+  var lead=quiz.querySelector('.lead'); lead.parentNode.insertBefore(intro, lead.nextSibling);
+
+  function fb(cls, html){ var d=document.createElement('div'); d.className='fb '+cls; d.innerHTML=html; return d; }
+  var auto=[];
+
+  quiz.parentNode.querySelectorAll('.q').forEach(function(q){
+    var n=parseInt(q.querySelector('.qn').textContent,10);
+    var box=document.createElement('div'); box.className='qi no-print'; q.appendChild(box);
+
+    if(n<=70){
+      auto.push(n);
+      var correct=key[n];
+      var show=function(choice, initial){
+        q.classList.add('done');
+        var ok=(choice===correct);
+        var exp=expl[n]?' '+expl[n]:'';
+        var label=(n<=20)?(correct==='t'?'True':'False'):correct.toUpperCase()+')';
+        box.querySelectorAll('.fb').forEach(function(x){x.remove();});
+        box.appendChild(fb(ok?'ok':'bad', ok?'<b>Correct!</b>'+exp:'<b>Not quite.</b> The answer is <b>'+label+'</b>.'+exp));
+        if(!initial){ state[n]=choice; save(); score(); }
+      };
+      if(n<=20){
+        var row=document.createElement('div'); row.className='tfb';
+        ['t','f'].forEach(function(v){
+          var b=document.createElement('button'); b.type='button'; b.textContent=v==='t'?'True':'False'; b.dataset.v=v;
+          b.onclick=function(){ if(q.classList.contains('done')) return; mark(v); };
+          row.appendChild(b);
+        });
+        box.appendChild(row);
+        var mark=function(v, initial){
+          row.querySelectorAll('button').forEach(function(b){ b.disabled=true;
+            if(b.dataset.v===key[n]) b.classList.add('ok'); else if(b.dataset.v===v) b.classList.add('bad'); });
+          show(v, initial);
+        };
+        if(state[n]) mark(state[n], true);
+      } else {
+        var lis=q.querySelectorAll('ol.opts li');
+        var pick=function(v, initial){
+          lis.forEach(function(li){ li.setAttribute('aria-disabled','true');
+            if(li.dataset.l===correct) li.classList.add('ok'); else if(li.dataset.l===v) li.classList.add('bad'); });
+          show(v, initial);
+        };
+        lis.forEach(function(li){
+          li.tabIndex=0; li.setAttribute('role','button');
+          li.onclick=function(){ if(!q.classList.contains('done')) pick(li.dataset.l); };
+          li.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); li.onclick(); } };
+        });
+        if(state[n]) pick(state[n], true);
+      }
+    } else {
+      var ta=document.createElement('textarea');
+      ta.placeholder=n<=80?'Write your answer here…':'Show your working here…';
+      ta.value=state['t'+n]||'';
+      var tmr; ta.oninput=function(){ clearTimeout(tmr); tmr=setTimeout(function(){ state['t'+n]=ta.value; save(); },300); };
+      var row2=document.createElement('div'); row2.className='row';
+      var btn=document.createElement('button'); btn.type='button'; btn.textContent='Show model answer';
+      var self=document.createElement('span'); self.className='self';
+      var model=null;
+      btn.onclick=function(){
+        if(model){ model.remove(); model=null; btn.textContent='Show model answer'; return; }
+        model=fb('model','<b>Model answer:</b> '+(expl[n]||'')); box.appendChild(model);
+        btn.textContent='Hide model answer';
+      };
+      var good=document.createElement('button'); good.type='button'; good.textContent='I got it ✓';
+      var nope=document.createElement('button'); nope.type='button'; nope.textContent='Not yet ✗';
+      var setSelf=function(v){ state['s'+n]=v; save();
+        good.classList.toggle('ok', v==='y'); nope.classList.toggle('bad', v==='n');
+        self.textContent=v==='y'?'Marked as understood':'Marked for review'; };
+      good.onclick=function(){ setSelf('y'); }; nope.onclick=function(){ setSelf('n'); };
+      if(state['s'+n]) setSelf(state['s'+n]);
+      row2.appendChild(btn); row2.appendChild(good); row2.appendChild(nope); row2.appendChild(self);
+      box.appendChild(ta); box.appendChild(row2);
+    }
+  });
+
+  var bar=document.getElementById('scorebar');
+  function score(){
+    var c=0,a=0; auto.forEach(function(n){ if(state[n]){ a++; if(state[n]===key[n]) c++; } });
+    document.getElementById('sc').textContent=c; document.getElementById('sa').textContent=a;
+    document.getElementById('sm').style.width=(c/70*100)+'%';
+  }
+  score();
+  if('IntersectionObserver' in window){
+    var start=quiz, end=document.getElementById('key');
+    new IntersectionObserver(function(){
+      var r1=start.getBoundingClientRect(), r2=end.getBoundingClientRect();
+      bar.classList.toggle('show', r1.top<innerHeight && r2.top>0);
+    }).observe(start);
+    addEventListener('scroll', function(){
+      var r1=start.getBoundingClientRect(), r2=end.getBoundingClientRect();
+      bar.classList.toggle('show', r1.top<innerHeight*0.6 && r2.top>innerHeight*0.4);
+    }, {passive:true});
+  } else { bar.classList.add('show'); }
+  document.getElementById('sreset').onclick=function(){
+    if(!confirm('Clear all your quiz answers?')) return;
+    state={}; save(); location.reload();
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heuristic &amp; Cost-Based Query Optimization Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1d1b26; --ink-2:#4a4658; --muted:#7a768a;
+  --paper:#fffdf8; --panel:#f6f2e9; --line:#d9d2c3;
+  --blue:#2459a8; --blue-soft:#e3ecfa;
+  --green:#1f7a4d; --green-soft:#e0f3e8;
+  --red:#b8322a; --red-soft:#fbe5e2;
+  --amber:#b5770c; --amber-soft:#fff1d1;
+  --violet:#6a3fb5; --violet-soft:#ece5fa;
+  --note:#fff4a8;
+  --hand:'Caveat', 'Comic Sans MS', cursive;
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, Consolas, monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:#e9e4d8;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62}
+.doc{max-width:900px;margin:0 auto;background:var(--paper);box-shadow:0 0 40px rgba(0,0,0,.12)}
+.sheet{padding:56px 64px;position:relative}
+.chapter{border-top:1px dashed var(--line)}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0 0 .4em}
+h2{font-size:34px;font-weight:800;letter-spacing:-.01em}
+h3{font-size:22px;font-weight:700;margin-top:1.6em;color:var(--blue)}
+h4{font-size:17px;font-family:var(--sans);font-weight:700;margin-top:1.2em}
+p{margin:.55em 0}
+ul,ol{padding-left:1.3em;margin:.5em 0}
+li{margin:.2em 0}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--panel);padding:1px 5px;border-radius:4px}
+b,strong{font-weight:700}
+.kicker{display:inline-block;font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--ink);padding:4px 10px;border-radius:3px;margin-bottom:12px}
+.lead{font-size:17px;color:var(--ink-2)}
+.hand{font-family:var(--hand);font-size:1.35em;line-height:1.1}
+.muted{color:var(--muted)}
+.c-blue{color:var(--blue)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-amber{color:var(--amber)} .c-violet{color:var(--violet)}
+.src{font-size:11.5px;color:var(--muted);font-style:italic}
+
+/* ---------- cover ---------- */
+.cover{min-height:1060px;display:flex;flex-direction:column;justify-content:space-between;background:
+ radial-gradient(circle at 85% 10%, #ffe9a8 0, transparent 40%),
+ radial-gradient(circle at 10% 90%, #d9e6fb 0, transparent 45%), var(--paper)}
+.cover h1{font-size:68px;font-weight:800;letter-spacing:-.02em;margin:10px 0 6px}
+.cover h1 span{color:var(--blue)}
+.cover .sub{font-size:19px;color:var(--ink-2);max-width:620px}
+.cover .badge{font-family:var(--hand);font-size:28px;color:var(--red);transform:rotate(-4deg);display:inline-block;margin-top:14px}
+.cover-tree{margin:20px auto 0;width:100%;max-width:720px}
+.cover-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;font-size:13px}
+.cover-meta div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.cover-meta b{display:block;font-family:var(--serif);font-size:24px}
+
+/* ---------- TOC ---------- */
+.toc{columns:2;column-gap:36px;padding:0;list-style:none;counter-reset:t}
+.toc li{break-inside:avoid;display:flex;gap:10px;padding:7px 0;border-bottom:1px dotted var(--line)}
+.toc li span.n{font-family:var(--serif);font-weight:800;color:var(--blue);min-width:28px}
+.toc a{color:inherit;text-decoration:none}
+
+/* ---------- boxes (Head-First style) ---------- */
+.box{border-radius:12px;padding:16px 20px;margin:18px 0;position:relative;break-inside:avoid}
+.box > .tag{position:absolute;top:-13px;left:16px;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;color:#fff}
+.brain{background:var(--violet-soft);border:2px solid var(--violet)} .brain>.tag{background:var(--violet)}
+.watch{background:var(--red-soft);border:2px solid var(--red)} .watch>.tag{background:var(--red)}
+.key{background:var(--green-soft);border:2px solid var(--green)} .key>.tag{background:var(--green)}
+.example{background:var(--blue-soft);border:2px solid var(--blue)} .example>.tag{background:var(--blue)}
+.lecture{background:var(--amber-soft);border:2px solid var(--amber)} .lecture>.tag{background:var(--amber)}
+.nodumb{background:#fff;border:2px dashed var(--ink-2)} .nodumb>.tag{background:var(--ink-2)}
+.nodumb dt{font-weight:700;margin-top:10px}
+.nodumb dt::before{content:"Q: ";color:var(--red);font-family:var(--serif)}
+.nodumb dd{margin:2px 0 0 0}
+.nodumb dd::before{content:"A: ";font-weight:700;color:var(--green);font-family:var(--serif)}
+.sticky{background:var(--note);font-family:var(--hand);font-size:22px;line-height:1.15;padding:14px 18px;box-shadow:2px 4px 10px rgba(0,0,0,.15);transform:rotate(-1.5deg);width:fit-content;max-width:330px;margin:14px 0;break-inside:avoid}
+.sticky.r{transform:rotate(1.8deg);margin-left:auto}
+.bubble{position:relative;background:#fff;border:2px solid var(--ink);border-radius:18px;padding:10px 14px;font-family:var(--hand);font-size:21px;line-height:1.15;width:fit-content;max-width:300px}
+.bubble::after{content:"";position:absolute;left:24px;bottom:-12px;border:6px solid transparent;border-top:8px solid var(--ink)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;break-inside:avoid}
+.card h4{margin-top:0}
+.figure{margin:20px 0;padding:16px;background:#fff;border:1.5px solid var(--line);border-radius:14px;break-inside:avoid}
+.figure figcaption,.caption{font-size:13px;color:var(--ink-2);margin-top:8px;text-align:center}
+svg{max-width:100%;height:auto;display:block;margin:0 auto}
+svg text{font-family:var(--sans)}
+svg .hand{font-family:var(--hand)}
+
+table.t{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;break-inside:avoid}
+table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+table.t th{background:var(--panel);font-weight:700}
+table.t.center td,table.t.center th{text-align:center}
+
+pre.code{font-family:var(--mono);font-size:13px;background:#1f1d2b;color:#f3efe2;padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.5;break-inside:avoid}
+pre.code .k{color:#ffb86b} pre.code .c{color:#8c88a3} pre.code .s{color:#a8e6a1}
+
+.formula{font-family:var(--serif);font-size:22px;text-align:center;background:#fff;border:2px solid var(--ink);border-radius:12px;padding:14px;margin:16px auto;max-width:560px}
+.formula small{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-2)}
+
+/* mini data blocks */
+.blk{display:inline-flex;flex-direction:column;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:#fff;min-width:70px;vertical-align:top}
+.blk .h{background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:2px 6px;text-align:center}
+.blk span{padding:2px 8px;border-top:1px solid var(--line);font-family:var(--mono);font-size:13px;text-align:center}
+.blk span.hit{background:#ffe17a;font-weight:700}
+
+/* flow */
+.flow{display:flex;flex-direction:column;gap:0;align-items:stretch;max-width:560px}
+.flow .step{display:flex;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 14px}
+.flow .step b.n{font-family:var(--serif);font-size:20px;color:var(--blue);min-width:26px}
+.flow .arrow{text-align:center;color:var(--muted);line-height:1;font-size:18px;padding:3px 0}
+
+/* bars */
+.bar{height:22px;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+
+/* quiz */
+.q{break-inside:avoid;margin:10px 0 14px;padding-left:38px;position:relative}
+.q .qn{position:absolute;left:0;top:0;font-family:var(--serif);font-weight:800;color:var(--blue);font-size:17px}
+.q ol.opts{list-style:none;padding:0;margin:6px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:3px 22px}
+.q ol.opts li::before{content:attr(data-l) ") ";font-weight:700;color:var(--ink-2)}
+.q .tf{font-weight:700;color:var(--ink-2);font-size:13px;margin-left:6px}
+.q .lines{border-bottom:1px solid var(--line);height:26px}
+.ans{break-inside:avoid;margin:8px 0;padding:8px 0 8px 38px;position:relative;border-bottom:1px dotted var(--line)}
+.ans .qn{position:absolute;left:0;top:8px;font-family:var(--serif);font-weight:800;color:var(--green)}
+.ans b.a{color:var(--green)}
+.ans-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-size:14px}
+.ans-grid div{background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.ans-grid b{color:var(--blue)}
+
+/* ---------- animation ---------- */
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes dash{to{stroke-dashoffset:-24}}
+@keyframes glow{0%,100%{fill:#fff}50%{fill:#ffe17a}}
+@keyframes pulseR{0%,100%{box-shadow:0 0 0 0 rgba(184,50,42,.35)}50%{box-shadow:0 0 0 8px rgba(184,50,42,0)}}
+@keyframes drop{0%{transform:translateY(-30px);opacity:0}60%{transform:translateY(4px);opacity:1}100%{transform:none;opacity:1}}
+@keyframes wiggle{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1deg)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes path1{0%,100%{fill:#fff}8%,30%{fill:#ffe17a}}
+@keyframes path2{0%,25%,100%{fill:#fff}33%,55%{fill:#ffe17a}}
+@keyframes path3{0%,50%,100%{fill:#fff}58%,80%{fill:#ffe17a}}
+@keyframes path4{0%,75%,100%{fill:#fff}83%,97%{fill:#b8f0c8}}
+
+html.js .reveal{opacity:0}
+html.js .reveal.in{animation:up .7s cubic-bezier(.2,.7,.2,1) both}
+.pop{animation:pop .6s cubic-bezier(.2,.7,.2,1) both}
+.flowline{stroke-dasharray:6 6;animation:dash 1.2s linear infinite}
+.sticky{animation:wiggle 5s ease-in-out infinite}
+.sticky.r{animation:none}
+.bar.anim{transform-origin:left;animation:grow 1.4s cubic-bezier(.2,.7,.2,1) both}
+.dropin{animation:drop 1s ease-out 0.4s both}
+.s1{animation:path1 4s infinite}.s2{animation:path2 4s infinite}.s3{animation:path3 4s infinite}.s4{animation:path4 4s infinite}
+.hit-pulse{animation:pulseR 1.8s infinite}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1}
+}
+
+/* ---------- small screens ---------- */
+@media (max-width:720px){
+  .sheet{padding:28px 16px}
+  .grid2,.grid3,.cover-meta{grid-template-columns:1fr}
+  .toc{columns:1}
+  .cover h1{font-size:44px}
+  h2{font-size:28px}
+  .q ol.opts{grid-template-columns:1fr}
+  .ans-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ---------- print ---------- */
+@page{size:A4;margin:13mm 12mm 14mm}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  .doc{box-shadow:none;max-width:none}
+  .sheet{padding:0 2mm}
+  .chapter{border-top:none;break-before:page}
+  .cover{min-height:265mm;padding-top:10mm}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1!important;transform:none!important}
+  .sticky{transform:rotate(-1.5deg)}
+  .sticky.r{transform:rotate(1.8deg)}
+  .flowline{stroke-dasharray:6 6}
+  .s1,.s2,.s3{fill:#ffe17a}.s4{fill:#b8f0c8}
+  h2,h3,h4{break-after:avoid}
+  .box,.figure,.card,table,pre,.q,.ans{break-inside:avoid}
+  .no-print{display:none!important}
+  .sheet{padding-top:3mm}
+  .box{padding-top:30px;margin-top:12px}
+  .box > .tag{top:8px}
+  pre.code{white-space:pre-wrap;word-break:break-word}
+  a{color:inherit;text-decoration:none}
+}
+.print-btn{position:fixed;right:18px;bottom:18px;z-index:9;background:var(--ink);color:#fff;border:0;border-radius:30px;padding:12px 18px;font:600 14px var(--sans);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.print-btn:hover{background:var(--blue)}
+
+/* ---------- interactive quiz (screen only; print output unchanged) ---------- */
+@media screen{
+  .quiz-on .q .tf{display:none}
+  .quiz-on .q ol.opts li{cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:5px 10px;background:#fff;transition:background .2s,border-color .2s,transform .15s}
+  .quiz-on .q:not(.done) ol.opts li:hover,.quiz-on .q:not(.done) ol.opts li:focus-visible{border-color:var(--blue);background:var(--blue-soft);outline:none;transform:translateX(3px)}
+  .quiz-on .q.done ol.opts li{cursor:default}
+  .quiz-on .q ol.opts li.ok{background:var(--green-soft);border-color:var(--green);font-weight:600}
+  .quiz-on .q ol.opts li.bad{background:var(--red-soft);border-color:var(--red);text-decoration:line-through;text-decoration-color:var(--red)}
+  .qi{margin-top:8px}
+  .qi .tfb{display:flex;gap:8px}
+  .qi button{font:600 13px var(--sans);border:1.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:20px;padding:5px 14px;cursor:pointer;transition:background .2s,color .2s}
+  .qi button:hover:not(:disabled){background:var(--ink);color:#fff}
+  .qi button:disabled{cursor:default;opacity:.55}
+  .qi button.ok{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+  .qi button.bad{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+  .qi .fb{margin-top:8px;padding:8px 12px;border-radius:8px;font-size:14px;animation:up .4s ease both}
+  .qi .fb.ok{background:var(--green-soft);border-left:4px solid var(--green)}
+  .qi .fb.bad{background:var(--red-soft);border-left:4px solid var(--red)}
+  .qi .fb.model{background:var(--amber-soft);border-left:4px solid var(--amber)}
+  .qi .fb pre.code{margin:8px 0 0}
+  .qi textarea{width:100%;min-height:90px;font:14px/1.5 var(--sans);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink);resize:vertical}
+  .qi textarea:focus{outline:none;border-color:var(--blue)}
+  .qi .row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center}
+  .qi .self{font-size:13px;color:var(--ink-2)}
+  .quiz-intro{background:var(--blue-soft);border:2px solid var(--blue);border-radius:12px;padding:12px 16px;margin:14px 0;font-size:14px}
+  .scorebar{position:fixed;left:18px;bottom:18px;z-index:9;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px 14px;font:14px var(--sans);box-shadow:0 6px 18px rgba(0,0,0,.18);display:none;gap:12px;align-items:center}
+  .scorebar.show{display:flex}
+  .scorebar b{font-family:var(--serif);font-size:20px;color:var(--blue)}
+  .scorebar .meter{width:120px;height:8px;background:var(--panel);border-radius:5px;overflow:hidden}
+  .scorebar .meter i{display:block;height:100%;background:var(--green);width:0;transition:width .4s}
+  .scorebar button{font:600 12px var(--sans);border:1.5px solid var(--ink);background:#fff;border-radius:16px;padding:4px 10px;cursor:pointer}
+  .scorebar button:hover{background:var(--ink);color:#fff}
+}
+@media (max-width:720px){ .scorebar{left:8px;right:8px;bottom:70px;justify-content:space-between} }
+</style>
+<link rel="stylesheet" href="study-site.css">
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d1b26"/></marker>
+    <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2459a8"/></marker>
+    <marker id="ahR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b8322a"/></marker>
+    <marker id="ahG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f7a4d"/></marker>
+  </defs>
+</svg>
+
+<header class="study-nav">
+  <nav class="study-nav-inner" aria-label="Primary navigation">
+    <a class="study-brand" href="index.html">
+      <span class="study-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5.5" rx="7.5" ry="3"></ellipse>
+          <path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13"></path>
+          <path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"></path>
+        </svg>
+      </span>
+      Database Engineering
+    </a>
+    <a class="back-home" href="index.html">
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11.5 4 5.5 10l6 6M6 10h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to Home
+    </a>
+  </nav>
+</header>
+
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<main class="doc">
+<!-- COVER -->
+<section class="sheet cover">
+  <div>
+    <span class="kicker">Database Management Engineering · Lectures 5 &amp; 6</span>
+    <h1>Making Queries<br><span>Cheaper</span></h1>
+    <p class="sub">A friendly, picture-first guide to query optimization: heuristic optimization (the 12 algebra transformation rules, the six-step procedure and the Aquarius query tree rewritten stage by stage) and cost-based optimization (catalog statistics, histograms, and the cost formulas of the selection algorithms S1–S6, with the Employee exercises). Ends with a 60-question exam and a full answer key.</p>
+    <span class="badge">Rewrite first. Then count blocks.</span>
+  </div>
+  <svg class="cover-tree" viewBox="0 0 720 300" role="img" aria-label="A query tree before and after optimization">
+    <g font-size="13" font-weight="700" text-anchor="middle">
+      <g class="pop" style="animation-delay:.1s"><rect x="60" y="20" width="60" height="30" rx="7" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="90" y="40" fill="#2459a8">π</text>
+      <rect x="60" y="76" width="60" height="30" rx="7" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="90" y="96" fill="#1f7a4d">σ</text>
+      <rect x="60" y="132" width="60" height="30" rx="7" fill="#fbe5e2" stroke="#b8322a" stroke-width="2"/><text x="90" y="152" fill="#b8322a">×</text>
+      <rect x="20" y="208" width="60" height="28" rx="14" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="50" y="227" font-size="11">EMP</text>
+      <rect x="100" y="208" width="60" height="28" rx="14" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="130" y="227" font-size="11">PROJ</text></g>
+      <g stroke="#1d1b26" stroke-width="2"><path d="M90 50 L90 76"/><path d="M90 106 L90 132"/><path d="M80 162 L52 208"/><path d="M100 162 L128 208"/></g>
+      <g class="pop" style="animation-delay:.8s">
+      <rect x="470" y="20" width="60" height="30" rx="7" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="500" y="40" fill="#2459a8">π</text>
+      <rect x="470" y="76" width="60" height="30" rx="7" fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"/><text x="500" y="96" fill="#6a3fb5">⋈</text>
+      <rect x="420" y="140" width="60" height="30" rx="7" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="450" y="160" fill="#1f7a4d">σ</text>
+      <rect x="520" y="140" width="60" height="30" rx="7" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="550" y="160" fill="#1f7a4d">σ</text>
+      <rect x="420" y="208" width="60" height="28" rx="14" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="450" y="227" font-size="11">EMP</text>
+      <rect x="520" y="208" width="60" height="28" rx="14" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="550" y="227" font-size="11">PROJ</text></g>
+      <g stroke="#1d1b26" stroke-width="2"><path d="M500 50 L500 76"/><path d="M490 106 L452 140"/><path d="M510 106 L548 140"/><path d="M450 170 L450 208"/><path d="M550 170 L550 208"/></g>
+    </g>
+    <g stroke="#b8322a" stroke-width="3" fill="none" class="flowline"><path d="M200 120 L390 120" marker-end="url(#ahR)"/></g>
+    <text x="215" y="105" class="hand" font-size="26" fill="#b8322a">same answer,</text><text x="215" y="150" class="hand" font-size="26" fill="#b8322a">far less work</text>
+    <text x="360" y="285" class="hand" font-size="22" fill="#1f7a4d" text-anchor="middle">push σ and π down · turn × into ⋈</text>
+  </svg>
+  <div class="cover-meta">
+    <div><b>14</b>illustrated lessons</div>
+    <div><b>60</b>exam questions</div>
+    <div><b>12</b>transformation rules, 6 selection algorithms</div>
+  </div>
+</section>
+<!-- TOC -->
+<section class="sheet chapter">
+  <span class="kicker">Start here</span>
+  <h2>What's inside</h2>
+  <ol class="toc">
+    <li><span class="n">01</span><a href="#c1">The evaluation problem and what optimization means</a></li>
+    <li><span class="n">02</span><a href="#c2">Two techniques: heuristics and cost estimation</a></li>
+    <li><span class="n">03</span><a href="#c3">Heuristics and the main heuristic</a></li>
+    <li><span class="n">04</span><a href="#c4">The 12 relational algebra transformation rules</a></li>
+    <li><span class="n">05</span><a href="#c5">Remember: SQL → algebra → three equivalent forms</a></li>
+    <li><span class="n">06</span><a href="#c6">Heuristic guidelines and the Aquarius query tree</a></li>
+    <li><span class="n">07</span><a href="#c7">The six heuristic optimization steps and pipelining</a></li>
+    <li><span class="n">08</span><a href="#c8">Cost-based optimization: what cost means</a></li>
+    <li><span class="n">09</span><a href="#c9">Catalog information, selectivity and histograms</a></li>
+    <li><span class="n">10</span><a href="#c10">S1 linear search and S2 binary search</a></li>
+    <li><span class="n">11</span><a href="#c11">S3a, S4, S5 and S6: the index algorithms</a></li>
+    <li><span class="n">12</span><a href="#c12">Exercises: queries on EMPLOYEE</a></li>
+    <li><span class="n">13</span><a href="#c13">Pricing joins, and heuristics + cost together</a></li>
+    <li><span class="n">14</span><a href="#c14">Summary, key ideas & dictionary</a></li>
+    <li><span class="n">Q</span><a href="#quiz">Final exam: 60 questions</a></li>
+    <li><span class="n">A</span><a href="#key">Answer key</a></li>
+  </ol>
+  <h3>How to use this guide</h3>
+  <p>Read the lessons in order: each one builds on the one before. Along the way you'll meet a few kinds of boxes, plus <span style="background:var(--note);padding:0 4px;font-family:var(--hand);font-size:1.25em">yellow sticky notes</span>: hints in the margin, like a friend scribbling on your book.</p>
+  <div class="grid2">
+    <div class="box key"><span class="tag">Key point</span>The idea you must remember. If you only re-read one thing before the exam, read these.</div>
+    <div class="box watch"><span class="tag">Watch it!</span>A common mistake or trap. Exams love these.</div>
+    <div class="box brain"><span class="tag">Brain power</span>Stop and think for a minute before reading on. Thinking beats re-reading.</div>
+    <div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Is it okay to ask "obvious" questions?</dt><dd>Yes. These boxes answer the questions most students are afraid to ask.</dd></dl></div>
+    <div class="box example"><span class="tag">Example</span>A worked example with real numbers.</div>
+    <div class="box lecture"><span class="tag">From the lecture</span>A definition or statement taken straight from your lecture slides, so you know the exact wording your teacher used.</div>
+  </div>
+</section>
+<section class="sheet chapter" id="c1">
+  <span class="kicker">Lesson 01</span>
+  <h2>The evaluation problem and what optimization means</h2>
+  <p class="lead">SQL tells the DBMS what we want; it is the optimizer that decides how to get it cheaply.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Query evaluation.</b> <b>Problem:</b> an SQL query is <b>declarative</b> — it does not specify a query execution plan. A relational algebra expression is <b>procedural</b> — there is an associated query execution plan. <b>Solution:</b> convert the SQL query to an equivalent relational algebra expression and evaluate it using the associated query execution plan. <i>But which equivalent expression is best?</i></div>
+<p>SQL says <b>what</b> you want. Relational algebra says <b>which operations, in which order</b>. Converting SQL to algebra therefore gives the DBMS a recipe, but a query almost always has <b>many equivalent recipes</b> that return the same rows at wildly different costs. Choosing between them is the optimizer's job.</p>
+<h3>Where the optimizer sits</h3>
+<div class="flow">
+<div class="step"><b class="n">1</b><span><b>Parsing and translation</b>: the query becomes a relational-algebra expression</span></div><div class="arrow">↓</div>
+<div class="step"><b class="n">2</b><span><b>Optimization</b>: the optimizer picks an execution plan, using <b>statistics about the data</b></span></div><div class="arrow">↓</div>
+<div class="step"><b class="n">3</b><span><b>Evaluation</b>: the evaluation engine runs the plan against the data and produces the query output</span></div></div>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Query optimization</b> = re-writing a <b>query</b> to produce an <b>equivalent</b>, but a <b>better</b> query. <b>Initial query tree → optimization (rewriting) → final query tree.</b> <b>Equivalent</b>: produces the same result set. <b>Better</b>: costs less (disk access, computation, memory usage, communication).</div>
+<table class="t"><tr><th>Word</th><th>Meaning</th><th>Consequence</th></tr><tr><td><b>Equivalent</b></td><td>produces exactly the same result set</td><td>Every transformation must be <b>provably safe</b>: the 12 rules of Lesson 4</td></tr><tr><td><b>Better</b></td><td>costs less: disk access, computation, memory, communication</td><td>In practice <b>disk access</b> (block reads) dominates everything else</td></tr></table>
+<h3>Three ways of saying the same thing</h3><div class="grid3"><div class="card">the <b>best</b> way to execute a SELECT query</div><div class="card">the <b>fastest</b> way to execute it</div><div class="card">the way with the <b>fewest disk accesses</b> <span class="muted">(the one that matters in practice)</span></div></div><div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>If the answer is the same, why does the plan matter?</dt><dd>Because cost is not the answer, it is the <b>route</b>. Joining two tables of 10,000 and 30,000 rows and <i>then</i> filtering can mean processing 300,000,000 pairs; filtering first may leave a few hundred rows to join.</dd><dt>Does the optimizer change my SQL?</dt><dd>No. It changes the <b>plan</b> (the algebra tree and the algorithms), never the result.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c2">
+  <span class="kicker">Lesson 02</span>
+  <h2>Two techniques: heuristics and cost estimation</h2>
+  <p class="lead">The two tools of the optimizer, and why a real DBMS needs both.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Two main techniques for query optimization.</b> <b>Heuristic rules</b>: rules for ordering the operations in query optimization. To transform a relational expression into another equivalent expression we need transformation rules that preserve equivalence. <b>Cost estimation</b>: it estimates the cost of different execution strategies and chooses the execution plan with the lowest execution cost.</div>
+<div class="grid2"><div class="card"><h4 class="c-blue">Heuristic rules</h4>Rewrite the query tree into an equivalent one that is <b>usually</b> cheaper. <b>No statistics needed</b>: the rules hold whatever the data looks like.<br><br><b>Output:</b> a better <i>tree</i>.</div><div class="card"><h4 class="c-green">Cost estimation</h4>Price <b>several plans</b> using catalog statistics, then pick the cheapest. Needs numbers, and the numbers are <b>estimates</b>.<br><br><b>Output:</b> a chosen <i>algorithm</i> for each operation.</div></div><p><b>Real systems use both.</b> Heuristics shrink the search space cheaply; cost estimation then makes the final choices among what is left.</p><figure class="figure reveal"><svg viewBox="0 0 760 120" role="img" aria-label="Heuristics then cost estimation">
+<g font-size="14" font-weight="700" text-anchor="middle">
+<rect x="10" y="30" width="130" height="50" rx="9" fill="#1d1b26"/><text x="75" y="60" fill="#fff">Initial tree</text>
+<rect x="190" y="30" width="170" height="50" rx="9" fill="#2459a8"/><text x="275" y="52" fill="#fff">Heuristic rewrite</text><text x="275" y="70" fill="#fff" font-size="11" font-weight="500">no numbers needed</text>
+<rect x="410" y="30" width="170" height="50" rx="9" fill="#1f7a4d"/><text x="495" y="52" fill="#fff">Cost estimation</text><text x="495" y="70" fill="#fff" font-size="11" font-weight="500">uses catalog statistics</text>
+<rect x="630" y="30" width="120" height="50" rx="9" fill="#b5770c"/><text x="690" y="60" fill="#fff">Plan</text></g>
+<g stroke="#1d1b26" stroke-width="2" fill="none" class="flowline"><path d="M142 55 L188 55" marker-end="url(#ah)"/><path d="M362 55 L408 55" marker-end="url(#ah)"/><path d="M582 55 L628 55" marker-end="url(#ah)"/></g></svg><figcaption>Heuristics rewrite the tree; cost estimation prices the choices that remain.</figcaption></figure>
+</section>
+<section class="sheet chapter" id="c3">
+  <span class="kicker">Lesson 03</span>
+  <h2>Heuristics and the main heuristic</h2>
+  <p class="lead">A rule of thumb that nearly always pays: shrink the data as soon as you can.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Heuristics</b>: techniques that don't have proofs; reached by trial-and-error or common sense. <b>Heuristic optimization</b>: applying transformations that produce a better query tree; a transformation must produce an equivalent tree.</div>
+<p>A heuristic is a <b>rule of thumb</b>. Nobody proves that "filter early" is always optimal; it simply works almost every time, and costs nothing to apply. (The <i>transformation</i> must be provably equivalent; it is the claim that it makes things <i>better</i> that is only a heuristic.)</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>The main heuristic</b> is to apply first the operations that <b>reduce the size of intermediate results</b>. Apply the operations that reduce the unary relation [tuple based]: e.g. apply <b>SELECT and PROJECT</b> operations before applying the JOIN or other binary operations. <b>Note:</b> perform select operations as early as possible to reduce the number of tuples, and perform project operations as early as possible to reduce the number of attributes. (This is done by moving select and project operations as far down the tree as possible.) <b>The task of heuristic optimization of query trees is to find a final query tree that is efficient to execute.</b></div>
+<h3>Why early selection and projection help</h3><figure class="figure reveal"><svg viewBox="0 0 760 210" role="img" aria-label="Filtering before joining shrinks the join inputs">
+<g font-size="13" font-weight="700" text-anchor="middle">
+<text x="190" y="20">Join first, filter later</text>
+<rect x="40" y="40" width="130" height="50" rx="6" fill="#fbe5e2" stroke="#b8322a" stroke-width="2"/><text x="105" y="70">10,000 rows</text>
+<rect x="210" y="40" width="130" height="50" rx="6" fill="#fbe5e2" stroke="#b8322a" stroke-width="2"/><text x="275" y="70">30,000 rows</text>
+<path d="M105 92 L190 135 M275 92 L190 135" stroke="#1d1b26" stroke-width="2" fill="none"/>
+<rect x="110" y="135" width="160" height="40" rx="8" fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"/><text x="190" y="160">⋈ on big inputs</text>
+<text x="570" y="20">Filter first, join later</text>
+<rect x="440" y="40" width="80" height="50" rx="6" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="480" y="70">σ → 4,000</text>
+<rect x="620" y="40" width="80" height="50" rx="6" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="660" y="70">σ → 300</text>
+<path d="M480 92 L570 135 M660 92 L570 135" stroke="#1d1b26" stroke-width="2" fill="none"/>
+<rect x="490" y="135" width="160" height="40" rx="8" fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"/><text x="570" y="160">⋈ on small inputs</text></g>
+<text x="40" y="200" class="hand" font-size="20" fill="#b8322a">(sizes are illustrative)</text></svg><figcaption>The same join is far cheaper when its inputs have already been shrunk by σ and π.</figcaption></figure>
+<ul><li><b>σ early</b> removes <b>rows</b>: fewer tuples flow into every later operator.</li><li><b>π early</b> removes <b>columns</b>: each record is narrower, so more records fit in a block and fewer blocks are read and written.</li></ul><div class="box watch"><span class="tag">Watch it!</span><b>Only the attributes still needed may be projected away.</b> Pushing a projection below a join must keep the <b>join attributes</b> and anything needed above (the final attribute list). Dropping a join column too early would make the join impossible.</div>
+<div class="box brain"><span class="tag">Brain power</span>A join needs 10,000 × 30,000 comparisons. If a selection first cuts the second table to 300 rows, by what factor does the join work shrink?</div>
+</section>
+<section class="sheet chapter" id="c4">
+  <span class="kicker">Lesson 04</span>
+  <h2>The 12 relational algebra transformation rules</h2>
+  <p class="lead">The only moves the optimizer is allowed to make: each one preserves the result.</p>
+<p>To rewrite a tree safely we need rules that <b>preserve equivalence</b>. The lecture gives twelve. Learn them in groups: rules about <b>σ</b> (1, 2, 4, 6, 10), about <b>π</b> (3, 4, 7, 11), about <b>⋈ and ×</b> (5, 6, 7, 9, 12), and about <b>set operations</b> (8, 9, 10, 11).</p><table class="t"><tr><th>#</th><th>Rule</th><th>Statement</th><th>In plain words</th></tr><tr><td>1</td><td><b>Cascade of σ</b></td><td>σ<sub>c1 AND c2 AND … AND cn</sub>(R) ≡ σ<sub>c1</sub>(σ<sub>c2</sub>(…(σ<sub>cn</sub>(R))…))</td><td>An AND-ed condition can be split into a chain of single selections.</td></tr><tr><td>2</td><td><b>Commutativity of σ</b></td><td>σ<sub>c1</sub>(σ<sub>c2</sub>(R)) ≡ σ<sub>c2</sub>(σ<sub>c1</sub>(R))</td><td>The order of selections does not matter, so the most restrictive can go first.</td></tr><tr><td>3</td><td><b>Cascade of π</b></td><td>π<sub>List1</sub>(π<sub>List2</sub>(…(π<sub>Listn</sub>(R))…)) ≡ π<sub>List1</sub>(R)</td><td>Only the outermost projection list matters (the others must contain it).</td></tr><tr><td>4</td><td><b>Commuting σ with π</b></td><td>π<sub>A1…An</sub>(σ<sub>c</sub>(R)) ≡ σ<sub>c</sub>(π<sub>A1…An</sub>(R))</td><td>Swap them, <b>provided c only uses attributes in the list</b>.</td></tr><tr><td>5</td><td><b>Commutativity of ⋈ (and ×)</b></td><td>R ⋈<sub>C</sub> S ≡ S ⋈<sub>C</sub> R; R × S ≡ S × R</td><td>Either relation may be the left input (this is what lets us choose the outer relation).</td></tr><tr><td>6</td><td><b>Commuting σ with ⋈ (or ×)</b></td><td>σ<sub>c</sub>(R ⋈ S) ≡ (σ<sub>c</sub>(R)) ⋈ S<br>σ<sub>c</sub>(R ⋈ S) ≡ (σ<sub>c1</sub>(R)) ⋈ (σ<sub>c2</sub>(S))</td><td>Push a selection below a join, <b>if c involves only R</b> (first form) or c = c1 AND c2 with c1 on R, c2 on S (second form).</td></tr><tr><td>7</td><td><b>Commuting π with ⋈ (or ×)</b></td><td>π<sub>L</sub>(R ⋈<sub>C</sub> S) ≡ (π<sub>A1…An</sub>(R)) ⋈<sub>C</sub> (π<sub>B1…Bm</sub>(S))</td><td>Push projections below a join; A’s and B’s are the attributes of L from each side <b>plus the join attributes</b>.</td></tr><tr><td>8</td><td><b>Commutativity of set operations</b></td><td>∪ and ∩ are commutative, but “−” is not</td><td>R ∪ S = S ∪ R, but R − S ≠ S − R.</td></tr><tr><td>9</td><td><b>Associativity of ⋈, ×, ∪, ∩</b></td><td>(R θ S) θ T = R θ (S θ T)</td><td>The grouping of a chain of the same operator can change (so the join order can change).</td></tr><tr><td>10</td><td><b>Commuting σ with set operations</b></td><td>σ<sub>c</sub>(R θ S) = (σ<sub>c</sub>(R)) θ (σ<sub>c</sub>(S))</td><td>Push the selection into both inputs of ∪, ∩ or −.</td></tr><tr><td>11</td><td><b>π commutes with ∪</b></td><td>π<sub>L</sub>(R ∪ S) = (π<sub>L</sub>(R)) ∪ (π<sub>L</sub>(S))</td><td>Project each input first, then union.</td></tr><tr><td>12</td><td><b>Converting (σ, ×) into ⋈</b></td><td>σ<sub>C</sub>(R × S) = R ⋈<sub>C</sub> S</td><td>A Cartesian product followed by a join condition <i>is</i> a join, and joins are far cheaper.</td></tr></table>
+<h3>Seeing a few of them in action</h3><div class="box example"><span class="tag">Example</span><b>Rule 1 then 2 (cascade, commute).</b><br>σ<sub>Dno=5 AND Salary&gt;300</sub>(EMPLOYEE) ≡ σ<sub>Dno=5</sub>(σ<sub>Salary&gt;300</sub>(EMPLOYEE)) ≡ σ<sub>Salary&gt;300</sub>(σ<sub>Dno=5</sub>(EMPLOYEE)). Pick the order that applies the most restrictive condition first.<br><br>
+<b>Rule 6 (σ below ⋈).</b><br>σ<sub>Salary&gt;300 AND Pname='X'</sub>(EMPLOYEE ⋈ PROJECT): <code>Salary</code> belongs to EMPLOYEE and <code>Pname</code> to PROJECT, so the second form applies: (σ<sub>Salary&gt;300</sub>(EMPLOYEE)) ⋈ (σ<sub>Pname='X'</sub>(PROJECT)).<br><br>
+<b>Rule 12 (× + σ → ⋈).</b><br>σ<sub>Dno=Dnumber</sub>(EMPLOYEE × DEPARTMENT) = EMPLOYEE ⋈<sub>Dno=Dnumber</sub> DEPARTMENT.</div>
+<div class="box watch"><span class="tag">Watch it!</span><b>Three rules have fine print.</b> Rule 4 needs the selection attributes to be in the projection list; rule 6 needs the condition to mention only the relation it is pushed into; rule 7 must keep the join attributes. And never commute “−” (rule 8) or associate it (rule 9 lists only ⋈, ×, ∪, ∩).</div>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Does rule 10 work for set difference too?</dt><dd>The lecture states it for a generic set operator θ, which includes ∪, ∩ and −: σ<sub>c</sub>(R − S) = σ<sub>c</sub>(R) − σ<sub>c</sub>(S).</dd><dt>Why is rule 5 important if the result is the same?</dt><dd>Because of <b>cost</b>: the nested-loop join is cheaper with the smaller relation outer, and rule 5 says swapping them is legal.</dd></dl></div>
+<div class="sticky">σ and π: push DOWN<br>× + σ: make ⋈<br>“−” never commutes</div>
+</section>
+<section class="sheet chapter" id="c5">
+  <span class="kicker">Lesson 05</span>
+  <h2>Remember: SQL → algebra → three equivalent forms</h2>
+  <p class="lead">The lecture's smallest example of rewriting, before the big one.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Remember:</b> <code>SELECT Name, age FROM Employee, Dept WHERE Depno = Depnumber AND age &lt; 30</code>. In relational algebra: <b>π</b><sub>Name,age</sub>(<b>σ</b><sub>Depno=Depnumber AND age&lt;30</sub>(Employee <b>×</b> Dept)).</div>
+<p>The standard translation maps the three SQL clauses to three operators: <b>SELECT → π</b>, <b>FROM → ×</b> (Cartesian product of all listed tables), <b>WHERE → σ</b>.</p><h3>Three equivalent expressions</h3><table class="t"><tr><th>Form</th><th>Expression</th><th>What changed</th></tr><tr><td>1 · Direct translation</td><td>π<sub>Name,age</sub>(σ<sub>Depno=Depnumber ∧ age&lt;30</sub>(Employee × Dept))</td><td>Cartesian product of both tables, then filtering. The most expensive form.</td></tr><tr><td>2 · Rule 12</td><td>π<sub>Name,age</sub>(σ<sub>age&lt;30</sub>(Employee ⋈<sub>Depno=Depnumber</sub> Dept))</td><td>σ + × became ⋈, leaving only the age condition above the join.</td></tr><tr><td>3 · Rules 6 and 5</td><td>π<sub>Name,age</sub>(Dept ⋈<sub>Depno=Depnumber</sub> (σ<sub>age&lt;30</sub>(Employee)))</td><td>σ pushed below the join onto Employee (rule 6); inputs swapped (rule 5). The best of the three.</td></tr></table>
+<p>The lecture shows (2) with an arrow because it is already a big improvement; (3) goes further. All three return the same rows.</p><figure class="figure reveal"><svg viewBox="0 0 760 225" role="img" aria-label="Form 1 versus form 3"><path d="M200 39 L200 61" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M200 89 L200 111" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M200 139 L120 171" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M200 139 L290 171" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M560 39 L560 61" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M560 89 L480 121" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M560 89 L650 121" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M650 149 L650 181" stroke="#1d1b26" stroke-width="2" fill="none"/><g class="pop"><rect x="158.0" y="11" width="84" height="28" rx="7" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="200" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#b5770c">π Name,age</text></g><g class="pop"><rect x="95.5" y="61" width="209" height="28" rx="7" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="200" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="#1f7a4d">σ Depno=Depnumber ∧ age&lt;30</text></g><g class="pop"><rect x="168.0" y="111" width="64" height="28" rx="7" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="200" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="#2459a8">×</text></g><g class="pop"><rect x="85.0" y="171" width="70" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="120" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">Employee</text></g><g class="pop"><rect x="258.0" y="171" width="64" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="290" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">Dept</text></g><g class="pop"><rect x="518.0" y="11" width="84" height="28" rx="7" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="560" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#b5770c">π Name,age</text></g><g class="pop"><rect x="495.0" y="61" width="130" height="28" rx="7" fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"/><text x="560" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="#6a3fb5">⋈ Depno=Depnumber</text></g><g class="pop"><rect x="448.0" y="121" width="64" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="480" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">Dept</text></g><g class="pop"><rect x="605.0" y="121" width="90" height="28" rx="7" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="650" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#1f7a4d">σ age&lt;30</text></g><g class="pop"><rect x="615.0" y="181" width="70" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="650" y="200" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">Employee</text></g></svg><figcaption>Left: form 1 (σ above ×). Right: form 3 (σ pushed to Employee, × replaced by ⋈).</figcaption></figure>
+</section>
+<section class="sheet chapter" id="c6">
+  <span class="kicker">Lesson 06</span>
+  <h2>Heuristic guidelines and the Aquarius query tree</h2>
+  <p class="lead">One query, five rewrites, and a tree that does thousands of times less work.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Heuristic optimization guidelines:</b> apply σ and π as early as possible (reduce the relation size: number of rows, absolute size); apply the most restrictive σ earlier; apply the most restrictive ⋈ earlier; if possible, avoid ×.</div>
+<table class="t"><tr><th>Guideline</th><th>Why</th></tr><tr><td>Apply σ and π as early as possible</td><td>Fewer rows (σ) and narrower rows (π) for every later operator</td></tr><tr><td>Apply the most restrictive σ earlier</td><td>The condition that removes the most rows shrinks the data the most</td></tr><tr><td>Apply the most restrictive ⋈ earlier</td><td>The join with the smallest result keeps intermediate results small</td></tr><tr><td>If possible, avoid ×</td><td>A Cartesian product has |R| × |S| tuples; a join has only the matching ones</td></tr></table>
+<h3>The Aquarius query, stage by stage</h3><pre class="code"><span class="k">SELECT</span> lname
+<span class="k">FROM</span>   employee, works_on, project
+<span class="k">WHERE</span>  (pname = 'Aquarius') <span class="k">and</span> (pnumber = pno) <span class="k">and</span> (essn = ssn) <span class="k">and</span> (bdate &gt; '1957-12-31');</pre>
+<p>"Last names of employees born after 1957 who work on the project called Aquarius."</p><h4>Stage (a) · Initial query tree: direct translation</h4><figure class="figure reveal"><svg viewBox="0 0 760 275" role="img" aria-label="Initial query tree"><path d="M380 39 L380 61" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M380 89 L380 116" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M380 144 L250 171" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M380 144 L520 171" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M250 199 L170 231" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M250 199 L330 231" stroke="#1d1b26" stroke-width="2" fill="none"/><g class="pop"><rect x="348.0" y="11" width="64" height="28" rx="7" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="380" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#b5770c">π Lname</text></g><g class="pop"><rect x="150.0" y="61" width="460" height="28" rx="7" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="380" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="#1f7a4d">σ Pname='Aquarius' ∧ Pnumber=Pno ∧ Essn=Ssn ∧ Bdate&gt;'1957-12-31'</text></g><g class="pop"><rect x="348.0" y="116" width="64" height="28" rx="7" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="380" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#2459a8">×</text></g><g class="pop"><rect x="218.0" y="171" width="64" height="28" rx="7" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="250" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#2459a8">×</text></g><g class="pop"><rect x="488.0" y="171" width="64" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="520" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">PROJECT</text></g><g class="pop"><rect x="135.0" y="231" width="70" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="170" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">EMPLOYEE</text></g><g class="pop"><rect x="295.0" y="231" width="70" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="330" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">WORKS_ON</text></g></svg><figcaption>Stage (a): all three tables are multiplied together, and one big σ sits on top. The initial tree is correct but expensive.</figcaption></figure>
+<p>With illustrative sizes EMPLOYEE = 10,000, WORKS_ON = 30,000, PROJECT = 100: EMPLOYEE × WORKS_ON already has <b>300,000,000</b> tuples, and × PROJECT makes <b>30,000,000,000</b>. Every one of them is built, then almost all thrown away.</p><h4>Stage (b) · Break σ up and move each piece down (rules 1, 2, 6)</h4><pre class="code">π Lname( σ Pnumber=Pno( σ Essn=Ssn( σ Bdate&gt;'1957-12-31'(EMPLOYEE) × WORKS_ON ) × σ Pname='Aquarius'(PROJECT) ) )</pre>
+<p>Each single-table condition now sits right on its table: the birth-date filter on EMPLOYEE, the project-name filter on PROJECT. The two <b>join conditions</b> (<code>Essn=Ssn</code>, <code>Pnumber=Pno</code>) involve two tables, so they can only sink as far as the × that brings those tables together.</p><h4>Stage (c) · Most restrictive σ first (rule 9, 5: re-arrange the leaves)</h4><pre class="code">π Lname( σ Essn=Ssn( σ Pnumber=Pno( σ Pname='Aquarius'(PROJECT) × WORKS_ON ) × σ Bdate&gt;'1957-12-31'(EMPLOYEE) ) )</pre>
+<p><code>Pname = 'Aquarius'</code> keeps probably <b>one</b> PROJECT row out of many, far more restrictive than <code>Bdate &gt; …</code>. So PROJECT is combined with WORKS_ON <b>first</b>, producing a small intermediate result (the assignments to that one project). EMPLOYEE is joined last.</p><h4>Stage (d) · Replace × and σ with ⋈ (rule 12)</h4><pre class="code">π Lname( ( σ Pname='Aquarius'(PROJECT) ⋈ Pnumber=Pno WORKS_ON ) ⋈ Essn=Ssn σ Bdate&gt;'1957-12-31'(EMPLOYEE) )</pre>
+<p>No Cartesian product remains. A join on an equality condition can use the join algorithms of the previous lecture.</p><h4>Stage (e) · Push π down (rules 3, 7)</h4><figure class="figure reveal"><svg viewBox="0 0 760 385" role="img" aria-label="Final query tree"><path d="M380 39 L380 64" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M380 92 L190 121" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M380 92 L580 121" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M190 149 L190 176" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M580 149 L580 176" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M580 204 L580 231" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M190 204 L90 231" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M190 204 L300 231" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M90 259 L90 286" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M90 314 L90 341" stroke="#1d1b26" stroke-width="2" fill="none"/><path d="M300 259 L300 286" stroke="#1d1b26" stroke-width="2" fill="none"/><g class="pop"><rect x="348.0" y="11" width="64" height="28" rx="7" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="380" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#b5770c">π Lname</text></g><g class="pop"><rect x="338.0" y="64" width="84" height="28" rx="7" fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"/><text x="380" y="83" text-anchor="middle" font-size="12" font-weight="700" fill="#6a3fb5">⋈ Essn=Ssn</text></g><g class="pop"><rect x="158.0" y="121" width="64" height="28" rx="7" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="190" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#b5770c">π Essn</text></g><g class="pop"><rect x="531.5" y="121" width="97" height="28" rx="7" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="580" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#b5770c">π Ssn, Lname</text></g><g class="pop"><rect x="138.5" y="176" width="103" height="28" rx="7" fill="#ece5fa" stroke="#6a3fb5" stroke-width="2"/><text x="190" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#6a3fb5">⋈ Pnumber=Pno</text></g><g class="pop"><rect x="495.5" y="176" width="169" height="28" rx="7" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="580" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#1f7a4d">σ Bdate&gt;'1957-12-31'</text></g><g class="pop"><rect x="545.0" y="231" width="70" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="580" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">EMPLOYEE</text></g><g class="pop"><rect x="51.5" y="231" width="77" height="28" rx="7" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="90" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#b5770c">π Pnumber</text></g><g class="pop"><rect x="255.0" y="231" width="90" height="28" rx="7" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="300" y="250" text-anchor="middle" font-size="12" font-weight="700" fill="#b5770c">π Essn, Pno</text></g><g class="pop"><rect x="22.0" y="286" width="136" height="28" rx="7" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="90" y="305" text-anchor="middle" font-size="12" font-weight="700" fill="#1f7a4d">σ Pname='Aquarius'</text></g><g class="pop"><rect x="265.0" y="286" width="70" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="300" y="305" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">WORKS_ON</text></g><g class="pop"><rect x="58.0" y="341" width="64" height="28" rx="16" fill="#f6f2e9" stroke="#1d1b26" stroke-width="2"/><text x="90" y="360" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1b26">PROJECT</text></g></svg><figcaption>Stage (e): the final tree. Each table is filtered and narrowed before it joins, and the most restrictive branch is joined first.</figcaption></figure>
+<table class="t"><tr><th>Table</th><th>Columns kept</th><th>Why exactly these</th></tr><tr><td>PROJECT</td><td>Pnumber</td><td>needed for the join Pnumber = Pno; nothing else is used above</td></tr><tr><td>WORKS_ON</td><td>Essn, Pno</td><td>Pno for the first join, Essn for the second</td></tr><tr><td>EMPLOYEE</td><td>Ssn, Lname</td><td>Ssn for the join, Lname for the final answer</td></tr><tr><td>after join 1</td><td>Essn</td><td>only Essn is needed to join with EMPLOYEE</td></tr></table>
+<div class="box example"><span class="tag">Example</span><b>Illustrative effect.</b> σ<sub>Pname</sub> leaves 1 project; its join with WORKS_ON yields about 30,000 / 100 = 300 assignments; EMPLOYEE is cut to about 4,000; the last join processes <b>300 × 4,000</b> possible pairs through a join algorithm instead of producing 30 billion tuples. The answer is identical.</div>
+<div class="box watch"><span class="tag">Watch it!</span><b>The "most restrictive" choice needs knowledge of the data.</b> The heuristic says "most restrictive first", but deciding that <code>Pname = 'Aquarius'</code> beats <code>Bdate &gt; …</code> relies on knowing how many rows each condition keeps, which is a statistic. This is where heuristic optimization starts to lean on cost estimation.</div>
+</section>
+<section class="sheet chapter" id="c7">
+  <span class="kicker">Lesson 07</span>
+  <h2>The six heuristic optimization steps and pipelining</h2>
+  <p class="lead">The lecture's procedure: six steps that turn any initial tree into an efficient final tree.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Heuristic optimization steps:</b><ol>
+<li>Break up any select operations with conjunctive conditions into a cascade of select operations.</li>
+<li>Move each select operation as far down the query tree as is permitted by the attributes involved in the select condition.</li>
+<li>Re-arrange the leaf nodes of the tree so that the leaf node relations with the most restrictive select operations are executed first in the query tree representation.</li>
+<li>Combine a Cartesian product operation with a subsequent select operation in the tree into a join operation.</li>
+<li>Break down and move lists of projection attributes down the tree as far as possible by creating new project operations as needed.</li>
+<li>Identify sub-trees that represent groups of operations that can be executed by a single algorithm (pipelining).</li></ol></div>
+<table class="t"><tr><th>Step</th><th>Action</th><th>Rules used</th><th>In the Aquarius example</th></tr><tr><td>1</td><td>Cascade the conjunctive σ</td><td>1</td><td>One σ with four AND-ed conditions becomes four σ nodes</td></tr><tr><td>2</td><td>Push each σ down</td><td>2, 4, 6, 10</td><td>Bdate σ onto EMPLOYEE, Pname σ onto PROJECT; join conditions stop at their ×</td></tr><tr><td>3</td><td>Re-order the leaves, most restrictive σ first</td><td>5, 9</td><td>PROJECT with σ Pname is combined with WORKS_ON before EMPLOYEE</td></tr><tr><td>4</td><td>× followed by σ → ⋈</td><td>12</td><td>Both Cartesian products become joins</td></tr><tr><td>5</td><td>Push π down</td><td>3, 4, 7, 11</td><td>π Pnumber, π Essn,Pno, π Ssn,Lname below the joins</td></tr><tr><td>6</td><td>Group pipelinable sub-trees</td><td>—</td><td>e.g. σ and π over one table can run in a single pass</td></tr></table>
+<h3>Step 6: pipelining</h3><p>Without pipelining each operator would <b>write its full result to disk</b>, and the next one would read it back. <b>Pipelining</b> passes each result record straight to the next operator as it is produced, so the intermediate result never touches the disk. A chain such as <code>π(σ(EMPLOYEE))</code> can run as one algorithm: read a record, test it, drop unneeded columns, pass it on.</p>
+<table class="t"><tr><th></th><th>Materialized</th><th>Pipelined</th></tr><tr><td>Intermediate results</td><td>written to disk, read back</td><td>passed record-by-record in memory</td></tr><tr><td>Disk cost</td><td>extra writes + reads</td><td>none for the intermediate result</td></tr><tr><td>Memory</td><td>little</td><td>a buffer per operator in the pipeline</td></tr></table>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Why must step 1 come before step 2?</dt><dd>A single σ with four AND-ed conditions cannot go anywhere as one block: its conditions refer to different tables. Splitting it lets each piece sink independently.</dd><dt>Why step 4 before step 5?</dt><dd>Projection lists depend on which attributes the joins need. Joins must therefore exist before we know which columns to keep.</dd></dl></div>
+<div class="box key"><span class="tag">Key point</span><b>The order of the steps is part of the answer.</b> Cascade → push σ → order leaves → ×+σ→⋈ → push π → pipeline. Exams often ask you to list or apply them in order.</div>
+</section>
+<section class="sheet chapter" id="c8">
+  <span class="kicker">Lesson 08</span>
+  <h2>Cost-based optimization: what cost means</h2>
+  <p class="lead">From "usually better" to "estimated to be cheapest": the unit of cost is the block access.</p>
+<p>Heuristics produce a better tree but cannot say which <b>algorithm</b> to use for each operation, or which of two reasonable plans is cheaper. For that the optimizer needs numbers.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Cost-based optimization:</b> pick the best plan by comparing <b>estimated</b> costs.</div>
+<h3>Components of cost</h3><table class="t"><tr><th>Component</th><th>Measured in</th><th>Example</th></tr><tr><td><b>I/O</b></td><td>blocks</td><td>blocks read from and written to disk</td></tr><tr><td><b>Storage</b></td><td>MB / GB</td><td>space for intermediate results</td></tr><tr><td><b>CPU</b></td><td>operations</td><td>comparisons while scanning, sorting, merging</td></tr><tr><td><b>RAM</b></td><td>buffers</td><td>memory blocks available to the operation</td></tr><tr><td><b>COMM</b></td><td>data transferred</td><td>bytes sent over the network (distributed databases)</td></tr></table>
+<figure class="figure reveal"><svg viewBox="0 0 760 130" role="img" aria-label="Jar of jelly beans: exact count versus estimate">
+<g font-size="13" font-weight="700" text-anchor="middle">
+<rect x="30" y="20" width="300" height="90" rx="10" fill="#fff1d1" stroke="#b5770c" stroke-width="2"/><text x="180" y="50">Empty the jar and count each bean</text><text x="180" y="72" font-weight="500">→ exact figure, but very expensive</text><text x="180" y="95" fill="#b8322a">= running the query</text>
+<rect x="430" y="20" width="300" height="90" rx="10" fill="#e0f3e8" stroke="#1f7a4d" stroke-width="2"/><text x="580" y="50">Count one portion, scale up</text><text x="580" y="72" font-weight="500">→ estimate, very cheap</text><text x="580" y="95" fill="#1f7a4d">= cost estimation from statistics</text></g></svg><figcaption>The lecture's jelly-bean analogy: cost estimation must be far cheaper than executing the query, so it settles for estimates.</figcaption></figure>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Cost estimation: I/O block accesses, only!</b> Cost = <b>disk access</b>: number of blocks read, number of blocks written [we ignore it in many cases]. Cost of reading = <b>finding the first block</b> + <b>reading all blocks with matching records</b>.</div>
+<h3>Why only I/O?</h3><p>One disk block read costs thousands of times more than one in-memory comparison, so I/O dominates. Counting only block accesses keeps the estimate simple enough to compute for every candidate plan.</p><h3>Memory buffers</h3><div class="box lecture"><span class="tag">From the lecture</span>Several algorithms can reduce disk I/O by using <b>extra buffer space</b>. The amount of real memory available to buffer depends on other concurrent queries and OS processes, known only during execution. We often use <b>worst-case estimates</b>, assuming only the minimum amount of memory needed for the operation is available. Required data may be <b>buffer-resident already</b>, avoiding disk I/O, but that is hard to take into account for cost estimation.</div>
+<div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>So estimates may be too pessimistic?</dt><dd>Yes, deliberately. The real run may find blocks already in memory, but the optimizer cannot count on it; assuming the worst gives a safe comparison between plans.</dd><dt>Are writes always ignored?</dt><dd>Not always. The slide says writes are ignored "in many cases". For joins, the lecture does include the cost of writing the result blocks.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c9">
+  <span class="kicker">Lesson 09</span>
+  <h2>Catalog information, selectivity and histograms</h2>
+  <p class="lead">The statistics that feed every cost formula.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Catalog information (metadata).</b> <b>Column:</b> distinct values (d), selectivity (sl), selection cardinality (s = sl × r). <b>Table:</b> number of records (r), average record size (R), number of file blocks (b), blocking factor (bfr), primary file organization (ordered/unordered), indexes (primary, secondary, clustering), histogram. <b>Index:</b> number of levels in a multi-level index (x), number of first-level index blocks (b<sub>i1</sub>).</div>
+<div class="grid3"><div class="card"><h4 class="c-blue">Column</h4><b>d</b> distinct values<br><b>sl</b> selectivity<br><b>s = sl × r</b> selection cardinality</div><div class="card"><h4 class="c-green">Table</h4><b>r</b> records<br><b>R</b> average record size<br><b>b</b> blocks<br><b>bfr</b> blocking factor<br>file organization<br>indexes<br>histogram</div><div class="card"><h4 class="c-amber">Index</h4><b>x</b> number of levels<br><b>b<sub>i1</sub></b> first-level index blocks</div></div><h3>How the numbers relate</h3><table class="t"><tr><th>Quantity</th><th>Relation</th><th>Example (EMPLOYEE)</th></tr><tr><td>blocking factor</td><td>bfr = ⌊block size / record size R⌋</td><td>bfr = 5 records per block</td></tr><tr><td>file blocks</td><td>b = ⌈r / bfr⌉</td><td>⌈10,000 / 5⌉ = 2,000</td></tr><tr><td>selectivity (uniform)</td><td>sl = 1/d (non-key), 1/r (key)</td><td>Dno: d = 125 → sl = 0.008</td></tr><tr><td>selection cardinality</td><td>s = sl × r</td><td>0.008 × 10,000 = 80</td></tr></table>
+<div class="box lecture"><span class="tag">From the lecture</span><b>Selection cardinality (s)</b> of attribute A of relation r: the <b>average</b> number of records that satisfy equality on A. S = sl × r.</div>
+<h3>Histograms</h3><div class="box lecture"><span class="tag">From the lecture</span><b>Histogram:</b> the number of values/tuples in each of a number of intervals. Widely used.</div>
+<figure class="figure reveal"><svg viewBox="0 0 760 230" role="img" aria-label="Histogram of age intervals">
+<g stroke="#1d1b26" stroke-width="2"><path d="M60 190 L720 190"/></g>
+<g font-size="13" font-weight="700" text-anchor="middle">
+<rect x="80" y="150" width="70" height="40" fill="#ff8a45" stroke="#c9501a" stroke-width="2"/><text x="115" y="212">&lt; 11</text>
+<rect x="170" y="60" width="70" height="130" fill="#ff8a45" stroke="#c9501a" stroke-width="2"/><text x="205" y="212">11–17</text>
+<rect x="260" y="20" width="70" height="170" fill="#ff8a45" stroke="#c9501a" stroke-width="2"/><text x="295" y="212">18–22</text>
+<rect x="350" y="120" width="70" height="70" fill="#ff8a45" stroke="#c9501a" stroke-width="2"/><text x="385" y="212">23–30</text>
+<rect x="440" y="80" width="70" height="110" fill="#ff8a45" stroke="#c9501a" stroke-width="2"/><text x="475" y="212">31–41</text>
+<rect x="530" y="100" width="70" height="90" fill="#ff8a45" stroke="#c9501a" stroke-width="2"/><text x="565" y="212">&gt; 42</text></g>
+<text x="630" y="60" class="hand" font-size="22" fill="#b8322a">some intervals are</text><text x="630" y="84" class="hand" font-size="22" fill="#b8322a">3× busier than others</text></svg><figcaption>A histogram of an age column. Bar heights show how many tuples fall in each interval.</figcaption></figure>
+<p>The simple formula <code>sl = 1/d</code> assumes every value is <b>equally frequent</b>. Real data rarely is: in the histogram the interval 18–22 holds far more tuples than the interval under 11. A histogram lets the optimizer estimate a condition such as <code>age BETWEEN 18 AND 22</code> from the actual frequencies, so its selectivity estimate is much closer to reality.</p><div class="box watch"><span class="tag">Watch it!</span><b>Statistics go stale.</b> Catalog values are updated periodically, not on every insert. After a large load of data, estimates can be badly wrong until the statistics are refreshed, and a cost-based optimizer will happily choose a bad plan from bad numbers.</div>
+</section>
+<section class="sheet chapter" id="c10">
+  <span class="kicker">Lesson 10</span>
+  <h2>S1 linear search and S2 binary search</h2>
+  <p class="lead">The two algorithms that need no index at all.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><b>σ cost estimation — the algorithms:</b> S1 linear search · S2 binary search · S3a primary index · <s>S3b hashing</s> · S4 ordering index with non-equality · S5 clustering index · S6 secondary index (B-tree).</div>
+<p>Each algorithm applies to a specific <b>access path</b>. The hashing algorithm S3b is struck out on the slides: it is not part of this course.</p><h3>S1 · Linear search (heap file)</h3><div class="box lecture"><span class="tag">From the lecture</span>Scan the data file, block by block, looking for records satisfying the comparison. <b>Relation total size = b blocks, stored continuously.</b> Worst case: cost = b. Best case: cost = 1. Average: b/2.</div>
+<p>Works for <b>any</b> condition on <b>any</b> field with no structure at all. The example: 9 records, bfr = 2, so b = 5, an unordered file:</p><div class="grid2"><div class="card"><table class="t center"><tr><th>Block</th><th>Records (ID: Name)</th></tr><tr><td>1</td><td>1:XYZ · 2:IOD</td></tr><tr><td>2</td><td>3:DSA · 4:ASD</td></tr><tr><td>3</td><td>5:FKL · 6:LOP</td></tr><tr><td>4</td><td>7:ABC · 8:XAS</td></tr><tr><td>5</td><td>9:OPX</td></tr></table></div><div class="card"><b>Name = 'XYZ'</b>: found in block 1, cost <b>1</b> (best case).<br><b>Name = 'OPX'</b>: found in block 5, cost <b>b = 5</b> (worst case).<br><b>Average</b> over all keys: b/2 = <b>2.5</b>.<br><br>On a <b>non-key</b> attribute, more matches may exist later, so the scan must continue to the end: cost = <b>b</b>.</div></div><h3>S2 · Binary search (ordered file)</h3><div class="box lecture"><span class="tag">From the lecture</span>Navigate the data file using binary search to locate the data block. <b>The relation is sorted.</b> cost(S2) = ⌈log<sub>2</sub> b⌉ + (⌈s/bfr⌉ − 1). Log<sub>2</sub>b is the cost to locate the first block; ⌈s/bfr⌉ is the number of blocks that contain records satisfying the selection. Equality on <b>key</b>: Log<sub>2</sub>b. Equality on <b>non-key</b>: Log<sub>2</sub>b + (⌈s/bfr⌉ − 1).</div>
+<div class="formula">S2 key: ⌈log<sub>2</sub> b⌉ &nbsp;·&nbsp; S2 non-key: ⌈log<sub>2</sub> b⌉ + ⌈s/bfr⌉ − 1<small>the file must be ordered on the searched field</small></div>
+<div class="box example"><span class="tag">Example</span>File ordered on <b>Dept</b> with values 1,1,3,3,5,5,5,5,7 (r = 9, bfr = 2, b = 5). Query: <code>Dept = '5'</code>, s = 4.<table class="t center"><tr><th>Block 1</th><th>Block 2</th><th>Block 3</th><th>Block 4</th><th>Block 5</th></tr><tr><td>1, 1</td><td>3, 3</td><td style="background:#ffe17a">5, 5</td><td style="background:#ffe17a">5, 5</td><td>7</td></tr></table>
+Find the first block with 5: ⌈log<sub>2</sub> 5⌉ = ⌈2.32⌉ = <b>3</b> reads. The matching records fill ⌈4/2⌉ = 2 blocks, and the first is already read, so add 2 − 1 = 1.<br>Cost = 3 + 2 − 1 = <b>4</b>. Linear search would cost 5.</div>
+<table class="t"><tr><th></th><th>Linear search (S1)</th><th>Binary search (S2)</th></tr><tr><td>Needs</td><td>nothing</td><td>file ordered on the search field</td></tr><tr><td>Equality on key</td><td>b/2 on average (b worst)</td><td>⌈log<sub>2</sub> b⌉</td></tr><tr><td>Equality on non-key</td><td>b</td><td>⌈log<sub>2</sub> b⌉ + ⌈s/bfr⌉ − 1</td></tr><tr><td>b = 1,000</td><td>500 (avg) / 1,000 (worst)</td><td>10</td></tr></table>
+<div class="box watch"><span class="tag">Watch it!</span><b>Binary search works on the ordering field only.</b> If the file is sorted by ID, a binary search on Name is impossible; the DBMS must fall back to S1.</div>
+</section>
+<section class="sheet chapter" id="c11">
+  <span class="kicker">Lesson 11</span>
+  <h2>S3a, S4, S5 and S6: the index algorithms</h2>
+  <p class="lead">Four ways to use an index, each with its own cost formula.</p>
+<h3>S3a · Primary index (equality on the key)</h3><div class="box lecture"><span class="tag">From the lecture</span>Navigate the index to locate the index record with the comparison value. <b>Cost = x + 1</b> (x index levels, plus one data block).</div>
+<div class="box example"><span class="tag">Example</span>A two-level primary index (x = 2) on an ordered file; query <code>Key = '35'</code>: read the top-level block, the first-level block, then the one data block: 2 + 1 = <b>3</b> blocks.</div>
+<h3>S4 · Ordering index with non-equality</h3><div class="box lecture"><span class="tag">From the lecture</span>Navigate the index to locate the data block with the corresponding equality condition, <b>then retrieve preceding or subsequent records.</b> Cost (rough) = <b>x + b/2</b>.</div>
+<p>For <code>Key &gt; 35</code> or <code>Key &lt; 35</code> on an ordered file, use the index to jump to the boundary and read the blocks on one side. On average about <b>half</b> the file qualifies, hence b/2.</p><h3>S5 · Clustering index</h3><div class="box lecture"><span class="tag">From the lecture</span>Navigate the index to locate the first data block satisfying the condition and then <b>retrieve subsequent blocks.</b> Cost = <b>x + ⌈s/bfr⌉</b>.</div>
+<div class="box example"><span class="tag">Example</span>Clustering index on Dept_number, x = 1, bfr = 4, b = 9. Query <code>Value = '6'</code> with s = 5 records. The matching records are contiguous, so they occupy ⌈5/4⌉ = 2 blocks. Cost = 1 + 2 = <b>3</b>.</div>
+<h3>S6 · Secondary index (B-tree)</h3><div class="box lecture"><span class="tag">From the lecture</span>Navigate the index to locate the index record with the comparison value. <b>Index on key:</b> x + 1. <b>Index on non-key:</b> x + 1 + s <i>("Why? Think and answer")</i>. <b>Non-equality comparison:</b> x + (b<sub>i1</sub>/2) + (r/2).</div>
+<figure class="figure reveal"><svg viewBox="0 0 760 190" role="img" aria-label="Small B-tree with keys 1 to 12">
+<g font-size="14" font-family="JetBrains Mono, monospace" text-anchor="middle">
+<rect x="300" y="15" width="160" height="34" rx="6" fill="#e3ecfa" stroke="#2459a8" stroke-width="2"/><text x="380" y="37">5  |  8</text>
+<rect x="50" y="120" width="170" height="34" rx="6" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="135" y="142">1  |  3</text>
+<rect x="295" y="120" width="170" height="34" rx="6" fill="#fff" stroke="#1d1b26" stroke-width="2"/><text x="380" y="142">6  |  7</text>
+<rect x="540" y="120" width="170" height="34" rx="6" fill="#ffe17a" stroke="#b5770c" stroke-width="2"/><text x="625" y="142">9  |  12</text></g>
+<g stroke="#1d1b26" stroke-width="2" fill="none"><path d="M320 49 L170 120"/><path d="M380 49 L380 120"/><path d="M440 49 L590 120"/></g>
+<g stroke="#b8322a" stroke-width="3" fill="none" class="flowline"><path d="M440 49 L590 120" marker-end="url(#ahR)"/></g>
+<text x="40" y="180" class="hand" font-size="22" fill="#b8322a">Value = 9, index on a key, x = 2 → 2 index blocks + 1 data block = 3</text></svg><figcaption>Searching a key in a B-tree: follow one path down the levels, then read the single data block.</figcaption></figure>
+<h4>Why x + 1 + s for a non-key?</h4><p>A non-key value occurs <b>s times</b>, and a secondary index does <b>not</b> keep equal records together: they can be in any blocks. So: <b>x</b> blocks to descend the index, <b>1</b> block of record pointers, and then up to <b>s</b> data-block reads, <i>one per matching record</i> in the worst case (the lecture's picture of deptnumber 3 scattered across five data blocks). Compare this with the clustering index, where the s records sit together in ⌈s/bfr⌉ blocks.</p><h4>Why x + b<sub>i1</sub>/2 + r/2 for a non-equality?</h4><p>A range condition qualifies about <b>half</b> the entries on average: so half of the <b>first-level index blocks</b> (b<sub>i1</sub>/2) are read, and about <b>half the records</b> (r/2) are fetched, each potentially from its own block because the file is not ordered on this attribute. That can be enormous.</p><h3>All six on one page</h3><table class="t"><tr><th></th><th>Algorithm</th><th>Applies to</th><th>Cost</th></tr><tr><td>S1</td><td>Linear search</td><td>any condition, any field</td><td>b (non-key) · b/2 avg (key)</td></tr><tr><td>S2</td><td>Binary search</td><td>ordered file, ordering field</td><td>key: ⌈log<sub>2</sub>b⌉ · non-key: ⌈log<sub>2</sub>b⌉ + ⌈s/bfr⌉ − 1</td></tr><tr><td>S3a</td><td>Primary index</td><td>equality on key</td><td>x + 1</td></tr><tr><td>S4</td><td>Ordering index</td><td>non-equality on ordering field</td><td>x + b/2 (rough)</td></tr><tr><td>S5</td><td>Clustering index</td><td>equality on clustering (non-key) field</td><td>x + ⌈s/bfr⌉</td></tr><tr><td>S6</td><td>Secondary index (B-tree)</td><td>equality or range on any indexed field</td><td>key: x + 1 · non-key: x + 1 + s · range: x + b<sub>i1</sub>/2 + r/2</td></tr></table>
+<div class="sticky r">x = levels<br>s = matches<br>b = blocks<br>r = records</div>
+</section>
+<section class="sheet chapter" id="c12">
+  <span class="kicker">Lesson 12</span>
+  <h2>Exercises: queries on EMPLOYEE</h2>
+  <p class="lead">Four queries, four sets of options, and one very instructive surprise.</p>
+<h3>The data</h3><table class="t"><tr><th></th><th>EMPLOYEE</th></tr><tr><td>records / bfr / blocks</td><td>r = 10,000 · bfr = 5 · b = 2,000</td></tr><tr><td>1 · Clustering index on Salary</td><td>x = 3 · sl = 0.002</td></tr><tr><td>2 · Secondary index on Ssn (key)</td><td>x = 4 · sl = 0.0001</td></tr><tr><td>3 · Secondary index on Dno</td><td>x = 2 · sl = 0.008 · d = 125 · b<sub>i1</sub> = 4</td></tr><tr><td>4 · Secondary index on Gender</td><td>x = 1 · sl = 0.5</td></tr></table>
+<h3>Query 1 · σ<sub>Ssn='1234'</sub>(EMPLOYEE)</h3><table class="t"><tr><th>Option</th><th>Formula</th><th>Cost</th></tr><tr><td>Secondary index on Ssn (key)</td><td>x + 1 = 4 + 1</td><td><b>5</b></td></tr><tr><td>Linear search</td><td>b/2 = 2,000 / 2 (key, average)</td><td>1,000</td></tr></table>
+<p>Use the index: <b>5 blocks</b>.</p><h3>Query 2 · σ<sub>Dno=5</sub>(EMPLOYEE)</h3><table class="t"><tr><th>Option</th><th>Formula</th><th>Cost</th></tr><tr><td>Secondary index on Dno (non-key)</td><td>x + 1 + s = 2 + 1 + (10,000 × 0.008)</td><td><b>83</b></td></tr><tr><td>Linear search</td><td>b (non-key)</td><td>2,000</td></tr></table>
+<p>Use the index: <b>83 blocks</b>.</p><h3>Query 3 · σ<sub>Dno&gt;5</sub>(EMPLOYEE)</h3><table class="t"><tr><th>Option</th><th>Formula</th><th>Cost</th></tr><tr><td>Secondary index on Dno (non-equality)</td><td>x + b<sub>i1</sub>/2 + r/2 = 2 + 4/2 + 10,000/2</td><td>5,004</td></tr><tr><td>Linear search</td><td>b</td><td><b>2,000</b></td></tr></table>
+<div class="box key"><span class="tag">Surprise</span><b>The index loses!</b> For a range condition that keeps about half the table, scattered record fetches cost more than simply scanning the file. The optimizer must therefore choose <b>linear search (2,000)</b> over the index (5,004). This is the clearest reason why optimization must <i>compute</i> costs rather than "always use the index".</div>
+<h3>Query 4 · σ<sub>Dno='5' ∧ Salary&gt;'300' ∧ Gender='F'</sub>(EMPLOYEE)</h3><p>A conjunctive condition. The optimizer prices <b>each conjunct as the access path</b>, then tests the other conditions on the retrieved records in memory:</p><table class="t"><tr><th>Access path</th><th>Formula</th><th>Cost</th></tr><tr><td>Linear search on everything</td><td>b</td><td>2,000</td></tr><tr><td>Use <b>Dno = 5</b> (secondary index)</td><td>x + s + 1 = 2 + 80 + 1</td><td><b>83</b></td></tr><tr><td>Use <b>Salary &gt; 300</b> (clustering index, non-equality)</td><td>x + ⌈b/2⌉ = 3 + ⌈2,000/2⌉</td><td>1,003</td></tr><tr><td>Use <b>Gender = 'F'</b> (secondary index)</td><td>x + s + 1 = 1 + (10,000 × 0.5) + 1</td><td>5,002</td></tr></table>
+<div class="figure reveal" style="padding:14px 18px"><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Use Dno = 5 (index)</div><div class="bar anim" style="width:3%;background:#1f7a4d">83 blocks</div></div><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Salary > 300 (clustering)</div><div class="bar anim" style="width:20.1%;background:#2459a8">1,003 blocks</div></div><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Linear search</div><div class="bar anim" style="width:40.0%;background:#b5770c">2,000 blocks</div></div><div style="display:grid;grid-template-columns:230px 1fr;gap:10px;align-items:center;margin:6px 0;font-size:13px"><div>Gender = F (index)</div><div class="bar anim" style="width:100.0%;background:#b8322a">5,002 blocks</div></div></div>
+<p><b>Choose the Dno = 5 index (83 blocks).</b> It retrieves about 80 records; the DBMS then checks <code>Salary &gt; 300</code> and <code>Gender = 'F'</code> on those 80 records in memory at no extra disk cost.</p><div class="box watch"><span class="tag">Watch it!</span><b>Selectivity decides, not the existence of an index.</b> Gender has an index but sl = 0.5, so using it costs 5,002 blocks, worse than scanning the whole file (2,000). Always compute; never assume "indexed = fast".</div>
+</section>
+<section class="sheet chapter" id="c13">
+  <span class="kicker">Lesson 13</span>
+  <h2>Pricing joins, and heuristics + cost together</h2>
+  <p class="lead">How the two techniques cooperate inside a real optimizer.</p>
+<p>Cost-based optimization also prices <b>joins</b>. The full treatment (nested-loop, single-loop, sort-merge) is in the join algorithms guide; here is the part that matters for optimization.</p><div class="box lecture"><span class="tag">From the lecture</span><b>Join cost function example:</b> EMPLOYEE ⋈<sub>Dno=Dnumber</sub> DEPARTMENT with js = 1/125, bfr<sub>ED</sub> = 4, n<sub>B</sub> = 3. EMPLOYEE: r = 10,000, bfr = 5, b = 2,000. DEPARTMENT: r = 125, bfr = 10, b = 13; primary index on Dnumber (x = 1); secondary index on Dno of EMPLOYEE (x = 2, s = 80).</div>
+<table class="t"><tr><th>Plan</th><th>Formula</th><th>Cost</th></tr><tr><td>Nested-loop, EMPLOYEE outer</td><td>b<sub>R</sub> + ⌈b<sub>R</sub>/(n<sub>B</sub>−2)⌉·b<sub>S</sub> + out = 2,000 + 2,000·13 + 2,500</td><td>30,500</td></tr><tr><td>Nested-loop, DEPARTMENT outer</td><td>13 + 13·2,000 + 2,500</td><td>28,513</td></tr><tr><td>Single-loop, EMPLOYEE outer (primary index probe)</td><td>2,000 + 10,000·(1+1) + 2,500</td><td>24,500</td></tr><tr><td>Single-loop, DEPARTMENT outer (secondary index probe)</td><td>13 + 125·(2+1+80) + 2,500</td><td><b>12,888</b></td></tr><tr><td>Nested-loop, DEPARTMENT outer, n<sub>B</sub> = 15</td><td>13 + ⌈13/13⌉·2,000 + 2,500</td><td><b>4,513</b></td></tr></table>
+<div class="box watch"><span class="tag">Watch it!</span><b>Slide numbers vs the formulas.</b> The Week 6 slides print 40,500, 38,513 and 12,763 for the first, second and fourth plans. Applying the slide's own formulas gives 30,500, 28,513 and 12,888 (see the join algorithms guide for the details). The slide for n<sub>B</sub> = 15 (4,513) is correct. The ranking is the same either way.</div>
+<h3>Putting heuristic and cost-based optimization together</h3><div class="flow">
+<div class="step"><b class="n">1</b>Parse the SQL; build the <b>initial query tree</b> (σ above ×)</div><div class="arrow">↓</div>
+<div class="step"><b class="n">2</b><b>Heuristic rewrite</b>: cascade σ, push σ and π down, × + σ → ⋈, put restrictive leaves first</div><div class="arrow">↓</div>
+<div class="step"><b class="n">3</b><b>Cost estimation</b> per operation: for each σ choose among S1–S6; for each ⋈ choose among nested-, single-loop and sort-merge, and the outer relation</div><div class="arrow">↓</div>
+<div class="step"><b class="n">4</b>Choose the cheapest combination; identify pipelinable sub-trees; execute</div></div>
+<h3>Limits of cost-based optimization</h3><table class="t"><tr><th>Weakness</th><th>Why it matters</th></tr><tr><td>Estimates, not facts</td><td>Wrong statistics (stale, or the uniform assumption fails) can pick a bad plan</td></tr><tr><td>Worst-case memory</td><td>The real buffer pool may be bigger or smaller than assumed</td></tr><tr><td>Search cost</td><td>Considering every plan is too expensive for big queries; the optimizer settles for a reasonably good one</td></tr><tr><td>Only I/O counted</td><td>CPU and communication costs are left out of the lecture's model</td></tr></table>
+</section>
+<section class="sheet chapter" id="c14">
+  <span class="kicker">Lesson 14</span>
+  <h2>Summary, key ideas &amp; dictionary</h2>
+  <p class="lead">The whole lecture on a page.</p>
+<h3>Heuristic optimization on one page</h3><ul><li><b>Goal:</b> an equivalent tree that reduces intermediate results; no statistics needed.</li><li><b>Move down:</b> σ and π. <b>Convert:</b> σ + × → ⋈. <b>Avoid:</b> ×. <b>First:</b> the most restrictive σ and ⋈.</li><li><b>Steps:</b> cascade σ → push σ → re-order leaves → ×+σ→⋈ → push π → pipeline.</li><li><b>Rules:</b> 12, including: ∪ and ∩ commute but − does not; ⋈, ×, ∪, ∩ associate; π keeps join attributes.</li></ul><h3>Cost-based optimization on one page</h3><ul><li><b>Unit of cost:</b> block accesses (I/O only), usually worst-case memory.</li><li><b>Statistics:</b> r, R, b, bfr, d, sl, s = sl × r, x, b<sub>i1</sub>, histograms.</li><li><b>Compute, don't assume:</b> an index can lose to a linear scan.</li></ul><table class="t"><tr><th>Algorithm</th><th>Cost</th></tr><tr><td>S1 linear</td><td>b (non-key) / b/2 avg (key)</td></tr><tr><td>S2 binary</td><td>⌈log<sub>2</sub>b⌉ (key) · + ⌈s/bfr⌉ − 1 (non-key)</td></tr><tr><td>S3a primary index</td><td>x + 1</td></tr><tr><td>S4 ordering index, non-equality</td><td>x + b/2</td></tr><tr><td>S5 clustering index</td><td>x + ⌈s/bfr⌉</td></tr><tr><td>S6 secondary, key</td><td>x + 1</td></tr><tr><td>S6 secondary, non-key</td><td>x + 1 + s</td></tr><tr><td>S6 secondary, non-equality</td><td>x + b<sub>i1</sub>/2 + r/2</td></tr></table>
+<h3>Dictionary</h3><table class="t"><tr><th>Term</th><th>Meaning</th></tr><tr><td>declarative / procedural</td><td>says what is wanted (SQL) / says which operations in which order (algebra)</td></tr><tr><td>query tree</td><td>tree whose leaves are tables and whose internal nodes are algebra operations</td></tr><tr><td>equivalent</td><td>produces exactly the same result set</td></tr><tr><td>heuristic</td><td>rule of thumb that usually helps, with no proof of optimality</td></tr><tr><td>restrictive (selection)</td><td>one that removes many rows (small selectivity value)</td></tr><tr><td>pipelining</td><td>passing records between operators without writing intermediate results to disk</td></tr><tr><td>catalog</td><td>the DBMS's stored statistics about tables, columns and indexes</td></tr><tr><td>histogram</td><td>number of tuples in each interval of an attribute's values</td></tr><tr><td>sl / s</td><td>selectivity / selection cardinality (s = sl × r)</td></tr><tr><td>x / b<sub>i1</sub></td><td>index levels / first-level index blocks</td></tr><tr><td>bfr / b</td><td>blocking factor (records per block) / number of file blocks</td></tr><tr><td>access path</td><td>the way a table can be read: heap, ordered file, or an index</td></tr></table>
+<div class="sticky">rewrite first,<br>then count blocks,<br>never assume.</div>
+</section>
+<section class="sheet chapter" id="quiz">
+  <span class="kicker">Final exam</span>
+  <h2>60 questions</h2>
+  <p class="lead">15 True/False · 30 Multiple choice · 5 Written · 10 Practical. Try them all before you look at the answer key.</p>
+  <div class="grid2"><div class="card"><b>Part A</b> True / False: Q1–Q15<br><b>Part B</b> Multiple choice: Q16–Q45</div><div class="card"><b>Part C</b> Long-form written: Q46–Q50<br><b>Part D</b> Practical: Q51–Q60</div></div>
+  <h3>Part A · True or False</h3>
+  <p class="muted">Write T or F. If false, try to say what would make it true.</p>
+  <div class="q"><span class="qn">1</span>SQL is a procedural language that specifies the execution plan; relational algebra is declarative.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">2</span>Heuristics are techniques with mathematical proofs that they always give the optimal result.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">3</span>A transformation used in heuristic optimization must produce an equivalent tree.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">4</span>The main heuristic is to apply first the operations that reduce the size of intermediate results.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">5</span>Select operations should be moved as far <b>up</b> the query tree as possible.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">6</span>A selection with several AND-ed conditions can be broken into a cascade of selections.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">7</span>Set difference (−) is commutative.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">8</span>A Cartesian product followed by a selection on a join condition can be converted into a join.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">9</span>In the lecture, cost estimation counts only I/O block accesses.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">10</span>Linear search can be applied to any condition on any field, with no access structure.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">11</span>Binary search on the data file can be applied to a condition on any field.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">12</span>For an equality condition on a key with a primary index, the cost is x + 1.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">13</span>An index on the search attribute always gives a lower cost than linear search.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">14</span>A histogram stores the number of tuples in each of a number of intervals.<span class="tf">T / F</span></div>
+  <div class="q"><span class="qn">15</span>Selection cardinality is computed as s = sl × r.<span class="tf">T / F</span></div>
+  <h3>Part B · Multiple choice</h3>
+  <p class="muted">Choose the one best answer.</p>
+  <div class="q"><span class="qn">16</span>A declarative language such as SQL specifies:<ol class="opts"><li data-l="a">how to get the data</li><li data-l="b">what is wanted, not how</li><li data-l="c">which index to use</li><li data-l="d">the join order</li></ol></div>
+  <div class="q"><span class="qn">17</span>In query optimization, "better" means:<ol class="opts"><li data-l="a">shorter SQL text</li><li data-l="b">costs less (disk access, computation, memory, communication)</li><li data-l="c">more rows returned</li><li data-l="d">a different result set</li></ol></div>
+  <div class="q"><span class="qn">18</span>Which is <b>not</b> a heuristic optimization guideline?<ol class="opts"><li data-l="a">apply σ and π as early as possible</li><li data-l="b">apply the most restrictive σ earlier</li><li data-l="c">avoid ×</li><li data-l="d">apply selections as late as possible</li></ol></div>
+  <div class="q"><span class="qn">19</span>σ<sub>c1 AND c2</sub>(R) ≡ σ<sub>c1</sub>(σ<sub>c2</sub>(R)) is the rule called:<ol class="opts"><li data-l="a">commutativity of σ</li><li data-l="b">cascade of σ</li><li data-l="c">cascade of π</li><li data-l="d">associativity of ⋈</li></ol></div>
+  <div class="q"><span class="qn">20</span>Which operation is <b>not</b> commutative?<ol class="opts"><li data-l="a">union</li><li data-l="b">intersection</li><li data-l="c">set difference</li><li data-l="d">join</li></ol></div>
+  <div class="q"><span class="qn">21</span>Rule 12 converts:<ol class="opts"><li data-l="a">a (π, ⋈) sequence into ×</li><li data-l="b">a (σ, ×) sequence into ⋈</li><li data-l="c">a (σ, π) sequence into ∪</li><li data-l="d">a join into a Cartesian product</li></ol></div>
+  <div class="q"><span class="qn">22</span>Associativity (rule 9) is stated for:<ol class="opts"><li data-l="a">⋈, ×, ∪ and ∩</li><li data-l="b">only ⋈</li><li data-l="c">−, ∪ and σ</li><li data-l="d">π and σ</li></ol></div>
+  <div class="q"><span class="qn">23</span>Pushing π down the tree mainly reduces:<ol class="opts"><li data-l="a">the number of tuples</li><li data-l="b">the number of attributes</li><li data-l="c">the number of tables</li><li data-l="d">the query length</li></ol></div>
+  <div class="q"><span class="qn">24</span>Pushing σ down the tree mainly reduces:<ol class="opts"><li data-l="a">the number of tuples</li><li data-l="b">the number of attributes</li><li data-l="c">the number of joins</li><li data-l="d">the number of indexes</li></ol></div>
+  <div class="q"><span class="qn">25</span>Heuristic step 3 is:<ol class="opts"><li data-l="a">break up conjunctive selects</li><li data-l="b">push π down</li><li data-l="c">re-arrange leaf nodes so the most restrictive selects execute first</li><li data-l="d">identify pipelining</li></ol></div>
+  <div class="q"><span class="qn">26</span>Heuristic step 6 identifies sub-trees that:<ol class="opts"><li data-l="a">can be executed by a single algorithm (pipelining)</li><li data-l="b">contain Cartesian products</li><li data-l="c">have no selections</li><li data-l="d">must be sorted</li></ol></div>
+  <div class="q"><span class="qn">27</span>In the Aquarius query, the most restrictive selection is on:<ol class="opts"><li data-l="a">Bdate &gt; '1957-12-31'</li><li data-l="b">Pname = 'Aquarius'</li><li data-l="c">Essn = Ssn</li><li data-l="d">Pnumber = Pno</li></ol></div>
+  <div class="q"><span class="qn">28</span>Step 1 of heuristic optimization is to:<ol class="opts"><li data-l="a">push π down</li><li data-l="b">convert × to ⋈</li><li data-l="c">break up conjunctive selects into a cascade</li><li data-l="d">estimate costs</li></ol></div>
+  <div class="q"><span class="qn">29</span>Which is <b>not</b> listed as a cost component in the lecture?<ol class="opts"><li data-l="a">I/O</li><li data-l="b">storage</li><li data-l="c">CPU</li><li data-l="d">network latency of the client browser</li></ol></div>
+  <div class="q"><span class="qn">30</span>The cost model used in the lecture counts mainly:<ol class="opts"><li data-l="a">CPU operations</li><li data-l="b">I/O block accesses</li><li data-l="c">RAM size</li><li data-l="d">bytes transferred</li></ol></div>
+  <div class="q"><span class="qn">31</span>Which item is <b>not</b> table-level catalog information?<ol class="opts"><li data-l="a">number of records r</li><li data-l="b">blocking factor bfr</li><li data-l="c">histogram</li><li data-l="d">number of index levels x</li></ol></div>
+  <div class="q"><span class="qn">32</span>Selection cardinality is:<ol class="opts"><li data-l="a">sl / r</li><li data-l="b">sl × r</li><li data-l="c">r / b</li><li data-l="d">b × bfr</li></ol></div>
+  <div class="q"><span class="qn">33</span><code>Dno = 5</code> with 125 distinct, uniform values has sl =<ol class="opts"><li data-l="a">1/5</li><li data-l="b">0.125</li><li data-l="c">0.008</li><li data-l="d">0.5</li></ol></div>
+  <div class="q"><span class="qn">34</span>Worst-case cost of a linear search for a key value in a file of b blocks:<ol class="opts"><li data-l="a">1</li><li data-l="b">log<sub>2</sub> b</li><li data-l="c">b/2</li><li data-l="d">b</li></ol></div>
+  <div class="q"><span class="qn">35</span>Binary search for a key in a 1,000-block ordered file costs about:<ol class="opts"><li data-l="a">10</li><li data-l="b">100</li><li data-l="c">500</li><li data-l="d">1,000</li></ol></div>
+  <div class="q"><span class="qn">36</span>Binary search, b = 5, bfr = 2, s = 4 (non-key equality). Cost =<ol class="opts"><li data-l="a">3</li><li data-l="b">4</li><li data-l="c">5</li><li data-l="d">2</li></ol></div>
+  <div class="q"><span class="qn">37</span>Primary index with x = 2: equality on the key costs<ol class="opts"><li data-l="a">2</li><li data-l="b">3</li><li data-l="c">4</li><li data-l="d">5</li></ol></div>
+  <div class="q"><span class="qn">38</span>Clustering index, x = 1, s = 5, bfr = 4. Cost =<ol class="opts"><li data-l="a">2</li><li data-l="b">3</li><li data-l="c">4</li><li data-l="d">6</li></ol></div>
+  <div class="q"><span class="qn">39</span>Secondary index on a non-key, x = 2, s = 80. Cost =<ol class="opts"><li data-l="a">3</li><li data-l="b">82</li><li data-l="c">83</li><li data-l="d">2,000</li></ol></div>
+  <div class="q"><span class="qn">40</span>Secondary index non-equality: x = 2, b<sub>i1</sub> = 4, r = 10,000. Cost =<ol class="opts"><li data-l="a">5,004</li><li data-l="b">2,000</li><li data-l="c">83</li><li data-l="d">10,006</li></ol></div>
+  <div class="q"><span class="qn">41</span>For σ<sub>Ssn='1234'</sub> the best option among index (x = 4, key) and linear search (b = 2,000) costs:<ol class="opts"><li data-l="a">5 blocks</li><li data-l="b">83 blocks</li><li data-l="c">1,000 blocks</li><li data-l="d">2,000 blocks</li></ol></div>
+  <div class="q"><span class="qn">42</span>For σ<sub>Dno&gt;5</sub> the optimizer should choose:<ol class="opts"><li data-l="a">the secondary index (5,004)</li><li data-l="b">linear search (2,000)</li><li data-l="c">binary search</li><li data-l="d">the clustering index on Salary</li></ol></div>
+  <div class="q"><span class="qn">43</span>Which algorithm is crossed out on the slides?<ol class="opts"><li data-l="a">S1 linear search</li><li data-l="b">S3a primary index</li><li data-l="c">S3b hashing</li><li data-l="d">S6 secondary index</li></ol></div>
+  <div class="q"><span class="qn">44</span>Why does a secondary index on a non-key cost x + 1 + s?<ol class="opts"><li data-l="a">the index has s levels</li><li data-l="b">the s matching records may lie in s different blocks</li><li data-l="c">binary search is needed</li><li data-l="d">the file is sorted</li></ol></div>
+  <div class="q"><span class="qn">45</span>We often assume worst-case memory because:<ol class="opts"><li data-l="a">memory is always tiny</li><li data-l="b">available buffer space is known only during execution</li><li data-l="c">buffers never help</li><li data-l="d">it makes the cost zero</li></ol></div>
+  <h3>Part C · Written</h3>
+  <p class="muted">Answer in your own words, in 2–5 sentences.</p>
+  <div class="q"><span class="qn">46</span>Explain why a declarative SQL query needs an optimizer, and what "equivalent" and "better" mean for a rewritten query.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">47</span>State the main heuristic of query optimization and explain, with a small example, why pushing σ and π down the tree helps.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">48</span>List the six steps of heuristic optimization in order and say which transformation rules support each.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">49</span>Why does the lecture count only I/O block accesses, and what role do catalog statistics and histograms play?<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">50</span>For a secondary B-tree index, explain the costs x + 1, x + 1 + s and x + b<sub>i1</sub>/2 + r/2, and why an index can be worse than linear search.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <h3>Part D · Practical</h3>
+  <p class="muted">Show your working. Use a calculator if you like; the formulas are in the lessons.</p>
+  <div class="q"><span class="qn">51</span>Translate to relational algebra and give two equivalent improved forms: <code>SELECT Name FROM Employee, Dept WHERE Depno = Depnumber AND age &lt; 30</code>.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">52</span>Push the selection below the join: σ<sub>Salary&gt;300 AND Pname='X'</sub>(EMPLOYEE ⋈<sub>Pno=Pnumber</sub> PROJECT).<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">53</span>A relation has r = 8,000 records and an attribute with 40 uniformly distributed values. Find sl and s for an equality condition.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">54</span>b = 1,000 blocks. Give the linear search cost (key, average and worst) and the binary search cost for a key.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">55</span>b = 400, bfr = 5, s = 30. Binary search with equality on a <b>non-key</b> ordering field: cost?<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">56</span>Clustering index: x = 2, s = 45 matching records, bfr = 10. Cost?<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">57</span>Secondary index with x = 3. Cost for equality on (a) a key; (b) a non-key with s = 50.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">58</span>b = 800, r = 4,000, secondary index with x = 2 and b<sub>i1</sub> = 6. For a range condition, compare the index with linear search.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">59</span>Using the EMPLOYEE data (r = 10,000, b = 2,000, Dno index x = 2 with sl 0.008, Gender index x = 1 with sl 0.5), choose the best plan for σ<sub>Dno=4 ∧ Gender='M'</sub> and give its cost.<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+  <div class="q"><span class="qn">60</span>Nested-loop join with DEPARTMENT (b = 13) outer and EMPLOYEE (b = 2,000) inner, n<sub>B</sub> = 5, output 2,500 blocks. Total cost?<div class="lines"></div><div class="lines"></div><div class="lines"></div></div>
+</section>
+<section class="sheet chapter" id="key">
+  <span class="kicker">Answer key</span>
+  <h2>Answers &amp; explanations</h2>
+  <h3>Part A · True / False</h3>
+  <div class="ans-grid">
+<div><b>1</b> F</div><div><b>2</b> F</div><div><b>3</b> T</div><div><b>4</b> T</div><div><b>5</b> F</div><div><b>6</b> T</div><div><b>7</b> F</div><div><b>8</b> T</div><div><b>9</b> T</div><div><b>10</b> T</div><div><b>11</b> F</div><div><b>12</b> T</div><div><b>13</b> F</div><div><b>14</b> T</div><div><b>15</b> T</div>
+  </div>
+  <div style="font-size:13.5px;margin-top:10px">
+    <div class="ans"><span class="qn">1</span><b class="a">False.</b> Reversed. <b>SQL is declarative</b> (what), <b>relational algebra is procedural</b> (how).</div>
+    <div class="ans"><span class="qn">2</span><b class="a">False.</b> Heuristics <b>don't have proofs</b>; they are reached by trial and error or common sense.</div>
+    <div class="ans"><span class="qn">3</span><b class="a">True.</b> Equivalence (the same result set) is mandatory.</div>
+    <div class="ans"><span class="qn">4</span><b class="a">True.</b> That is why σ and π go down the tree.</div>
+    <div class="ans"><span class="qn">5</span><b class="a">False.</b> As far <b>down</b> as possible, so they reduce tuples early.</div>
+    <div class="ans"><span class="qn">6</span><b class="a">True.</b> Rule 1, the cascade of σ.</div>
+    <div class="ans"><span class="qn">7</span><b class="a">False.</b> Only ∪ and ∩ are commutative; R − S ≠ S − R.</div>
+    <div class="ans"><span class="qn">8</span><b class="a">True.</b> Rule 12: σ<sub>C</sub>(R × S) = R ⋈<sub>C</sub> S.</div>
+    <div class="ans"><span class="qn">9</span><b class="a">True.</b> "Cost estimation: I/O block accesses, only!"</div>
+    <div class="ans"><span class="qn">10</span><b class="a">True.</b> It is the baseline algorithm S1.</div>
+    <div class="ans"><span class="qn">11</span><b class="a">False.</b> Only on the field the file is <b>ordered</b> on.</div>
+    <div class="ans"><span class="qn">12</span><b class="a">True.</b> S3a: x index levels + one data block.</div>
+    <div class="ans"><span class="qn">13</span><b class="a">False.</b> For σ<sub>Dno&gt;5</sub> the index costs 5,004 against 2,000 for a scan.</div>
+    <div class="ans"><span class="qn">14</span><b class="a">True.</b> It captures uneven value distributions that sl = 1/d misses.</div>
+    <div class="ans"><span class="qn">15</span><b class="a">True.</b> The average number of records satisfying an equality condition.</div>
+  </div>
+  <h3>Part B · Multiple choice</h3>
+  <div class="ans-grid">
+<div><b>16</b> B</div><div><b>17</b> B</div><div><b>18</b> D</div><div><b>19</b> B</div><div><b>20</b> C</div><div><b>21</b> B</div><div><b>22</b> A</div><div><b>23</b> B</div><div><b>24</b> A</div><div><b>25</b> C</div><div><b>26</b> A</div><div><b>27</b> B</div><div><b>28</b> C</div><div><b>29</b> D</div><div><b>30</b> B</div><div><b>31</b> D</div><div><b>32</b> B</div><div><b>33</b> C</div><div><b>34</b> D</div><div><b>35</b> A</div><div><b>36</b> B</div><div><b>37</b> B</div><div><b>38</b> B</div><div><b>39</b> C</div><div><b>40</b> A</div><div><b>41</b> A</div><div><b>42</b> B</div><div><b>43</b> C</div><div><b>44</b> B</div><div><b>45</b> B</div>
+  </div>
+  <div style="font-size:13.5px;margin-top:10px">
+    <div class="ans"><span class="qn">16</span><b class="a">B)</b> Declarative = what, not how.</div>
+    <div class="ans"><span class="qn">17</span><b class="a">B)</b> A better query is an equivalent one that costs less.</div>
+    <div class="ans"><span class="qn">18</span><b class="a">D)</b> Selections should be applied <b>early</b>.</div>
+    <div class="ans"><span class="qn">19</span><b class="a">B)</b> Rule 1, cascade of σ.</div>
+    <div class="ans"><span class="qn">20</span><b class="a">C)</b> R − S ≠ S − R.</div>
+    <div class="ans"><span class="qn">21</span><b class="a">B)</b> σ<sub>C</sub>(R × S) = R ⋈<sub>C</sub> S.</div>
+    <div class="ans"><span class="qn">22</span><b class="a">A)</b> Set difference is not listed.</div>
+    <div class="ans"><span class="qn">23</span><b class="a">B)</b> Narrower records, more per block.</div>
+    <div class="ans"><span class="qn">24</span><b class="a">A)</b> Fewer rows reach later operators.</div>
+    <div class="ans"><span class="qn">25</span><b class="a">C)</b> The lecture's step 3.</div>
+    <div class="ans"><span class="qn">26</span><b class="a">A)</b> Pipelining groups.</div>
+    <div class="ans"><span class="qn">27</span><b class="a">B)</b> It keeps very few PROJECT rows, so it goes first.</div>
+    <div class="ans"><span class="qn">28</span><b class="a">C)</b> Rule 1 is applied first.</div>
+    <div class="ans"><span class="qn">29</span><b class="a">D)</b> The list: I/O, storage, CPU, RAM, communication.</div>
+    <div class="ans"><span class="qn">30</span><b class="a">B)</b> I/O only.</div>
+    <div class="ans"><span class="qn">31</span><b class="a">D)</b> x belongs to the <b>index</b>.</div>
+    <div class="ans"><span class="qn">32</span><b class="a">B)</b> S = sl × r.</div>
+    <div class="ans"><span class="qn">33</span><b class="a">C)</b> 1/125 = 0.008.</div>
+    <div class="ans"><span class="qn">34</span><b class="a">D)</b> The last block, if it is the one holding the record.</div>
+    <div class="ans"><span class="qn">35</span><b class="a">A)</b> ⌈log<sub>2</sub> 1000⌉ = 10.</div>
+    <div class="ans"><span class="qn">36</span><b class="a">B)</b> ⌈log<sub>2</sub>5⌉ + ⌈4/2⌉ − 1 = 3 + 2 − 1 = 4.</div>
+    <div class="ans"><span class="qn">37</span><b class="a">B)</b> x + 1 = 3.</div>
+    <div class="ans"><span class="qn">38</span><b class="a">B)</b> 1 + ⌈5/4⌉ = 3.</div>
+    <div class="ans"><span class="qn">39</span><b class="a">C)</b> x + 1 + s = 83.</div>
+    <div class="ans"><span class="qn">40</span><b class="a">A)</b> 2 + 2 + 5,000 = 5,004.</div>
+    <div class="ans"><span class="qn">41</span><b class="a">A)</b> The index: 4 + 1 = 5.</div>
+    <div class="ans"><span class="qn">42</span><b class="a">B)</b> 2,000 &lt; 5,004.</div>
+    <div class="ans"><span class="qn">43</span><b class="a">C)</b> Hashing is not covered.</div>
+    <div class="ans"><span class="qn">44</span><b class="a">B)</b> Equal records are scattered; each may need its own block read.</div>
+    <div class="ans"><span class="qn">45</span><b class="a">B)</b> The optimizer cannot know what else is running.</div>
+  </div>
+  <h3>Part C · Written (model answers)</h3>
+  <div style="font-size:13.5px">
+    <div class="ans"><span class="qn">46</span>SQL specifies <b>what</b> result is wanted, not a plan; relational algebra is procedural and has an execution plan, but a query has many equivalent algebra expressions. The optimizer chooses among them. <b>Equivalent</b> means the same result set; <b>better</b> means a lower cost (disk access, computation, memory, communication), mainly the number of block accesses. The optimizer changes the plan, never the answer.</div>
+    <div class="ans"><span class="qn">47</span>Main heuristic: apply first the operations that <b>reduce the size of intermediate results</b>. σ removes tuples and π removes attributes, so doing them before a join gives the join smaller, narrower inputs. Example: EMPLOYEE × DEPT then σ age&lt;30 builds all pairs first; σ<sub>age&lt;30</sub>(EMPLOYEE) ⋈ DEPT joins only the young employees. The result is the same, the work much smaller. Projections must keep the join attributes.</div>
+    <div class="ans"><span class="qn">48</span>(1) Break conjunctive selects into a cascade (rule 1). (2) Move each select as far down as its attributes allow (rules 2, 4, 6, 10). (3) Re-arrange the leaves so those with the most restrictive selects come first (rules 5, 9). (4) Combine × and a following σ into ⋈ (rule 12). (5) Push π lists down by creating new projections (rules 3, 4, 7, 11). (6) Identify sub-trees that can run as one pipelined algorithm.</div>
+    <div class="ans"><span class="qn">49</span>A disk block access costs far more than in-memory work, so I/O dominates, and counting blocks is simple enough to do for every candidate plan. Cost estimation must be far cheaper than running the query (jelly-bean analogy), so it uses catalog statistics (r, b, bfr, d, sl, x, b<sub>i1</sub>) to estimate. A histogram records the number of tuples per interval, correcting the uniformity assumption sl = 1/d when values are unevenly distributed.</div>
+    <div class="ans"><span class="qn">50</span><b>Key</b>: x index levels plus one data block (one match). <b>Non-key</b>: x levels, one pointer block, then up to s data blocks, because matching records are scattered. <b>Range</b>: about half the first-level index blocks and half the records, each possibly in a different block. When many records qualify (large s or a range, e.g. Dno&gt;5: 5,004 vs 2,000, or Gender: 5,002 vs 2,000) the scattered fetches exceed one sequential scan, so linear search wins.</div>
+  </div>
+  <h3>Part D · Practical (worked solutions)</h3>
+  <div style="font-size:13.5px">
+    <div class="ans"><span class="qn">51</span>Direct: π<sub>Name</sub>(σ<sub>Depno=Depnumber ∧ age&lt;30</sub>(Employee × Dept)). Improved 1 (rule 12): π<sub>Name</sub>(σ<sub>age&lt;30</sub>(Employee ⋈<sub>Depno=Depnumber</sub> Dept)). Improved 2 (rule 6): π<sub>Name</sub>(Dept ⋈<sub>Depno=Depnumber</sub> σ<sub>age&lt;30</sub>(Employee)) (the join needs Depno, so a pushed projection on Employee must keep Name, age and Depno).</div>
+    <div class="ans"><span class="qn">52</span>Salary belongs to EMPLOYEE, Pname to PROJECT (rule 6, second form): <b>(σ<sub>Salary&gt;300</sub>(EMPLOYEE)) ⋈<sub>Pno=Pnumber</sub> (σ<sub>Pname='X'</sub>(PROJECT))</b>.</div>
+    <div class="ans"><span class="qn">53</span>sl = 1/40 = 0.025; s = 0.025 × 8,000 = <b>200</b> records.</div>
+    <div class="ans"><span class="qn">54</span>Linear: average b/2 = <b>500</b>, worst <b>1,000</b>. Binary (ordered file): ⌈log<sub>2</sub> 1000⌉ = <b>10</b>.</div>
+    <div class="ans"><span class="qn">55</span>⌈log<sub>2</sub> 400⌉ = 9 (2<sup>8</sup> = 256 &lt; 400 ≤ 512 = 2<sup>9</sup>). ⌈30/5⌉ = 6. Cost = 9 + 6 − 1 = <b>14</b> blocks.</div>
+    <div class="ans"><span class="qn">56</span>x + ⌈s/bfr⌉ = 2 + ⌈45/10⌉ = 2 + 5 = <b>7</b> blocks.</div>
+    <div class="ans"><span class="qn">57</span>(a) x + 1 = <b>4</b>. (b) x + 1 + s = 3 + 1 + 50 = <b>54</b>.</div>
+    <div class="ans"><span class="qn">58</span>Index: x + b<sub>i1</sub>/2 + r/2 = 2 + 3 + 2,000 = <b>2,005</b>. Linear: b = <b>800</b>. <b>Linear search is cheaper</b>.</div>
+    <div class="ans"><span class="qn">59</span>Options: linear 2,000; Dno index 2 + 80 + 1 = <b>83</b>; Gender index 1 + 5,000 + 1 = 5,002. Choose the <b>Dno index (83 blocks)</b> and test Gender='M' on the ~80 retrieved records in memory.</div>
+    <div class="ans"><span class="qn">60</span>Chunk = n<sub>B</sub> − 2 = 3. ⌈13/3⌉ = 5 scans of EMPLOYEE. Cost = 13 + 5 × 2,000 + 2,500 = 13 + 10,000 + 2,500 = <b>12,513</b> blocks.</div>
+  </div>
+<div class="box key" style="margin-top:26px"><span class="tag">You made it</span>If you can explain <b>why</b> SQL needs an optimizer, <b>apply</b> the twelve rules and six steps to turn an initial tree into a final one, <b>say</b> what a catalog statistic is, and <b>compute</b> the cost of S1–S6 to choose the cheapest access path (even when the index loses), you understand query optimization.</div>
+</section>
+</main>
+
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  function showAll(){ els.forEach(function(e){ e.classList.add('in'); }); }
+  if (!('IntersectionObserver' in window)) { showAll(); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, {threshold: 0.12});
+  els.forEach(function(e){ io.observe(e); });
+  window.addEventListener('beforeprint', showAll);
+  if (window.matchMedia) { var mq = window.matchMedia('print'); if (mq.addEventListener) mq.addEventListener('change', function(m){ if (m.matches) showAll(); }); }
+})();
+</script>
+
+<div class="scorebar no-print" id="scorebar" aria-live="polite">
+  <div>Score <b id="sc">0</b> / <span id="st">45</span><div class="muted" style="font-size:12px"><span id="sa">0</span> of 45 auto-marked answered</div></div>
+  <div class="meter"><i id="sm"></i></div>
+  <button type="button" id="sreset">Reset quiz</button>
+</div>
+<script>
+(function(){
+  var quiz=document.getElementById('quiz'); if(!quiz) return;
+  var STORE='qp-opt-quiz-v1', state={};
+  try{ state=JSON.parse(localStorage.getItem(STORE)||'{}')||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+
+  // answer letters from the key grids
+  var key={};
+  document.querySelectorAll('#key .ans-grid div').forEach(function(d){
+    var n=parseInt(d.querySelector('b').textContent,10);
+    key[n]=d.textContent.replace(/^\s*\d+\s*/,'').trim().toLowerCase();
+  });
+  // explanations / model answers
+  var expl={};
+  document.querySelectorAll('.ans').forEach(function(a){
+    var q=a.querySelector('.qn'); if(!q) return;
+    var m=q.textContent.match(/(\d+)(?:\s*[–-]\s*(\d+))?/); if(!m) return;
+    var c=a.cloneNode(true); c.querySelector('.qn').remove();
+    for(var i=+m[1]; i<=(m[2]?+m[2]:+m[1]); i++) expl[i]=c.innerHTML;
+  });
+
+  document.documentElement.classList.add('quiz-on');
+  var intro=document.createElement('div');
+  intro.className='quiz-intro no-print';
+  intro.innerHTML='<b>Interactive mode.</b> Click an answer for True/False and multiple-choice questions to mark it right away. For the written and practical questions, write your answer, then reveal the model answer and mark yourself. Your progress is saved in this browser. Printing still gives the clean paper version.';
+  var lead=quiz.querySelector('.lead'); lead.parentNode.insertBefore(intro, lead.nextSibling);
+
+  function fb(cls, html){ var d=document.createElement('div'); d.className='fb '+cls; d.innerHTML=html; return d; }
+  var auto=[];
+
+  quiz.parentNode.querySelectorAll('.q').forEach(function(q){
+    var n=parseInt(q.querySelector('.qn').textContent,10);
+    var box=document.createElement('div'); box.className='qi no-print'; q.appendChild(box);
+
+    if(n<=45){
+      auto.push(n);
+      var correct=key[n];
+      var show=function(choice, initial){
+        q.classList.add('done');
+        var ok=(choice===correct);
+        var exp=expl[n]?' '+expl[n]:'';
+        var label=(n<=15)?(correct==='t'?'True':'False'):correct.toUpperCase()+')';
+        box.querySelectorAll('.fb').forEach(function(x){x.remove();});
+        box.appendChild(fb(ok?'ok':'bad', ok?'<b>Correct!</b>'+exp:'<b>Not quite.</b> The answer is <b>'+label+'</b>.'+exp));
+        if(!initial){ state[n]=choice; save(); score(); }
+      };
+      if(n<=15){
+        var row=document.createElement('div'); row.className='tfb';
+        ['t','f'].forEach(function(v){
+          var b=document.createElement('button'); b.type='button'; b.textContent=v==='t'?'True':'False'; b.dataset.v=v;
+          b.onclick=function(){ if(q.classList.contains('done')) return; mark(v); };
+          row.appendChild(b);
+        });
+        box.appendChild(row);
+        var mark=function(v, initial){
+          row.querySelectorAll('button').forEach(function(b){ b.disabled=true;
+            if(b.dataset.v===key[n]) b.classList.add('ok'); else if(b.dataset.v===v) b.classList.add('bad'); });
+          show(v, initial);
+        };
+        if(state[n]) mark(state[n], true);
+      } else {
+        var lis=q.querySelectorAll('ol.opts li');
+        var pick=function(v, initial){
+          lis.forEach(function(li){ li.setAttribute('aria-disabled','true');
+            if(li.dataset.l===correct) li.classList.add('ok'); else if(li.dataset.l===v) li.classList.add('bad'); });
+          show(v, initial);
+        };
+        lis.forEach(function(li){
+          li.tabIndex=0; li.setAttribute('role','button');
+          li.onclick=function(){ if(!q.classList.contains('done')) pick(li.dataset.l); };
+          li.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); li.onclick(); } };
+        });
+        if(state[n]) pick(state[n], true);
+      }
+    } else {
+      var ta=document.createElement('textarea');
+      ta.placeholder=n<=50?'Write your answer here…':'Show your working here…';
+      ta.value=state['t'+n]||'';
+      var tmr; ta.oninput=function(){ clearTimeout(tmr); tmr=setTimeout(function(){ state['t'+n]=ta.value; save(); },300); };
+      var row2=document.createElement('div'); row2.className='row';
+      var btn=document.createElement('button'); btn.type='button'; btn.textContent='Show model answer';
+      var self=document.createElement('span'); self.className='self';
+      var model=null;
+      btn.onclick=function(){
+        if(model){ model.remove(); model=null; btn.textContent='Show model answer'; return; }
+        model=fb('model','<b>Model answer:</b> '+(expl[n]||'')); box.appendChild(model);
+        btn.textContent='Hide model answer';
+      };
+      var good=document.createElement('button'); good.type='button'; good.textContent='I got it ✓';
+      var nope=document.createElement('button'); nope.type='button'; nope.textContent='Not yet ✗';
+      var setSelf=function(v){ state['s'+n]=v; save();
+        good.classList.toggle('ok', v==='y'); nope.classList.toggle('bad', v==='n');
+        self.textContent=v==='y'?'Marked as understood':'Marked for review'; };
+      good.onclick=function(){ setSelf('y'); }; nope.onclick=function(){ setSelf('n'); };
+      if(state['s'+n]) setSelf(state['s'+n]);
+      row2.appendChild(btn); row2.appendChild(good); row2.appendChild(nope); row2.appendChild(self);
+      box.appendChild(ta); box.appendChild(row2);
+    }
+  });
+
+  var bar=document.getElementById('scorebar');
+  function score(){
+    var c=0,a=0; auto.forEach(function(n){ if(state[n]){ a++; if(state[n]===key[n]) c++; } });
+    document.getElementById('sc').textContent=c; document.getElementById('sa').textContent=a;
+    document.getElementById('sm').style.width=(c/45*100)+'%';
+  }
+  score();
+  if('IntersectionObserver' in window){
+    var start=quiz, end=document.getElementById('key');
+    new IntersectionObserver(function(){
+      var r1=start.getBoundingClientRect(), r2=end.getBoundingClientRect();
+      bar.classList.toggle('show', r1.top<innerHeight && r2.top>0);
+    }).observe(start);
+    addEventListener('scroll', function(){
+      var r1=start.getBoundingClientRect(), r2=end.getBoundingClientRect();
+      bar.classList.toggle('show', r1.top<innerHeight*0.6 && r2.top>innerHeight*0.4);
+    }, {passive:true});
+  } else { bar.classList.add('show'); }
+  document.getElementById('sreset').onclick=function(){
+    if(!confirm('Clear all your quiz answers?')) return;
+    state={}; save(); location.reload();
+  };
+})();
+</script>
+</body>
+</html>
