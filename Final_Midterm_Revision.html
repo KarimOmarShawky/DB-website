@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A focused database engineering midterm revision with worked examples and 108 explained practice questions across four lecture areas.">
+  <meta name="description" content="Database Engineering midterm revision with four lecture topics, interactive practice, and sourced past-exam questions with suggested answers.">
   <meta name="theme-color" content="#f3f6f4">
   <title>Database Engineering — Midterm Revision</title>
   <link rel="stylesheet" href="study-site.css">
@@ -477,6 +477,15 @@
       text-underline-offset: 3px;
     }
     .question-source:hover { color: #234b36; }
+    .past-exam-written {
+      align-self: start;
+      gap: 7px;
+    }
+    .past-exam-written .question-topic { margin: 0; }
+    .past-exam-written h3 { margin: 0; color: #294453; font-size: 1.02rem; }
+    .past-exam-written > p { margin: 0; color: #586b73; font-size: .9rem; }
+    .past-exam-written .explanation { margin-top: 6px; }
+    .past-exam-written .explanation p { white-space: pre-wrap; }
 
     .check-answer {
       min-height: 38px;
@@ -599,11 +608,11 @@
   <main class="doc revision-main">
     <section class="revision-hero" aria-labelledby="revision-title">
       <div>
-        <p class="eyebrow">Focused practice · Four lecture areas</p>
+        <p class="eyebrow">Focused review · Lecture topics and past exams</p>
         <h1 id="revision-title">Midterm Revision</h1>
-        <p>Refresh the ideas most likely to need explanation or calculation, then test yourself. This is a revision companion—not a replacement for the four full study guides.</p>
+        <p>Review the four lecture areas, practice exam-style problems, and check suggested answers. The lecture guides remain separate for full explanations.</p>
       </div>
-      <div class="hero-count" aria-label="108 practice questions">
+      <div class="hero-count" aria-label="108 practice questions plus past-exam practice">
         <strong>108</strong>
         <span>practice questions</span>
       </div>
@@ -617,6 +626,7 @@
       <a href="#query-questions">Query processing</a>
       <a href="#join-questions">Joins &amp; grouping</a>
       <a href="#optimization-questions">Optimization</a>
+      <a href="#exam-questions">Past exam practice</a>
     </nav>
 
     <section class="revision-panel" id="refresh" aria-labelledby="refresh-title">
@@ -1372,6 +1382,15 @@
             <details class="explanation"><summary>Show explanation</summary><p><strong>Correct: A.</strong> Heuristics are useful transformations that often expose better plans, but physical choices depend on statistics, indexes, relation sizes, and I/O costs. Cost-based optimization compares alternatives that preserve query semantics; estimates guide the decision.</p></details>
           </article>
         </section>
+        <section id="exam-questions" aria-labelledby="exam-question-title">
+          <header class="revision-heading">
+            <p class="eyebrow">Past exam practice · eight source papers</p>
+            <h2 id="exam-question-title">Exam questions and suggested answers</h2>
+            <p>These are original practice prompts based on recurring topics in the linked exams. Multiple-choice items are scored; written answers open as suggestions. Sources identify the relevant paper, question, and page.</p>
+          </header>
+          <div id="past-exam-mcq" aria-label="Past exam multiple-choice practice"></div>
+          <div class="topic-grid" id="past-exam-written" aria-label="Past exam written practice"></div>
+        </section>
       </form>
     </section>
 
@@ -1462,6 +1481,224 @@
           ['If two equivalent plans have estimated I/O costs of 900 and 1,250 block accesses, which would the basic cost-based comparison prefer?', ['The 900-block plan, subject to the model and estimates', 'The 1,250-block plan because it is larger', 'Neither, because costs cannot be compared', 'The plan with more intermediate rows'], 0, 'Under the same model and assumptions, the lower estimated cost is preferred; it remains an estimate, not a guarantee of actual runtime.']
         ]
       };
+      var pastExamQuestions = [
+        {
+          type: 'written',
+          prompt: 'Two transactions read the same stock value, 20. One sells 3 units and writes 17; the other, using its earlier read, adds 5 and writes 25. Name the anomaly and compare the final value with a serial execution.',
+          answer: 'This is a lost update: the second write overwrites the first transaction’s change. The stored value becomes 25, while a serial execution would produce 22 (20 − 3 + 5).',
+          sources: [['1- Midterm 2013.pdf', 'Midterm 2013 · Q1 · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'List the transaction states from execution through termination, and explain what distinguishes partially committed from committed.',
+          answer: 'A typical path is Active → Partially committed → Committed → Terminated; a transaction can instead enter Failed and then Aborted. Partially committed means its final statement has run but its effects are not yet guaranteed durable. Committed means the commit completed and the effects are durable.',
+          sources: [['1- Midterm 2013.pdf', 'Midterm 2013 · Q2 · p.1', 1], ['2- Midterm 2014.pdf', 'Midterm 2014 · Q1 · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'Name four common join algorithms and give one condition that makes each a reasonable option.',
+          answer: 'Block nested-loop join works without an index and can benefit from memory buffers. Index nested-loop (single-loop) join is useful when the inner relation has an index on its join attribute. Sort-merge join is attractive when both inputs are already ordered on the join keys or sorting is worth its cost. Hash join is suited to equality joins when partitions can be built and processed efficiently.',
+          sources: [['1- Midterm 2013.pdf', 'Midterm 2013 · Q4 · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'Compare sorting and hashing as query-processing techniques: give a strength and a limitation of each.',
+          answer: 'Sorting supports ordered output, range processing, and merge-based operations, but sorting unsorted data can require substantial I/O. Hashing can provide fast equality lookup and can be parallelized, but it is sensitive to skew and is less suitable for ordered/range results.',
+          sources: [['1- Midterm 2013.pdf', 'Midterm 2013 · Q5 · p.1', 1], ['3- Midterm 2015 - Answers.pdf', 'Midterm 2015 · Q1 and Q5 · pp.1–2', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'Explain the difference between materializing an intermediate result and pipelining it to the next operator.',
+          answer: 'Materialization writes an operator’s intermediate relation to storage and a later operator reads it back. Pipelining streams tuples directly from one operator to the next, avoiding that intermediate write/read when the operators support streaming. Pipelining is also called stream-based processing in these course materials.',
+          sources: [['1- Midterm 2013.pdf', 'Midterm 2013 · Q10 · p.1', 1], ['3- Midterm 2015 - Answers.pdf', 'Midterm 2015 · Q6 · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'Define selectivity, selection cardinality, blocking factor, and join selectivity. State what each measures.',
+          answer: 'Selectivity (sl) is the fraction of a relation that satisfies a predicate. Selection cardinality (s) is the number of matching tuples, often estimated as sl × r. Blocking factor (bfr) is the number of records that fit in a block. Join selectivity (Js) is the fraction of Cartesian-product tuple pairs that satisfy the join condition.',
+          sources: [['1- Midterm 2013.pdf', 'Midterm 2013 · Q8 · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'What do ACID properties require of a transaction?',
+          answer: 'Atomicity: all operations happen or none do. Consistency: a transaction preserves database constraints. Isolation: concurrent execution does not expose an invalid interleaving. Durability: committed changes survive failures.',
+          sources: [['2- Midterm 2014.pdf', 'Midterm 2014 · Q1 · p.1', 1], ['7- Midterm 2021 (Credit).pdf', 'Midterm 2021 (Credit) · Q3(a) · p.3', 3]]
+        },
+        {
+          type: 'written',
+          prompt: 'Construct a short example of a dirty read and explain why it is unsafe.',
+          answer: 'T1 writes X=90 but has not committed. T2 reads X=90 and uses it in another update. If T1 then aborts, T2 has consumed a value that was rolled back. T2 must be rolled back too, or the database may retain a result based on invalid data.',
+          sources: [['2- Midterm 2014.pdf', 'Midterm 2014 · Q2 · p.1', 1], ['8- Midterm 2023.pdf', 'Midterm 2023 · Q3(a) · p.2', 2]]
+        },
+        {
+          type: 'mcq',
+          prompt: 'Which expression is the standard block nested-loop join input-read cost when R is outer and M buffers are available? Ignore result writes.',
+          choices: ['bR + ceil(bR / (M − 2)) × bS', 'bR + bS, regardless of memory', 'M × bR × bS', 'ceil(bR / bS) + M'],
+          answer: 0,
+          explanation: 'M−2 buffers hold an outer chunk after reserving one for the inner input and one for output. Each outer chunk triggers a scan of S.',
+          sources: [['2- Midterm 2014.pdf', 'Midterm 2014 · Q4 · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'For the schedule W1(X); R2(X); C2; C1, classify recoverability, cascadelessness, and strictness.',
+          answer: 'It is not recoverable: T2 reads the value written by T1 and commits before T1 commits. It is not cascadeless because R2(X) reads an uncommitted write. It is not strict because T2 accesses X while T1’s write is still uncommitted.',
+          sources: [['2- Midterm 2014.pdf', 'Midterm 2014 · Q7 · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'In mandatory access control, how are users and data labeled, and how does the system decide whether access is permitted?',
+          answer: 'Users receive a clearance and data objects receive a classification. Access is permitted according to the policy’s comparison of those labels. A commonly taught hierarchy, from highest to lowest, is Top Secret, Secret, Confidential, and Unclassified.',
+          sources: [['2- Midterm 2014.pdf', 'Midterm 2014 · Q6 · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'Outline the main stages from receiving an SQL statement to returning its result.',
+          answer: 'The DBMS scans, parses, and validates the SQL; translates it into an internal representation; optimizes the query; generates an execution plan/code; and executes that plan. The input is the SQL request and the output is the result relation returned to the requester.',
+          sources: [['3- Midterm 2015 - Answers.pdf', 'Midterm 2015 · Q2 · p.1', 1], ['1- Midterm 2013.pdf', 'Midterm 2013 · Q6 · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'R occupies 14 blocks, S occupies 6 blocks, and only 3 buffers are available. For block nested-loop join, choose the better outer relation and calculate input reads, excluding result writes.',
+          answer: 'Use S as the outer relation. With M=3, the outer chunk holds M−2=1 block, so S requires ceil(6/1)=6 chunks and R is scanned 6 times. Cost = 6 + 6×14 = 90 block reads. Using R as outer would cost 14 + 14×6 = 98.',
+          sources: [['3- Midterm 2015 - Answers.pdf', 'Midterm 2015 · Q7 · p.2', 2]]
+        },
+        {
+          type: 'mcq',
+          prompt: 'Which is the sensible order for the two optimization phases emphasized in the exam?',
+          choices: ['Apply useful heuristic rewrites, then estimate costs of physical alternatives', 'Choose physical algorithms before forming an equivalent logical query', 'Cost-based optimization must always precede parsing', 'Run every plan before applying rewrites'],
+          answer: 0,
+          explanation: 'Heuristics first simplify/reorder the logical expression; cost-based optimization then compares physical implementations of the rewritten query.',
+          sources: [['3- Midterm 2015 - Answers.pdf', 'Midterm 2015 · Q8 · p.2', 2], ['4- Midterm 2017.pdf', 'Midterm 2017 · Q3 · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'Can an index by itself answer every aggregate query? Explain when it can help and when the values still need to be processed.',
+          answer: 'No single dense/sparse index answers every aggregate efficiently. An ordered index can expose MIN or MAX at an extreme leaf, and a covering index may answer an aggregate without fetching table rows. SUM and AVG generally require processing all qualifying values; COUNT also depends on the exact qualifying entries. The access path and whether the index contains all required values matter.',
+          sources: [['4- Midterm 2017.pdf', 'Midterm 2017 · Q1 · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'For R with 100,000 records of 500 bytes and S with 50,000 records of 750 bytes, using 5,000-byte blocks and M=6 buffers, choose the outer relation and estimate block nested-loop input reads. Ignore output writes.',
+          answer: 'R occupies 10,000 blocks; S occupies 7,500 blocks. Choose S as outer. The outer chunk holds M−2=4 blocks, so there are ceil(7,500/4)=1,875 scans of R. Cost = 7,500 + 1,875×10,000 = 18,757,500 block reads. At least 3 buffers are needed: outer input, inner input, and output.',
+          sources: [['4- Midterm 2017.pdf', 'Midterm 2017 · Q2(a–b) · pp.1–2', 1], ['5- Midterm 2019.pdf', 'Midterm 2019 · Q2(a–b) · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'Give three heuristic transformations that can reduce the optimizer’s plan-search work or intermediate data.',
+          answer: 'Examples: push selections toward base relations; push projections down while retaining attributes needed later; replace a Cartesian product followed by a join predicate with a join; and limit enumeration to left-deep join trees. Each reduces unnecessary intermediate work or the number of candidate plans.',
+          sources: [['4- Midterm 2017.pdf', 'Midterm 2017 · Q3 · p.2', 2], ['7- Midterm 2021 (Credit).pdf', 'Midterm 2021 (Credit) · Q2 · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'Use the schedule in the cited exam to determine conflict serializability and transaction-recovery properties. What does its precedence graph show?',
+          answer: 'The precedence graph contains edges in both directions between T1 and T3: R3(X) precedes W1(X), while W1(X) precedes W3(X). That cycle means the schedule is not conflict-serializable. T3 reads T1’s uncommitted write on Z, but T1 commits before T3, so the schedule is recoverable, not cascadeless, and not strict.',
+          sources: [['4- Midterm 2017.pdf', 'Midterm 2017 · Q4(a–b) · pp.2–3', 2], ['8- Midterm 2023.pdf', 'Midterm 2023 · Q3(b) · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'A query joins Sailors, Boats, and Reserves, filters for red boats and sailors younger than 30, and returns a few Sailors columns. Describe the main logical optimization steps.',
+          answer: 'Translate the FROM/WHERE query to a relational-algebra tree. Split the conjunctive predicate; push Boat.color=Red and Sailor.age<30 to their respective leaves; convert each product plus its equality condition into a join; join the reduced inputs; and push projections down while keeping all join keys and final output attributes.',
+          sources: [['5- Midterm 2019.pdf', 'Midterm 2019 · Q1(a–b) · p.1', 1]]
+        },
+        {
+          type: 'mcq',
+          prompt: 'For SELECT Dno, AVG(Salary) ... GROUP BY Dno, which index organization most directly keeps equal grouping values together?',
+          choices: ['A clustering index on Dno', 'A primary index on Salary', 'A secondary index on Salary only', 'An index on an unrelated column'],
+          answer: 0,
+          explanation: 'A clustering index orders the file by the non-key grouping field, making equal Dno values adjacent for group processing.',
+          sources: [['5- Midterm 2019.pdf', 'Midterm 2019 · Indexing Q4 · p.3', 3]]
+        },
+        {
+          type: 'written',
+          prompt: 'When can a dense index be advantageous for searches for values that are absent, and why is it not universally the better choice?',
+          answer: 'If the dense index is resident in memory, it can establish that a key is absent without reading a data page. A sparse index may need a data-page check after locating the nearest anchor. Dense indexes use more space and incur more maintenance, and for present values or other workloads those costs may outweigh the absent-key benefit.',
+          sources: [['5- Midterm 2019.pdf', 'Midterm 2019 · Indexing Q3 · p.2', 2], ['6- Midterm 2021.pdf', 'Midterm 2021 · Q1(b) · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'A transaction reads the same row twice and sees different committed values because another transaction updates it between the reads. Name the anomaly and one way to prevent it.',
+          answer: 'This is an unrepeatable read. A transaction isolation level that holds the relevant read lock through the transaction (such as repeatable read or serializable, depending on the DBMS) prevents another transaction from changing that row between reads.',
+          sources: [['5- Midterm 2019.pdf', 'Midterm 2019 · Transaction Q3(a) · p.3', 3]]
+        },
+        {
+          type: 'mcq',
+          prompt: 'In a B-tree index ordered by an attribute, where should a database look to find the maximum value?',
+          choices: ['The left-most leaf entry', 'The right-most leaf entry', 'The root separator only', 'A random leaf, then a full table scan'],
+          answer: 1,
+          explanation: 'Following the right-most child pointers reaches the largest indexed key. For MAX to be index-only, the index must contain the needed value and satisfy the query.',
+          sources: [['6- Midterm 2021.pdf', 'Midterm 2021 · Q1(a) · p.1', 1], ['8- Midterm 2023.pdf', 'Midterm 2023 · Q1(a) · p.1', 1]]
+        },
+        {
+          type: 'mcq',
+          prompt: 'Which statement about a primary index is accurate?',
+          choices: ['It is defined by the file’s ordering field; density is a separate property', 'It must always be dense', 'It is another name for any secondary index', 'It can exist only on an unordered heap'],
+          answer: 0,
+          explanation: 'Primary describes the relation between the index and the data-file ordering. Dense versus sparse describes how completely index entries cover the search values/records.',
+          sources: [['6- Midterm 2021.pdf', 'Midterm 2021 · Q1(c) · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'When would SELECT Fname ... and SELECT DISTINCT Fname ... have the same additional duplicate-removal cost?',
+          answer: 'When Fname is guaranteed unique (for example, it is a key), no duplicates can occur, so duplicate elimination has no work to do. Otherwise DISTINCT may require extra processing.',
+          sources: [['6- Midterm 2021.pdf', 'Midterm 2021 · Q1(d) · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'Explain why pushing a projection downward can reduce query cost, and name an attribute that must not be projected away too early.',
+          answer: 'A lower projection removes unused columns before large joins or intermediate results, reducing tuple width and I/O. Keep every attribute needed by a later selection or join condition, as well as the final output attributes.',
+          sources: [['6- Midterm 2021.pdf', 'Midterm 2021 · Q2(a) · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'Give small relations R(A,B) and S(A,B) showing that projecting A after difference can differ from subtracting the projected relations.',
+          answer: 'Let R={(1,x),(1,y)} and S={(1,y)}. Then R−S={(1,x)}, so πA(R−S)={1}. But πA(R)={1} and πA(S)={1}, so πA(R)−πA(S)=∅. The results differ.',
+          sources: [['6- Midterm 2021.pdf', 'Midterm 2021 · Q2(b) · p.2', 2]]
+        },
+        {
+          type: 'mcq',
+          prompt: 'For a heap file with no ordering on the search field, what kind of index is generally needed to find arbitrary matching records directly?',
+          choices: ['A sparse index with one anchor per several blocks', 'A dense index with an entry for each record/search value', 'A primary index on the heap order', 'No index entries at all'],
+          answer: 1,
+          explanation: 'Because heap records are not ordered by the search field, sparse block anchors cannot reliably direct the search to a range; a dense index provides direct entries.',
+          sources: [['7- Midterm 2021 (Credit).pdf', 'Midterm 2021 (Credit) · Q1(b) · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'Give a workload where a sequential scan can beat using a secondary index, even though the index can locate matches.',
+          answer: 'If a non-key predicate matches a large fraction of rows and those rows are scattered across pages, following index pointers can cause many random page reads. A sequential scan reads the file pages in order and may be cheaper.',
+          sources: [['7- Midterm 2021 (Credit).pdf', 'Midterm 2021 (Credit) · Q1(c) · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'State when selection and projection may commute, and give the key reason they may fail to commute.',
+          answer: 'They may commute if the selection predicate uses only attributes retained by the projection. They cannot be freely swapped if the projection discards an attribute needed to evaluate the selection; the predicate would no longer be computable.',
+          sources: [['7- Midterm 2021 (Credit).pdf', 'Midterm 2021 (Credit) · Q2(a) · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'Why does a query optimizer represent a declarative SQL request using relational algebra?',
+          answer: 'SQL states what result is wanted, while relational algebra expresses the operations that produce it. The algebra can be represented as a query tree and transformed into equivalent trees with different estimated costs.',
+          sources: [['7- Midterm 2021 (Credit).pdf', 'Midterm 2021 (Credit) · Q2(b) · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'Give an example of a query that can be answered from an index without fetching base-table pages, and state the necessary condition.',
+          answer: 'For example, SELECT MAX(Salary) FROM Employee can use an ordered B-tree on Salary by following the right-most leaf. It can avoid base-table page reads when the index contains the required value and the query needs no columns absent from the index.',
+          sources: [['8- Midterm 2023.pdf', 'Midterm 2023 · Q1(b) · p.1', 1]]
+        },
+        {
+          type: 'written',
+          prompt: 'Write a stored procedure that returns the number of registrations for a course name using the supplied course and registration tables.',
+          answer: 'CREATE PROCEDURE dbo.num_reg @cname varchar(100)\nAS\nBEGIN\n  SET NOCOUNT ON;\n  SELECT COUNT(*) AS registration_count\n  FROM dbo.registeration AS r\n  JOIN dbo.course AS c ON c.cid = r.cid\n  WHERE c.cname = @cname;\nEND;',
+          sources: [['8- Midterm 2023.pdf', 'Midterm 2023 · T-SQL Q1 · p.2', 2]]
+        },
+        {
+          type: 'written',
+          prompt: 'A student may register for at most six courses. Sketch a set-based SQL Server trigger that rejects an insert taking any student over the limit.',
+          answer: 'CREATE TRIGGER dbo.trg_max_reg ON dbo.registeration\nAFTER INSERT\nAS\nBEGIN\n  SET NOCOUNT ON;\n  IF EXISTS (\n    SELECT 1\n    FROM (SELECT DISTINCT sid FROM inserted) AS students\n    WHERE (SELECT COUNT(*) FROM dbo.registeration AS r\n           WHERE r.sid = students.sid) > 6\n  )\n  BEGIN\n    ROLLBACK TRANSACTION;\n              THROW 50001, \'A student may register for at most six courses.\', 1;\n  END;\nEND;',
+          sources: [['8- Midterm 2023.pdf', 'Midterm 2023 · T-SQL Q2 · p.3', 3]]
+        }
+      ];
       var sections = Object.keys(addedQuestions);
       var questions = Array.prototype.slice.call(document.querySelectorAll('.question'));
       var questionId = questions.length;
@@ -1552,6 +1789,115 @@
         });
       });
 
+      var examMcqList = document.getElementById('past-exam-mcq');
+      var examWrittenList = document.getElementById('past-exam-written');
+      var writtenCount = 0;
+
+      function appendSourceLinks(container, sources) {
+        sources.forEach(function (source) {
+          var link = document.createElement('a');
+          link.className = 'question-source';
+          link.href = source[0] + '#page=' + source[2];
+          link.textContent = 'Source: ' + source[1];
+          link.target = '_blank';
+          link.rel = 'noopener';
+          container.appendChild(link);
+        });
+      }
+
+      pastExamQuestions.forEach(function (item) {
+        if (item.type === 'mcq') {
+          questionId += 1;
+          var question = document.createElement('article');
+          question.className = 'question';
+          question.setAttribute('data-question', String(questionId));
+          question.setAttribute('data-answer', 'abcd'.charAt(item.answer));
+
+          var head = document.createElement('div');
+          head.className = 'question-head';
+          var number = document.createElement('span');
+          number.className = 'question-number';
+          number.textContent = questionId < 10 ? '0' + questionId : String(questionId);
+          var title = document.createElement('div');
+          var topic = document.createElement('p');
+          topic.className = 'question-topic';
+          topic.textContent = 'Past exams · multiple choice';
+          var fieldset = document.createElement('fieldset');
+          var legend = document.createElement('legend');
+          legend.textContent = item.prompt;
+          fieldset.appendChild(legend);
+          title.appendChild(topic);
+          title.appendChild(fieldset);
+          head.appendChild(number);
+          head.appendChild(title);
+          question.appendChild(head);
+
+          var options = document.createElement('div');
+          options.className = 'options';
+          item.choices.forEach(function (choice, index) {
+            var label = document.createElement('label');
+            label.className = 'option';
+            var input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'q' + questionId;
+            input.value = 'abcd'.charAt(index);
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(choice));
+            options.appendChild(label);
+          });
+          question.appendChild(options);
+
+          var actions = document.createElement('div');
+          actions.className = 'question-actions';
+          var check = document.createElement('button');
+          check.className = 'check-answer';
+          check.type = 'button';
+          check.textContent = 'Check answer';
+          var status = document.createElement('span');
+          status.className = 'answer-status';
+          status.setAttribute('aria-live', 'polite');
+          actions.appendChild(check);
+          actions.appendChild(status);
+          question.appendChild(actions);
+
+          var explanation = document.createElement('details');
+          explanation.className = 'explanation';
+          var summary = document.createElement('summary');
+          summary.textContent = 'Show answer and explanation';
+          var explanationText = document.createElement('p');
+          explanationText.textContent = 'Correct answer: ' + 'ABCD'.charAt(item.answer) + '. ' + item.explanation;
+          explanation.appendChild(summary);
+          explanation.appendChild(explanationText);
+          question.appendChild(explanation);
+          appendSourceLinks(question, item.sources);
+          examMcqList.appendChild(question);
+          questions.push(question);
+          return;
+        }
+
+        writtenCount += 1;
+        var written = document.createElement('article');
+        written.className = 'topic-card past-exam-written';
+        var writtenTopic = document.createElement('p');
+        writtenTopic.className = 'topic-label question-topic';
+        writtenTopic.textContent = 'Written practice · suggested answer';
+        var writtenHeading = document.createElement('h3');
+        writtenHeading.textContent = item.prompt;
+        var suggested = document.createElement('details');
+        suggested.className = 'explanation';
+        var suggestedTitle = document.createElement('summary');
+        suggestedTitle.textContent = 'Show suggested answer';
+        var suggestedText = document.createElement('p');
+        suggestedText.textContent = item.answer;
+        suggested.appendChild(suggestedTitle);
+        suggested.appendChild(suggestedText);
+        written.appendChild(writtenTopic);
+        written.appendChild(writtenHeading);
+        written.appendChild(suggested);
+        appendSourceLinks(written, item.sources);
+        examWrittenList.appendChild(written);
+      });
+
       questions = Array.prototype.slice.call(document.querySelectorAll('.question'));
       questions.forEach(function (question, index) {
         var id = index + 1;
@@ -1562,9 +1908,12 @@
         });
       });
 
-      document.querySelector('.hero-count').setAttribute('aria-label', questions.length + ' practice questions');
-      document.getElementById('question-count-label').textContent = questions.length + ' questions · ' + (questions.length / sections.length) + ' per topic';
-      document.querySelector('.hero-count strong').textContent = String(questions.length);
+      var totalPracticeQuestions = questions.length + writtenCount;
+      document.querySelector('.hero-count').setAttribute('aria-label', totalPracticeQuestions + ' practice questions');
+      document.getElementById('question-count-label').textContent = totalPracticeQuestions + ' practice questions · ' + questions.length + ' auto-checked';
+      document.querySelector('.hero-count strong').textContent = String(totalPracticeQuestions);
+      document.querySelector('#exam-questions .revision-heading .eyebrow').textContent =
+        pastExamQuestions.length + ' adapted questions · ' + (pastExamQuestions.length - writtenCount) + ' MCQ · ' + writtenCount + ' written';
       document.querySelectorAll('.question-list > section').forEach(function (section) {
         var sectionQuestions = section.querySelectorAll('.question');
         var first = Number(sectionQuestions[0].getAttribute('data-question'));
