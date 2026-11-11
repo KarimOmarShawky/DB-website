@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f3f6f4">
-<meta name="description" content="IS312 Database Systems II — exam-night midterm revision with a verified, source-based question bank (past midterms 2013–2023).">
-<title>IS312 Database Systems II — Exam-Night Midterm Revision</title>
+<meta name="description" content="Database Systems II — exam-night midterm revision with a verified, source-based question bank (past midterms 2013–2023).">
+<title>Database Systems II — Exam-Night Midterm Revision</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -299,9 +299,9 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 
 <section class="sheet cover">
   <div>
-    <span class="kicker">IS312 · Database Systems II · Midterm</span>
+    <span class="kicker">Database Systems II · Midterm</span>
     <h1>Exam-Night <span>Midterm</span> Revision</h1>
-    <p class="sub">Each lecture has a short revision, then its questions with model answers. Every count is the number of <b>distinct readable papers</b> out of the 8 supplied (2013, 2014, 2015, 2017, 2019, 2021 IS312, 2021 SIS312, 2023).</p>
+    <p class="sub">Each lecture has a short revision, then its questions with model answers. Every count is the number of <b>distinct readable papers</b> out of the 8 supplied (2013, 2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023).</p>
     <span class="badge">Start with the ideas marked ⚠ — they repeat across papers.</span>
   </div>
   <svg class="cover-tree" viewBox="0 0 330 190" role="img" aria-label="Most repeated ideas, by number of papers out of 8: block nested-loop join cost 7; recoverable, cascadeless or strict classification 6; heuristics before cost-based optimization 4; MAX or MIN with a B-tree 4; dirty read, ACID and transaction states 3 each">
@@ -357,11 +357,11 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 <h3 id="l1-a">A. Exam Priority</h3>
 
 <div class="prio med">
-<p><span class="badge med">Medium priority</span> &nbsp;Relevant ideas appear in <b>4 of 8</b> readable papers: 2013 IS312, 2019 IS312, 2021 IS312, 2021 SIS312. Each question is short (1–2.5 marks).</p>
+<p><span class="badge med">Medium priority</span> &nbsp;Relevant ideas appear in <b>4 of 8</b> readable papers: 2013, 2019, 2021, 2021 SIS312. Each question is short (1–2.5 marks).</p>
 <ul class="tight">
-<li>Dense vs sparse index for non-existent keys — <b>2</b> papers (2019 IS312, 2021 IS312) — the same sentence in both papers.</li>
-<li>Primary index: sparse or dense — <b>1</b> paper (2021 IS312); Indexes on heap files must be dense — <b>1</b> paper (2021 SIS312); Primary vs secondary vs clustering index — <b>1</b> paper (2013 IS312).</li>
-<li>Dense vs sparse in any form: <b>4</b> papers (2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312) — four different questions; the 2017 one is about aggregates and is answered in <a href="#q-agg-dense-sparse">Lecture 3</a>.</li>
+<li>Dense vs sparse index for non-existent keys — <b>2</b> papers (2019, 2021) — the same sentence in both papers.</li>
+<li>Primary index: sparse or dense — <b>1</b> paper (2021); Indexes on heap files must be dense — <b>1</b> paper (2021 SIS312); Primary vs secondary vs clustering index — <b>1</b> paper (2013).</li>
+<li>Dense vs sparse in any form: <b>4</b> papers (2017, 2019, 2021, 2021 SIS312) — four different questions; the 2017 one is about aggregates and is answered in <a href="#q-agg-dense-sparse">Lecture 3</a>.</li>
 <li>MAX / MIN with a B-tree is taught in the Week 04 slides, so it is counted and answered in <a href="#l3">Lecture 3</a>.</li>
 </ul>
 </div>
@@ -425,9 +425,9 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 <div class="qh"><span class="qn">Question 1.1</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">Dense vs sparse, missing keys</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2019 IS312, Q2.3, PDF page 11 [2 marks]; 2021 IS312, Q1(b), PDF page 14 [1.5 marks]. (Exact wording. Neither paper has an answer key.)</p>
+<p><b>Source:</b> Past exam — 2019, Q2.3, PDF page 11 [2 marks]; 2021, Q1(b), PDF page 14 [1.5 marks]. (Exact wording. Neither paper has an answer key.)</p>
 <p><b>Idea tested:</b> Dense vs sparse index for non-existent keys</p>
-<p><b>Appeared in:</b> 2 verified exam papers — 2019 IS312, 2021 IS312.</p>
+<p><b>Appeared in:</b> 2 verified exam papers — 2019, 2021.</p>
 <p><b>Exact or similar repetitions:</b> Exact repeat: the same sentence in both papers. Related dense/sparse questions with a different point: <a href="#q-primary-sd">Question 1.2</a>, <a href="#q-heap-dense">Question 1.3</a> and <a href="#q-agg-dense-sparse">Question 3.8</a>.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -454,9 +454,9 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 <div class="qh"><span class="qn">Question 1.2</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Primary index: sparse or dense</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2021 IS312, Q1(c), PDF page 14 [2.5 marks]. (Faithful paraphrase; the paper prints “True of False why and give example”. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2021, Q1(c), PDF page 14 [2.5 marks]. (Faithful paraphrase; the paper prints “True of False why and give example”. No answer key.)</p>
 <p><b>Idea tested:</b> Primary index: sparse or dense</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2021 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2021.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. Related: <a href="#q-heap-dense">Question 1.3</a> (heap files) and <a href="#q-idx-types">Question 1.4</a> (index types).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -508,9 +508,9 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 <div class="qh"><span class="qn">Question 1.4</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Primary vs secondary vs clustering</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q3, PDF page 1 [1 point]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2013, Q3, PDF page 1 [1 point]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Primary vs secondary vs clustering index</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2013 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2013.</p>
 <p><b>Exact or similar repetitions:</b> Asked once as a direct comparison. The 2021 papers test single rows of the same table (<a href="#q-primary-sd">Question 1.2</a> and <a href="#q-heap-dense">Question 1.3</a>).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -597,11 +597,11 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 <h3 id="l2-a">A. Exam Priority</h3>
 
 <div class="prio med">
-<p><span class="badge med">Medium priority</span> &nbsp;Relevant ideas appear in <b>4 of 8</b> readable papers: 2013 IS312, 2015 IS312, 2021 IS312, 2021 SIS312. No idea in this lecture appears in more than two papers.</p>
+<p><span class="badge med">Medium priority</span> &nbsp;Relevant ideas appear in <b>4 of 8</b> readable papers: 2013, 2015, 2021, 2021 SIS312. No idea in this lecture appears in more than two papers.</p>
 <ul class="tight">
-<li>Query-processing steps — <b>2</b> papers (2013 IS312, 2015 IS312).</li>
-<li>Sorting vs hashing (advantages and disadvantages) — <b>2</b> papers (2013 IS312, 2015 IS312) and Pipelining vs materialization — <b>2</b> papers (2013 IS312, 2015 IS312) — both are <b>not in the supplied slides</b>; they come from the 2013 and 2015 papers, which were set by other instructors.</li>
-<li>Cost of DISTINCT (duplicate elimination) — <b>1</b> paper (2021 IS312); Why SQL is translated into relational algebra — <b>1</b> paper (2021 SIS312) — the two questions from Dr. Noha Nagy’s papers.</li>
+<li>Query-processing steps — <b>2</b> papers (2013, 2015).</li>
+<li>Sorting vs hashing (advantages and disadvantages) — <b>2</b> papers (2013, 2015) and Pipelining vs materialization — <b>2</b> papers (2013, 2015) — both are <b>not in the supplied slides</b>; they come from the 2013 and 2015 papers, which were set by other instructors.</li>
+<li>Cost of DISTINCT (duplicate elimination) — <b>1</b> paper (2021); Why SQL is translated into relational algebra — <b>1</b> paper (2021 SIS312) — the two questions from Dr. Noha Nagy’s papers.</li>
 <li>Selection algorithms and set operations: 0 direct exam questions. Their cost formulas are in <a href="#l5">Lecture 5</a>.</li>
 </ul>
 </div>
@@ -674,9 +674,9 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 <div class="qh"><span class="qn">Question 2.1</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">Steps of query processing</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q6, PDF page 1 [1 point] (exact wording, no key); 2015 IS312, Q2, PDF page 4 [1 point] (exact wording, official key).</p>
+<p><b>Source:</b> Past exam — 2013, Q6, PDF page 1 [1 point] (exact wording, no key); 2015, Q2, PDF page 4 [1 point] (exact wording, official key).</p>
 <p><b>Idea tested:</b> Query-processing steps</p>
-<p><b>Appeared in:</b> 2 verified exam papers — 2013 IS312, 2015 IS312.</p>
+<p><b>Appeared in:</b> 2 verified exam papers — 2013, 2015.</p>
 <p><b>Exact or similar repetitions:</b> Same idea in two formats: draw the diagram (2013); list four steps with the input and the output (2015).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -730,9 +730,9 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 <div class="qh"><span class="qn">Question 2.3</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Cost of DISTINCT</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2021 IS312, Q1(d) parts 1 and 2, PDF page 14. (Exact wording; printed under “Question 1: Indexing”. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2021, Q1(d) parts 1 and 2, PDF page 14. (Exact wording; printed under “Question 1: Indexing”. No answer key.)</p>
 <p><b>Idea tested:</b> Cost of DISTINCT (duplicate elimination)</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2021 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2021.</p>
 <p><b>Exact or similar repetitions:</b> Asked once.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -763,9 +763,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 2.4</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">Sorting vs hashing</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q5, PDF page 1 [1 point] (exact wording, no key); 2015 IS312, Q1 and Q5, PDF page 4 (exact wording, official key).</p>
+<p><b>Source:</b> Past exam — 2013, Q5, PDF page 1 [1 point] (exact wording, no key); 2015, Q1 and Q5, PDF page 4 (exact wording, official key).</p>
 <p><b>Idea tested:</b> Sorting vs hashing (advantages and disadvantages)</p>
-<p><b>Appeared in:</b> 2 verified exam papers — 2013 IS312, 2015 IS312.</p>
+<p><b>Appeared in:</b> 2 verified exam papers — 2013, 2015.</p>
 <p><b>Exact or similar repetitions:</b> Related idea in two papers: one comparison question in 2013, split into two questions in 2015. Not asked since 2015.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -792,9 +792,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 2.5</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">Pipelining vs materialization</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q10, PDF page 1 [1 point] (exact wording, no key); 2015 IS312, Q6, PDF pages 4–5 [2 points] (exact wording, official key).</p>
+<p><b>Source:</b> Past exam — 2013, Q10, PDF page 1 [1 point] (exact wording, no key); 2015, Q6, PDF pages 4–5 [2 points] (exact wording, official key).</p>
 <p><b>Idea tested:</b> Pipelining vs materialization</p>
-<p><b>Appeared in:</b> 2 verified exam papers — 2013 IS312, 2015 IS312.</p>
+<p><b>Appeared in:</b> 2 verified exam papers — 2013, 2015.</p>
 <p><b>Exact or similar repetitions:</b> Related idea in two papers with different wording: materialization vs pipelining (2013); pipelining vs stream-based processing (2015). Not asked since 2015.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -884,12 +884,12 @@ Where dno='3'</pre></div>
 <h3 id="l3-a">A. Exam Priority</h3>
 
 <div class="prio high">
-<p><span class="badge high">High priority</span> &nbsp;Relevant ideas appear in <b>8 of 8</b> readable papers: 2013 IS312, 2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312. Every paper has at least one question from this lecture.</p>
+<p><span class="badge high">High priority</span> &nbsp;Relevant ideas appear in <b>8 of 8</b> readable papers: 2013, 2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023. Every paper has at least one question from this lecture.</p>
 <ul class="tight">
-<li>Block nested-loop join cost — <b>7</b> papers (2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312). The <b>same large problem</b> (R 100,000 × 500 bytes, S 50,000 × 750 bytes, block 5,000 bytes, 6 buffers) is in <b>5</b> papers: 2017, 2019, 2021 IS312, 2021 SIS312, 2023.</li>
-<li>Minimum buffers for a nested-loop join — <b>3</b> papers (2017 IS312, 2019 IS312, 2023 IS312) — always part (b) of the large problem.</li>
-<li>MAX / MIN using a B-tree index — <b>4</b> papers (2014 IS312, 2021 IS312, 2021 SIS312, 2023 IS312) — MAX in 2014, 2021 IS312 and 2023; MIN in 2021 SIS312.</li>
-<li>Once each: Index-only query — <b>1</b> paper (2023 IS312); Dense and sparse indexes for aggregate operations — <b>1</b> paper (2017 IS312); Suitable index for GROUP BY — <b>1</b> paper (2019 IS312); Join algorithms and their preconditions — <b>1</b> paper (2013 IS312).</li>
+<li>Block nested-loop join cost — <b>7</b> papers (2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023). The <b>same large problem</b> (R 100,000 × 500 bytes, S 50,000 × 750 bytes, block 5,000 bytes, 6 buffers) is in <b>5</b> papers: 2017, 2019, 2021, 2021 SIS312, 2023.</li>
+<li>Minimum buffers for a nested-loop join — <b>3</b> papers (2017, 2019, 2023) — always part (b) of the large problem.</li>
+<li>MAX / MIN using a B-tree index — <b>4</b> papers (2014, 2021, 2021 SIS312, 2023) — MAX in 2014, 2021 and 2023; MIN in 2021 SIS312.</li>
+<li>Once each: Index-only query — <b>1</b> paper (2023); Dense and sparse indexes for aggregate operations — <b>1</b> paper (2017); Suitable index for GROUP BY — <b>1</b> paper (2019); Join algorithms and their preconditions — <b>1</b> paper (2013).</li>
 </ul>
 </div>
 
@@ -976,10 +976,10 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 3.1</span><span class="src-chip exam">Past exam</span><span class="rep hot">⚠ Repeated in 7 exam papers</span><span class="sub">The repeated large nested-loop join</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2017 IS312, Q2(a)(b), PDF pages 7–8; 2019 IS312, Q1.2(a)(b), PDF page 11; 2021 IS312, Q2(c) (printed as a second “a)”), PDF page 15; 2021 SIS312, Q2(c) (printed as “a)”), PDF page 18; 2023 IS312, Q2(a)(b), PDF page 21. (Exact wording. Official keys: 2021 SIS312 and 2023.)</p>
-<p><b>Idea tested (1):</b> Block nested-loop join cost — <b>Appeared in:</b> 7 verified exam papers — 2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
-<p><b>Idea tested (2):</b> Minimum buffers for a nested-loop join — <b>Appeared in:</b> 3 verified exam papers — 2017 IS312, 2019 IS312, 2023 IS312.</p>
-<p><b>Exact or similar repetitions:</b> Exact repeated scenario: the same text and numbers in <b>5</b> papers (2017, 2019, 2021 IS312, 2021 SIS312, 2023). Part (b) is in 3 of them (2017, 2019, 2023). The broader idea adds 2014 (formula only, <a href="#q-nlj-formula">Question 3.3</a>) and 2015 (other numbers, <a href="#q-nlj-small">Question 3.2</a>).</p>
+<p><b>Source:</b> Past exam — 2017, Q2(a)(b), PDF pages 7–8; 2019, Q1.2(a)(b), PDF page 11; 2021, Q2(c) (printed as a second “a)”), PDF page 15; 2021 SIS312, Q2(c) (printed as “a)”), PDF page 18; 2023, Q2(a)(b), PDF page 21. (Exact wording. Official keys: 2021 SIS312 and 2023.)</p>
+<p><b>Idea tested (1):</b> Block nested-loop join cost — <b>Appeared in:</b> 7 verified exam papers — 2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
+<p><b>Idea tested (2):</b> Minimum buffers for a nested-loop join — <b>Appeared in:</b> 3 verified exam papers — 2017, 2019, 2023.</p>
+<p><b>Exact or similar repetitions:</b> Exact repeated scenario: the same text and numbers in <b>5</b> papers (2017, 2019, 2021, 2021 SIS312, 2023). Part (b) is in 3 of them (2017, 2019, 2023). The broader idea adds 2014 (formula only, <a href="#q-nlj-formula">Question 3.3</a>) and 2015 (other numbers, <a href="#q-nlj-small">Question 3.2</a>).</p>
 </div>
 <p class="lbl">Question:</p>
 <div class="qtext">
@@ -1009,9 +1009,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 3.2</span><span class="src-chip exam">Past exam</span><span class="rep hot">⚠ Repeated in 7 exam papers</span><span class="sub">Nested-loop join with 14 and 6 blocks</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2015 IS312, Q7, PDF page 5 [2 points]. (Exact wording. Official key available — it contains an error.)</p>
+<p><b>Source:</b> Past exam — 2015, Q7, PDF page 5 [2 points]. (Exact wording. Official key available — it contains an error.)</p>
 <p><b>Idea tested:</b> Block nested-loop join cost</p>
-<p><b>Appeared in:</b> 7 verified exam papers — 2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 7 verified exam papers — 2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> A variation of the nested-loop cost idea with small numbers; this version appears only in 2015.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1033,9 +1033,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 3.3</span><span class="src-chip exam">Past exam</span><span class="rep hot">⚠ Repeated in 7 exam papers</span><span class="sub">Nested-loop join cost formula</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2014 IS312, Q4, PDF pages 2–3 [1 point]. (Exact wording. Official key available.)</p>
+<p><b>Source:</b> Past exam — 2014, Q4, PDF pages 2–3 [1 point]. (Exact wording. Official key available.)</p>
 <p><b>Idea tested:</b> Block nested-loop join cost</p>
-<p><b>Appeared in:</b> 7 verified exam papers — 2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 7 verified exam papers — 2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Formula-only version of the nested-loop cost idea; asked this way once.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1063,7 +1063,7 @@ Where dno='3'</pre></div>
 <div class="meta">
 <p><b>Source:</b> Lecture slides — Week 06 deck — quiz, W5&amp;6&amp;7.pdf, PDF page 94 (answers on 97); the same numbers are worked in Week 04 — Query Optimization Techniques, W2&amp;3&amp;4.pdf, slides 44–45 (PDF pages 143–144). Adapted from a lecture slide example.</p>
 <p><b>Idea tested:</b> Block nested-loop join cost</p>
-<p><b>Appeared in:</b> 7 verified exam papers — 2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 7 verified exam papers — 2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question; the smallest version of the repeated calculation.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1088,8 +1088,8 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. Inspired by the large nested-loop problem of 2017–2023; the numbers are new and were not in any exam.</p>
-<p><b>Idea tested (1):</b> Block nested-loop join cost — <b>Appeared in:</b> 7 verified exam papers — 2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
-<p><b>Idea tested (2):</b> Minimum buffers for a nested-loop join — <b>Appeared in:</b> 3 verified exam papers — 2017 IS312, 2019 IS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Block nested-loop join cost — <b>Appeared in:</b> 7 verified exam papers — 2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
+<p><b>Idea tested (2):</b> Minimum buffers for a nested-loop join — <b>Appeared in:</b> 3 verified exam papers — 2017, 2019, 2023.</p>
 <p><b>Exact or similar repetitions:</b> A variation written for practice. The record sizes divide the block size exactly, so both blocking conventions give the same block counts.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1118,10 +1118,10 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 3.6</span><span class="src-chip exam">Past exam</span><span class="rep hot">⚠ Repeated in 4 exam papers</span><span class="sub">MAX / MIN with a B-tree</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2014 IS312, Q3, PDF page 2 [1 point]; 2021 IS312, Q1(a), PDF page 14 [1 mark]; 2023 IS312, Q1(a), PDF page 21 [2 marks]; 2021 SIS312, Q1(a), PDF page 17 [1 mark] (MIN). (Exact wording. Official keys: 2014, 2021 SIS312, 2023.)</p>
+<p><b>Source:</b> Past exam — 2014, Q3, PDF page 2 [1 point]; 2021, Q1(a), PDF page 14 [1 mark]; 2023, Q1(a), PDF page 21 [2 marks]; 2021 SIS312, Q1(a), PDF page 17 [1 mark] (MIN). (Exact wording. Official keys: 2014, 2021 SIS312, 2023.)</p>
 <p><b>Idea tested:</b> MAX / MIN using a B-tree index</p>
-<p><b>Appeared in:</b> 4 verified exam papers — 2014 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
-<p><b>Exact or similar repetitions:</b> Exact repeat of the MAX sentence in 3 papers (2014, 2021 IS312, 2023); the 2021 SIS312 paper asks the same about MIN.</p>
+<p><b>Appeared in:</b> 4 verified exam papers — 2014, 2021, 2021 SIS312, 2023.</p>
+<p><b>Exact or similar repetitions:</b> Exact repeat of the MAX sentence in 3 papers (2014, 2021, 2023); the 2021 SIS312 paper asks the same about MIN.</p>
 </div>
 <p class="lbl">Question:</p>
 <div class="qtext">
@@ -1144,9 +1144,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 3.7</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Index-only query</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2023 IS312, Q1(b), PDF page 21 [3 marks]. (Exact wording. Official key available.)</p>
+<p><b>Source:</b> Past exam — 2023, Q1(b), PDF page 21 [3 marks]. (Exact wording. Official key available.)</p>
 <p><b>Idea tested:</b> Index-only query</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2023 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2023.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. Closely related to MAX / MIN with a B-tree (<a href="#q-btree-maxmin">Question 3.6</a>).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1170,9 +1170,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 3.8</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Dense and sparse indexes for aggregates</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2017 IS312, Q1, PDF page 7 [4 marks]. (Exact wording. No answer key in the PDF; the answer below is built from the slides.)</p>
+<p><b>Source:</b> Past exam — 2017, Q1, PDF page 7 [4 marks]. (Exact wording. No answer key in the PDF; the answer below is built from the slides.)</p>
 <p><b>Idea tested:</b> Dense and sparse indexes for aggregate operations</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2017 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2017.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. Related: MAX / MIN with a B-tree (4 papers) and the index-only query (1 paper).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1202,9 +1202,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 3.9</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Index for GROUP BY</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2019 IS312, Q2.4, PDF page 12 [1 mark]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2019, Q2.4, PDF page 12 [1 mark]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Suitable index for GROUP BY</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2019 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2019.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. The same query is the GROUP BY example in the Week 04 slides.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1258,9 +1258,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 3.11</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Join algorithms and pre-conditions</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q4(a) and Q4(b), PDF page 1 [1 point]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2013, Q4(a) and Q4(b), PDF page 1 [1 point]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Join algorithms and their preconditions</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2013 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2013.</p>
 <p><b>Exact or similar repetitions:</b> Asked once, in the oldest paper. Later papers test the nested-loop algorithm numerically instead.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1298,12 +1298,12 @@ Where dno='3'</pre></div>
 <h3 id="l4-a">A. Exam Priority</h3>
 
 <div class="prio high">
-<p><span class="badge high">High priority</span> &nbsp;Relevant ideas appear in <b>7 of 8</b> readable papers: 2013 IS312, 2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312. Only the 2023 paper has no question from this lecture.</p>
+<p><span class="badge high">High priority</span> &nbsp;Relevant ideas appear in <b>7 of 8</b> readable papers: 2013, 2014, 2015, 2017, 2019, 2021, 2021 SIS312. Only the 2023 paper has no question from this lecture.</p>
 <ul class="tight">
-<li>Heuristic optimization before cost-based optimization — <b>4</b> papers (2014 IS312, 2015 IS312, 2017 IS312, 2021 IS312) — the same sentence in 2014, 2017 and 2021 IS312; 2015 asks the reverse (“after”).</li>
-<li>Query-tree reasoning: <b>3</b> papers (2014, 2015, 2019) — Heuristic optimization of a query tree — <b>2</b> papers (2014 IS312, 2019 IS312); Query-tree equivalence and the SQL of a tree — <b>1</b> paper (2015 IS312). The 2014 tree figure is missing from the PDF.</li>
-<li>Heuristic optimization rules — <b>2</b> papers (2013 IS312, 2021 SIS312).</li>
-<li>Projection equivalences: <b>3</b> papers (2019, 2021 IS312, 2021 SIS312) — four different questions: Commutativity of projection — <b>1</b> paper (2019 IS312); Commuting selection with projection — <b>1</b> paper (2021 SIS312); Projection over set difference — <b>1</b> paper (2021 IS312); Pushing projection down — <b>1</b> paper (2021 IS312).</li>
+<li>Heuristic optimization before cost-based optimization — <b>4</b> papers (2014, 2015, 2017, 2021) — the same sentence in 2014, 2017 and 2021; 2015 asks the reverse (“after”).</li>
+<li>Query-tree reasoning: <b>3</b> papers (2014, 2015, 2019) — Heuristic optimization of a query tree — <b>2</b> papers (2014, 2019); Query-tree equivalence and the SQL of a tree — <b>1</b> paper (2015). The 2014 tree figure is missing from the PDF.</li>
+<li>Heuristic optimization rules — <b>2</b> papers (2013, 2021 SIS312).</li>
+<li>Projection equivalences: <b>3</b> papers (2019, 2021, 2021 SIS312) — four different questions: Commutativity of projection — <b>1</b> paper (2019); Commuting selection with projection — <b>1</b> paper (2021 SIS312); Projection over set difference — <b>1</b> paper (2021); Pushing projection down — <b>1</b> paper (2021).</li>
 </ul>
 </div>
 
@@ -1378,10 +1378,10 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 4.1</span><span class="src-chip exam">Past exam</span><span class="rep hot">⚠ Repeated in 4 exam papers</span><span class="sub">Heuristics before cost-based?</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2014 IS312, Q5, PDF page 3 [1 point]; 2017 IS312, Q3, PDF page 8 [4 marks]; 2021 IS312, Q2(d) (printed as a second “b)”), PDF page 15 [2 marks]; 2015 IS312, Q8, PDF page 5 [2 points] (reversed wording). (Exact wording. Official keys: 2014 and 2015.)</p>
+<p><b>Source:</b> Past exam — 2014, Q5, PDF page 3 [1 point]; 2017, Q3, PDF page 8 [4 marks]; 2021, Q2(d) (printed as a second “b)”), PDF page 15 [2 marks]; 2015, Q8, PDF page 5 [2 points] (reversed wording). (Exact wording. Official keys: 2014 and 2015.)</p>
 <p><b>Idea tested:</b> Heuristic optimization before cost-based optimization</p>
-<p><b>Appeared in:</b> 4 verified exam papers — 2014 IS312, 2015 IS312, 2017 IS312, 2021 IS312.</p>
-<p><b>Exact or similar repetitions:</b> Exact repeat of the same sentence in 3 papers (2014, 2017, 2021 IS312). The 2015 paper reverses it: “after” instead of “before”.</p>
+<p><b>Appeared in:</b> 4 verified exam papers — 2014, 2015, 2017, 2021.</p>
+<p><b>Exact or similar repetitions:</b> Exact repeat of the same sentence in 3 papers (2014, 2017, 2021). The 2015 paper reverses it: “after” instead of “before”.</p>
 </div>
 <p class="lbl">Question:</p>
 <div class="qtext">
@@ -1408,9 +1408,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 4.2</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">SQL → RA → initial and optimized tree</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2019 IS312, Q1.1(a) [1 mark] and Q1.1(b) [3 marks], PDF page 10. (Exact wording; the schema is copied as printed, including the attribute name “rang”. No answer key.)</p>
-<p><b>Idea tested (1):</b> Heuristic optimization of a query tree — <b>Appeared in:</b> 2 verified exam papers — 2014 IS312, 2019 IS312.</p>
-<p><b>Idea tested (2):</b> SQL to relational algebra — <b>Appeared in:</b> 1 verified exam paper — 2019 IS312.</p>
+<p><b>Source:</b> Past exam — 2019, Q1.1(a) [1 mark] and Q1.1(b) [3 marks], PDF page 10. (Exact wording; the schema is copied as printed, including the attribute name “rang”. No answer key.)</p>
+<p><b>Idea tested (1):</b> Heuristic optimization of a query tree — <b>Appeared in:</b> 2 verified exam papers — 2014, 2019.</p>
+<p><b>Idea tested (2):</b> SQL to relational algebra — <b>Appeared in:</b> 1 verified exam paper — 2019.</p>
 <p><b>Exact or similar repetitions:</b> The only paper where a full SQL-to-optimized-tree derivation can be reproduced. Related: 2014 Q9 asks to optimize a given tree (figure missing) and 2015 Q9 compares two trees (<a href="#q-tree-equiv">Question 4.3</a>).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1450,9 +1450,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 4.3</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Are the two query trees equivalent?</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2015 IS312, Q9, PDF pages 5–6 [2 points]. (Exact wording; the two trees are transcribed from the figure on PDF page 6, which is readable. Official key available.)</p>
+<p><b>Source:</b> Past exam — 2015, Q9, PDF pages 5–6 [2 points]. (Exact wording; the two trees are transcribed from the figure on PDF page 6, which is readable. Official key available.)</p>
 <p><b>Idea tested:</b> Query-tree equivalence and the SQL of a tree</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2015 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2015.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. The two trees are the first and last trees of the lecture example (section B.5).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1483,15 +1483,15 @@ Where dno='3'</pre></div>
 </div>
 </article>
 
-<div class="note gap" id="q-tree-missing"><b>Missing figure — 2014 IS312, Q9, PDF page 3 [2 points]:</b> “Perform heuristic optimizations for the shown query tree”. The query tree is <b>not in the supplied PDF</b> (page 3 has no figure, and the key shows no answer), so this question cannot be reproduced and no tree has been invented for it. The method is the six steps of section B.4; practise it on <a href="#q-sailors">Question 4.2</a>.</div>
+<div class="note gap" id="q-tree-missing"><b>Missing figure — 2014, Q9, PDF page 3 [2 points]:</b> “Perform heuristic optimizations for the shown query tree”. The query tree is <b>not in the supplied PDF</b> (page 3 has no figure, and the key shows no answer), so this question cannot be reproduced and no tree has been invented for it. The method is the six steps of section B.4; practise it on <a href="#q-sailors">Question 4.2</a>.</div>
 
 <article class="q" id="q-hrules">
 <div class="qh"><span class="qn">Question 4.4</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">Rules of heuristic optimization</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q7, PDF page 1 [1 point] (exact wording, no key); 2021 SIS312, Q2(d), PDF page 18 [1.5 marks] (exact wording, official key).</p>
+<p><b>Source:</b> Past exam — 2013, Q7, PDF page 1 [1 point] (exact wording, no key); 2021 SIS312, Q2(d), PDF page 18 [1.5 marks] (exact wording, official key).</p>
 <p><b>Idea tested:</b> Heuristic optimization rules</p>
-<p><b>Appeared in:</b> 2 verified exam papers — 2013 IS312, 2021 SIS312.</p>
+<p><b>Appeared in:</b> 2 verified exam papers — 2013, 2021 SIS312.</p>
 <p><b>Exact or similar repetitions:</b> Related idea in two papers: list the rules (2013); list three heuristics that reduce the optimizer’s search space (2021 SIS312).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1525,9 +1525,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 4.5</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Pushing projection down</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2021 IS312, Q2(a), PDF page 15 [1 mark]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2021, Q2(a), PDF page 15 [1 mark]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Pushing projection down</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2021 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2021.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. Related projection questions: <a href="#q-pi-diff">4.6</a>, <a href="#q-sigma-pi">4.7</a> and <a href="#q-pi-comm">4.8</a>.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1548,9 +1548,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 4.6</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Projection over set difference</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2021 IS312, Q2(b), PDF page 15 [1 mark]. (Faithful paraphrase: the paper prints the second expression as “π A(R) − 5A(S)”; the “5” is a misprinted π. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2021, Q2(b), PDF page 15 [1 mark]. (Faithful paraphrase: the paper prints the second expression as “π A(R) − 5A(S)”; the “5” is a misprinted π. No answer key.)</p>
 <p><b>Idea tested:</b> Projection over set difference</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2021 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2021.</p>
 <p><b>Exact or similar repetitions:</b> Asked once.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1601,9 +1601,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 4.8</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Is projection commutative?</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2019 IS312, Q1.1(c), PDF page 10 [2 marks]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2019, Q1.1(c), PDF page 10 [2 marks]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Commutativity of projection</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2019 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2019.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. Compare with <a href="#q-sigma-pi">Question 4.7</a>, which asks about σ and π together.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1662,10 +1662,10 @@ Where dno='3'</pre></div>
 <h3 id="l5-a">A. Exam Priority</h3>
 
 <div class="prio low">
-<p><span class="badge low">Lower priority</span> &nbsp;Relevant ideas appear in <b>2 of 8</b> readable papers: 2013 IS312, 2021 SIS312. The nested-loop cost formula comes from these decks too, but it is counted in <a href="#l3">Lecture 3</a> (7 papers).</p>
+<p><span class="badge low">Lower priority</span> &nbsp;Relevant ideas appear in <b>2 of 8</b> readable papers: 2013, 2021 SIS312. The nested-loop cost formula comes from these decks too, but it is counted in <a href="#l3">Lecture 3</a> (7 papers).</p>
 <ul class="tight">
-<li>Selectivity, selection cardinality, blocking factor and join selectivity — <b>1</b> paper (2013 IS312).</li>
-<li>Single-loop join cost — <b>1</b> paper (2013 IS312) — the clustering-index case.</li>
+<li>Selectivity, selection cardinality, blocking factor and join selectivity — <b>1</b> paper (2013).</li>
+<li>Single-loop join cost — <b>1</b> paper (2013) — the clustering-index case.</li>
 <li>Linear scan vs index access — <b>1</b> paper (2021 SIS312).</li>
 <li>Selection cost estimation with the formulas below: 0 direct exam questions, but the slide exercises are the model for any numerical question.</li>
 </ul>
@@ -1731,9 +1731,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 5.1</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">sl, s, bfr and js</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q8, PDF page 1 [1 point]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2013, Q8, PDF page 1 [1 point]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Selectivity, selection cardinality, blocking factor and join selectivity</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2013 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2013.</p>
 <p><b>Exact or similar repetitions:</b> Asked once as definitions. The same quantities are needed in every cost calculation.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1759,9 +1759,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 5.2</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Single-loop join with a clustering index</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q9, PDF page 1 [1 point]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2013, Q9, PDF page 1 [1 point]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Single-loop join cost</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2013 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2013.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. The nested-loop formula is the one that repeats (Lecture 3).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1850,8 +1850,8 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> Lecture slides — Week 06 deck — Query Optimization Techniques (cost estimation), W5&amp;6&amp;7.pdf, slides 40–50 (PDF pages 81–91). Adapted from a lecture slide example.</p>
-<p><b>Idea tested (1):</b> Block nested-loop join cost — <b>Appeared in:</b> 7 verified exam papers — 2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
-<p><b>Idea tested (2):</b> Single-loop join cost — <b>Appeared in:</b> 1 verified exam paper — 2013 IS312.</p>
+<p><b>Idea tested (1):</b> Block nested-loop join cost — <b>Appeared in:</b> 7 verified exam papers — 2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
+<p><b>Idea tested (2):</b> Single-loop join cost — <b>Appeared in:</b> 1 verified exam paper — 2013.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question; it is the lecture’s full comparison of nested-loop and single-loop plans, with the output cost included.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1884,8 +1884,8 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> Lecture slides — Week 06 deck — quiz, W5&amp;6&amp;7.pdf, PDF pages 93–95 (answers on 96–98), quiz Q1, Q2, Q6 and Q7. Adapted from a lecture slide example.</p>
-<p><b>Idea tested (1):</b> Selectivity, selection cardinality, blocking factor and join selectivity — <b>Appeared in:</b> 1 verified exam paper — 2013 IS312.</p>
-<p><b>Idea tested (2):</b> Single-loop join cost — <b>Appeared in:</b> 1 verified exam paper — 2013 IS312.</p>
+<p><b>Idea tested (1):</b> Selectivity, selection cardinality, blocking factor and join selectivity — <b>Appeared in:</b> 1 verified exam paper — 2013.</p>
+<p><b>Idea tested (2):</b> Single-loop join cost — <b>Appeared in:</b> 1 verified exam paper — 2013.</p>
 <p><b>Exact or similar repetitions:</b> Not exam questions; the slides’ own multiple-choice checks.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -1921,12 +1921,12 @@ Where dno='3'</pre></div>
 <h3 id="l6-a">A. Exam Priority</h3>
 
 <div class="prio high">
-<p><span class="badge high">High priority</span> &nbsp;Relevant ideas appear in <b>7 of 8</b> readable papers: 2013 IS312, 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312. Only the 2015 paper has no transaction question.</p>
+<p><span class="badge high">High priority</span> &nbsp;Relevant ideas appear in <b>7 of 8</b> readable papers: 2013, 2014, 2017, 2019, 2021, 2021 SIS312, 2023. Only the 2015 paper has no transaction question.</p>
 <ul class="tight">
-<li>Recoverability classification of a schedule — <b>6</b> papers (2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312). The <b>same schedule S</b> is in <b>3</b> papers (2017, 2021 IS312, 2023) and a close variation in 2019. This format has been announced for the exam as multiple choice.</li>
-<li>Concurrency problems: Dirty read problem — <b>3</b> papers (2014 IS312, 2021 SIS312, 2023 IS312); Lost update problem — <b>2</b> papers (2013 IS312, 2021 IS312); Unrepeatable read problem — <b>1</b> paper (2019 IS312).</li>
-<li>ACID properties — <b>3</b> papers (2014 IS312, 2021 IS312, 2021 SIS312); Transaction states and state diagram — <b>3</b> papers (2013 IS312, 2019 IS312, 2021 SIS312); Partially committed vs committed — <b>2</b> papers (2019 IS312, 2021 SIS312); Transaction definition — <b>2</b> papers (2013 IS312, 2014 IS312).</li>
-<li>Conflict-serializability and precedence graph — <b>2</b> papers (2014 IS312, 2017 IS312) — <b>not in the supplied slides</b>.</li>
+<li>Recoverability classification of a schedule — <b>6</b> papers (2014, 2017, 2019, 2021, 2021 SIS312, 2023). The <b>same schedule S</b> is in <b>3</b> papers (2017, 2021, 2023) and a close variation in 2019. This format has been announced for the exam as multiple choice.</li>
+<li>Concurrency problems: Dirty read problem — <b>3</b> papers (2014, 2021 SIS312, 2023); Lost update problem — <b>2</b> papers (2013, 2021); Unrepeatable read problem — <b>1</b> paper (2019).</li>
+<li>ACID properties — <b>3</b> papers (2014, 2021, 2021 SIS312); Transaction states and state diagram — <b>3</b> papers (2013, 2019, 2021 SIS312); Partially committed vs committed — <b>2</b> papers (2019, 2021 SIS312); Transaction definition — <b>2</b> papers (2013, 2014).</li>
+<li>Conflict-serializability and precedence graph — <b>2</b> papers (2014, 2017) — <b>not in the supplied slides</b>.</li>
 </ul>
 </div>
 
@@ -2052,10 +2052,10 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.1</span><span class="src-chip exam">Past exam</span><span class="rep hot">⚠ Repeated in 6 exam papers</span><span class="sub">The repeated schedule S</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2017 IS312, Q4(b), PDF page 9; 2021 IS312, Q3(c), PDF page 16 [3 marks]; 2023 IS312, Q3(b), PDF page 22 [3 marks]. (Exact wording. Official key: 2023.)</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
-<p><b>Idea tested (2):</b> Modifying a schedule to make it strict — <b>Appeared in:</b> 1 verified exam paper — 2017 IS312.</p>
-<p><b>Exact or similar repetitions:</b> Exact repeated schedule in <b>3</b> papers (2017, 2021 IS312, 2023). The 2019 paper uses a variation with two extra reads (<a href="#q-rec-2019">Question 6.2</a>). Other schedules: 2014 (<a href="#q-rec-s52">Question 6.4</a>) and 2021 SIS312 (<a href="#q-rec-s1s2">Question 6.3</a>). The “make it strict” part is in 2017 only.</p>
+<p><b>Source:</b> Past exam — 2017, Q4(b), PDF page 9; 2021, Q3(c), PDF page 16 [3 marks]; 2023, Q3(b), PDF page 22 [3 marks]. (Exact wording. Official key: 2023.)</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
+<p><b>Idea tested (2):</b> Modifying a schedule to make it strict — <b>Appeared in:</b> 1 verified exam paper — 2017.</p>
+<p><b>Exact or similar repetitions:</b> Exact repeated schedule in <b>3</b> papers (2017, 2021, 2023). The 2019 paper uses a variation with two extra reads (<a href="#q-rec-2019">Question 6.2</a>). Other schedules: 2014 (<a href="#q-rec-s52">Question 6.4</a>) and 2021 SIS312 (<a href="#q-rec-s1s2">Question 6.3</a>). The “make it strict” part is in 2017 only.</p>
 </div>
 <p class="lbl">Question:</p>
 <div class="qtext">
@@ -2095,9 +2095,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.2</span><span class="src-chip exam">Past exam</span><span class="rep hot">⚠ Repeated in 6 exam papers</span><span class="sub">The 2019 variation</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2019 IS312, Q3(b), PDF page 12 [3 marks]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2019, Q3(b), PDF page 12 [3 marks]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Recoverability classification of a schedule</p>
-<p><b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> A variation of the repeated schedule: the same operations plus two extra reads, R1(z) and R3(y).</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2127,7 +2127,7 @@ Where dno='3'</pre></div>
 <div class="meta">
 <p><b>Source:</b> Past exam — 2021 SIS312, Q3(d) (printed as “a)”), PDF page 19 [3 marks]. (Exact wording. Official key available.)</p>
 <p><b>Idea tested:</b> Recoverability classification of a schedule</p>
-<p><b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Same task as the repeated question, with two different two-transaction schedules. S2 is the lecture’s strict example.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2162,9 +2162,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.4</span><span class="src-chip exam">Past exam</span><span class="rep hot">⚠ Repeated in 6 exam papers</span><span class="sub">Schedule S52</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2014 IS312, Q7, PDF page 3 [1 point]. (Exact wording. Official key available — it is incomplete.)</p>
+<p><b>Source:</b> Past exam — 2014, Q7, PDF page 3 [1 point]. (Exact wording. Official key available — it is incomplete.)</p>
 <p><b>Idea tested:</b> Recoverability classification of a schedule</p>
-<p><b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Same task with another two-transaction schedule; this schedule appears only in 2014.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2222,7 +2222,7 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> Lecture slides — Week 07 — Transaction Processing, W5&amp;6&amp;7.pdf, slides 49–50 (PDF pages 148–149). Adapted from a lecture slide example.</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Idea tested (2):</b> Proper (complete) schedule — <b>Appeared in:</b> 0 verified exam papers.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question; the lecture’s own “which schedule is…?” slide, the model for the announced multiple-choice format.</p>
 </div>
@@ -2254,7 +2254,7 @@ Where dno='3'</pre></div>
 <div class="meta">
 <p><b>Source:</b> Lecture slides — Week 07 — Transaction Processing, W5&amp;6&amp;7.pdf, slides 54, 57 (PDF pages 153, 156). Adapted from a lecture slide example.</p>
 <p><b>Idea tested:</b> Recoverability classification of a schedule</p>
-<p><b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Sb is the schedule used as S2 in the 2021 SIS312 paper.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2284,7 +2284,7 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> Lecture HTML — Transaction_Processing_Study_Guide.html, section “Part B · Exam-style: which schedule is…?”, question 13. (Adapted; every option re-checked against the Week 07 slides.)</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Idea tested (2):</b> Proper (complete) schedule — <b>Appeared in:</b> 0 verified exam papers.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the multiple-choice form.</p>
 </div>
@@ -2306,7 +2306,7 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> Lecture HTML — Transaction_Processing_Study_Guide.html, section “Part B · Exam-style: which schedule is…?”, question 22. (Adapted; every option re-checked against the Week 07 slides.)</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Idea tested (2):</b> Proper (complete) schedule — <b>Appeared in:</b> 0 verified exam papers.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the multiple-choice form.</p>
 </div>
@@ -2328,7 +2328,7 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. Written in the multiple-choice format announced for the exam; it is not a past-exam question.</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Idea tested (2):</b> Proper (complete) schedule — <b>Appeared in:</b> 0 verified exam papers.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the announced multiple-choice form.</p>
 </div>
@@ -2351,7 +2351,7 @@ Where dno='3'</pre></div>
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. Written in the multiple-choice format announced for the exam; it is not a past-exam question.</p>
 <p><b>Idea tested:</b> Recoverability classification of a schedule</p>
-<p><b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the announced multiple-choice form.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2372,7 +2372,7 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. Written in the multiple-choice format announced for the exam; it is not a past-exam question.</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Idea tested (2):</b> Proper (complete) schedule — <b>Appeared in:</b> 0 verified exam papers.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the announced multiple-choice form.</p>
 </div>
@@ -2395,7 +2395,7 @@ Where dno='3'</pre></div>
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. Written in the multiple-choice format announced for the exam; it is not a past-exam question.</p>
 <p><b>Idea tested:</b> Recoverability classification of a schedule</p>
-<p><b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the announced multiple-choice form.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2416,7 +2416,7 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. Written in the multiple-choice format announced for the exam; it is not a past-exam question.</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Idea tested (2):</b> Proper (complete) schedule — <b>Appeared in:</b> 0 verified exam papers.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the announced multiple-choice form.</p>
 </div>
@@ -2438,7 +2438,7 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. Written in the multiple-choice format announced for the exam; it is not a past-exam question.</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Idea tested (2):</b> Proper (complete) schedule — <b>Appeared in:</b> 0 verified exam papers.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the announced multiple-choice form.</p>
 </div>
@@ -2460,7 +2460,7 @@ Where dno='3'</pre></div>
 <div class="qb">
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. Written in the multiple-choice format announced for the exam; it is not a past-exam question.</p>
-<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Idea tested (1):</b> Recoverability classification of a schedule — <b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Idea tested (2):</b> Proper (complete) schedule — <b>Appeared in:</b> 0 verified exam papers.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same task as the exam classification questions (6 papers), in the announced multiple-choice form.</p>
 </div>
@@ -2483,7 +2483,7 @@ Where dno='3'</pre></div>
 <div class="meta">
 <p><b>Source:</b> AI-generated — Midterm-style question. It is not a past-exam question; the abort scenario follows the lecture’s cascading-rollback slide.</p>
 <p><b>Idea tested:</b> Recoverability classification of a schedule</p>
-<p><b>Appeared in:</b> 6 verified exam papers — 2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 6 verified exam papers — 2014, 2017, 2019, 2021, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Not an exam question. Same classification task (6 papers), extended with the cascading-rollback case from the slides.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2512,9 +2512,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.18</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">Is the repeated schedule conflict-serializable?</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2017 IS312, Q4(a), PDF page 8 [part of 8 marks]. (Exact wording. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2017, Q4(a), PDF page 8 [part of 8 marks]. (Exact wording. No answer key.)</p>
 <p><b>Idea tested:</b> Conflict-serializability and precedence graph</p>
-<p><b>Appeared in:</b> 2 verified exam papers — 2014 IS312, 2017 IS312.</p>
+<p><b>Appeared in:</b> 2 verified exam papers — 2014, 2017.</p>
 <p><b>Exact or similar repetitions:</b> Conflict-serializability is tested in 2 papers with different schedules (2014: S3, <a href="#q-confser-s3">Question 6.19</a>). The schedule here is the repeated schedule S of <a href="#q-rec-repeated">Question 6.1</a>; only the 2017 paper asks this part.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2562,9 +2562,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.19</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">Schedule S3</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2014 IS312, Q8, PDF page 3 [1 point]. (Exact wording. Official key available — it gives the result without the proof.)</p>
+<p><b>Source:</b> Past exam — 2014, Q8, PDF page 3 [1 point]. (Exact wording. Official key available — it gives the result without the proof.)</p>
 <p><b>Idea tested:</b> Conflict-serializability and precedence graph</p>
-<p><b>Appeared in:</b> 2 verified exam papers — 2014 IS312, 2017 IS312.</p>
+<p><b>Appeared in:</b> 2 verified exam papers — 2014, 2017.</p>
 <p><b>Exact or similar repetitions:</b> Conflict-serializability is tested in 2 papers (2014 and 2017) with different schedules.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2593,9 +2593,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.20</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 3 exam papers</span><span class="sub">Dirty read</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2014 IS312, Q2, PDF page 2 [1 point]; 2021 SIS312, Q3(b), PDF page 19 [2 marks]; 2023 IS312, Q3(a), PDF page 22 [3 marks]. (Exact wording. Official key in all three.)</p>
+<p><b>Source:</b> Past exam — 2014, Q2, PDF page 2 [1 point]; 2021 SIS312, Q3(b), PDF page 19 [2 marks]; 2023, Q3(a), PDF page 22 [3 marks]. (Exact wording. Official key in all three.)</p>
 <p><b>Idea tested:</b> Dirty read problem</p>
-<p><b>Appeared in:</b> 3 verified exam papers — 2014 IS312, 2021 SIS312, 2023 IS312.</p>
+<p><b>Appeared in:</b> 3 verified exam papers — 2014, 2021 SIS312, 2023.</p>
 <p><b>Exact or similar repetitions:</b> Exact repeat of the same sentence in 3 papers. The key shows the same figure each time.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2624,9 +2624,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.21</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 2 exam papers</span><span class="sub">Lost update</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q1, PDF page 1 [1 point]; 2021 IS312, Q3(b), PDF page 16 [2 marks]. (Exact wording; the 2013 paper says “the ‘lost update’ data concurrency problem”. No answer key in either paper.)</p>
+<p><b>Source:</b> Past exam — 2013, Q1, PDF page 1 [1 point]; 2021, Q3(b), PDF page 16 [2 marks]. (Exact wording; the 2013 paper says “the ‘lost update’ data concurrency problem”. No answer key in either paper.)</p>
 <p><b>Idea tested:</b> Lost update problem</p>
-<p><b>Appeared in:</b> 2 verified exam papers — 2013 IS312, 2021 IS312.</p>
+<p><b>Appeared in:</b> 2 verified exam papers — 2013, 2021.</p>
 <p><b>Exact or similar repetitions:</b> The same request in 2 papers.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2655,9 +2655,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.22</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Unrepeatable read</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2019 IS312, Q3(a), PDF page 12 [2 marks]. (Exact wording; the paper prints “the ‘unrepeatable read problem’ problem”. No answer key.)</p>
+<p><b>Source:</b> Past exam — 2019, Q3(a), PDF page 12 [2 marks]. (Exact wording; the paper prints “the ‘unrepeatable read problem’ problem”. No answer key.)</p>
 <p><b>Idea tested:</b> Unrepeatable read problem</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2019 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2019.</p>
 <p><b>Exact or similar repetitions:</b> Asked once. Same format as the dirty-read and lost-update questions.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2720,15 +2720,15 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.24</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 3 exam papers</span><span class="sub">Transaction and ACID</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2014 IS312, Q1, PDF page 2 [1 point]; 2021 IS312, Q3(a), PDF page 16 [3 marks]; 2021 SIS312, Q3(a), PDF page 18 [3 marks]. (Exact wording. Official keys: 2014 and 2021 SIS312.)</p>
-<p><b>Idea tested (1):</b> ACID properties — <b>Appeared in:</b> 3 verified exam papers — 2014 IS312, 2021 IS312, 2021 SIS312.</p>
-<p><b>Idea tested (2):</b> Transaction definition — <b>Appeared in:</b> 2 verified exam papers — 2013 IS312, 2014 IS312.</p>
+<p><b>Source:</b> Past exam — 2014, Q1, PDF page 2 [1 point]; 2021, Q3(a), PDF page 16 [3 marks]; 2021 SIS312, Q3(a), PDF page 18 [3 marks]. (Exact wording. Official keys: 2014 and 2021 SIS312.)</p>
+<p><b>Idea tested (1):</b> ACID properties — <b>Appeared in:</b> 3 verified exam papers — 2014, 2021, 2021 SIS312.</p>
+<p><b>Idea tested (2):</b> Transaction definition — <b>Appeared in:</b> 2 verified exam papers — 2013, 2014.</p>
 <p><b>Exact or similar repetitions:</b> The ACID part is in 3 papers (2014 and both 2021 papers, which share the same sentence). The definition part is in 2014 here and in 2013 (<a href="#q-states">Question 6.25</a>).</p>
 </div>
 <p class="lbl">Question:</p>
 <div class="qtext">
 <p><b>2014:</b> “What is a transaction? Explain the ACID properties.”</p>
-<p><b>2021 IS312 and 2021 SIS312:</b> “Explain briefly the transaction properties.”</p>
+<p><b>2021 and 2021 SIS312:</b> “Explain briefly the transaction properties.”</p>
 </div>
 <details class="ans"><summary>Model answer</summary>
 <div class="ab">
@@ -2750,10 +2750,10 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 6.25</span><span class="src-chip exam">Past exam</span><span class="rep">⚠ Repeated in 3 exam papers</span><span class="sub">Transaction states</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2013 IS312, Q2, PDF page 1 [1 point] (exact wording, no key); 2019 IS312, Q3(c), PDF page 13 [2 points] and 2021 SIS312, Q3(c), PDF page 19 [1 mark] (exact wording, same diagram; official key in both — in the 2019 file it is printed in white text).</p>
-<p><b>Idea tested (1):</b> Transaction states and state diagram — <b>Appeared in:</b> 3 verified exam papers — 2013 IS312, 2019 IS312, 2021 SIS312.</p>
-<p><b>Idea tested (2):</b> Partially committed vs committed — <b>Appeared in:</b> 2 verified exam papers — 2019 IS312, 2021 SIS312.</p>
-<p><b>Idea tested (3):</b> Transaction definition — <b>Appeared in:</b> 2 verified exam papers — 2013 IS312, 2014 IS312.</p>
+<p><b>Source:</b> Past exam — 2013, Q2, PDF page 1 [1 point] (exact wording, no key); 2019, Q3(c), PDF page 13 [2 points] and 2021 SIS312, Q3(c), PDF page 19 [1 mark] (exact wording, same diagram; official key in both — in the 2019 file it is printed in white text).</p>
+<p><b>Idea tested (1):</b> Transaction states and state diagram — <b>Appeared in:</b> 3 verified exam papers — 2013, 2019, 2021 SIS312.</p>
+<p><b>Idea tested (2):</b> Partially committed vs committed — <b>Appeared in:</b> 2 verified exam papers — 2019, 2021 SIS312.</p>
+<p><b>Idea tested (3):</b> Transaction definition — <b>Appeared in:</b> 2 verified exam papers — 2013, 2014.</p>
 <p><b>Exact or similar repetitions:</b> The state diagram is in 3 papers: draw it (2013), explain two of its states (2019, 2021 SIS312). The “partially committed vs committed” question is an exact repeat in 2 papers.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2819,10 +2819,10 @@ Where dno='3'</pre></div>
 <h3 id="t7-a">A. Exam Priority</h3>
 
 <div class="prio low">
-<p><span class="badge low">Lower priority</span> &nbsp;Relevant ideas appear in <b>2 of 8</b> readable papers: 2014 IS312, 2023 IS312. Neither topic is in the supplied lecture files, so this section is limited to what the two exam questions and their keys require.</p>
+<p><span class="badge low">Lower priority</span> &nbsp;Relevant ideas appear in <b>2 of 8</b> readable papers: 2014, 2023. Neither topic is in the supplied lecture files, so this section is limited to what the two exam questions and their keys require.</p>
 <ul class="tight">
-<li>T-SQL stored procedure / user-defined function — <b>1</b> paper (2023 IS312); T-SQL trigger — <b>1</b> paper (2023 IS312) — one 5-mark question in the most recent paper.</li>
-<li>Mandatory access control — <b>1</b> paper (2014 IS312).</li>
+<li>T-SQL stored procedure / user-defined function — <b>1</b> paper (2023); T-SQL trigger — <b>1</b> paper (2023) — one 5-mark question in the most recent paper.</li>
+<li>Mandatory access control — <b>1</b> paper (2014).</li>
 </ul>
 </div>
 
@@ -2848,9 +2848,9 @@ Where dno='3'</pre></div>
 <div class="qh"><span class="qn">Question 7.1</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">T-SQL object for a report</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2023 IS312, Q4.1, PDF pages 22–23 [2 marks]. (Exact wording; schema copied as printed, including the table name “registeration”. Official key available.)</p>
+<p><b>Source:</b> Past exam — 2023, Q4.1, PDF pages 22–23 [2 marks]. (Exact wording; schema copied as printed, including the table name “registeration”. Official key available.)</p>
 <p><b>Idea tested:</b> T-SQL stored procedure / user-defined function</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2023 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2023.</p>
 <p><b>Exact or similar repetitions:</b> Asked once (2023). It is the first of the two parts of the T-SQL question.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2899,9 +2899,9 @@ GO
 <div class="qh"><span class="qn">Question 7.2</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Trigger: at most 6 courses</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2023 IS312, Q4.2, PDF page 23 [3 marks]. (Exact wording; same schema. Official key available — it contains errors.)</p>
+<p><b>Source:</b> Past exam — 2023, Q4.2, PDF page 23 [3 marks]. (Exact wording; same schema. Official key available — it contains errors.)</p>
 <p><b>Idea tested:</b> T-SQL trigger</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2023 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2023.</p>
 <p><b>Exact or similar repetitions:</b> Asked once (2023). It is the second part of the T-SQL question.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2948,9 +2948,9 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <div class="qh"><span class="qn">Question 7.3</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Mandatory access control</span></div>
 <div class="qb">
 <div class="meta">
-<p><b>Source:</b> Past exam — 2014 IS312, Q6, PDF page 3 [1 point]. (Exact wording. Official key available.)</p>
+<p><b>Source:</b> Past exam — 2014, Q6, PDF page 3 [1 point]. (Exact wording. Official key available.)</p>
 <p><b>Idea tested:</b> Mandatory access control</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2014 IS312.</p>
+<p><b>Appeared in:</b> 1 verified exam paper — 2014.</p>
 <p><b>Exact or similar repetitions:</b> Asked once, in 2014. No later paper asks about database security.</p>
 </div>
 <p class="lbl">Question:</p>
@@ -2975,46 +2975,46 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <section class="sheet chapter" id="most-repeated">
 <span class="kicker">Reference A</span>
 <h2>Most-Repeated Ideas</h2>
-<p class="sub">A count is the number of <b>distinct readable papers</b> (out of 8) that directly ask about the idea. 2021 IS312 and 2021 SIS312 are two papers. An idea that only appears inside an answer is not counted. The counts rest on the readable material: 2015 Q3–Q4 and the figure of 2014 Q9 are missing from the PDF.</p>
+<p class="sub">A count is the number of <b>distinct readable papers</b> (out of 8) that directly ask about the idea. 2021 and 2021 SIS312 are two papers. An idea that only appears inside an answer is not counted. The counts rest on the readable material: 2015 Q3–Q4 and the figure of 2014 Q9 are missing from the PDF.</p>
 
 <h3>1. Ideas ranked by number of papers (broader ideas)</h3>
 <div class="tw"><table class="c6">
 <tr><th class="c">Papers</th><th>Idea</th><th>Years and papers</th><th>Type</th><th>Note</th><th>Covered in</th></tr>
-<tr class="hl"><td class="c"><b>7</b></td><td><b>Block nested-loop join cost</b></td><td>2014 IS312, 2015 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312</td><td>Broader idea</td><td>Formula only in 2014; 14 and 6 blocks with 3 buffers in 2015; the large R/S problem in the other five.</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr><tr class="hl"><td class="c"><b>6</b></td><td><b>Recoverability classification of a schedule</b></td><td>2014 IS312, 2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312</td><td>Broader idea</td><td>Different schedules in 2014 and 2021 SIS312; announced for the exam as multiple choice.</td><td><a href="#q-rec-repeated">Lecture 6 · Question 6.1</a></td></tr><tr class="hl"><td class="c"><b>6</b></td><td><b>Concurrency problems (lost update, dirty read or unrepeatable read)</b></td><td>2013 IS312, 2014 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312</td><td>Group of related ideas</td><td>Three different problems; each paper asks for an example of one.</td><td><a href="#q-dirty">Lecture 6 · Question 6.20</a></td></tr><tr class="hl"><td class="c"><b>4</b></td><td><b>MAX / MIN using a B-tree index</b></td><td>2014 IS312, 2021 IS312, 2021 SIS312, 2023 IS312</td><td>Broader idea</td><td>MAX in 2014, 2021 IS312 and 2023; MIN in 2021 SIS312.</td><td><a href="#q-btree-maxmin">Lecture 3 · Question 3.6</a></td></tr><tr class="hl"><td class="c"><b>4</b></td><td><b>Heuristic optimization before cost-based optimization</b></td><td>2014 IS312, 2015 IS312, 2017 IS312, 2021 IS312</td><td>Broader idea</td><td>2015 reverses the wording (“after”).</td><td><a href="#q-hbefore">Lecture 4 · Question 4.1</a></td></tr><tr class="hl"><td class="c"><b>4</b></td><td><b>Dense vs sparse indexes (any question)</b></td><td>2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312</td><td>Group of related ideas</td><td>Four different questions: aggregates, non-existent keys, primary index, heap files.</td><td><a href="#l1-b">Lecture 1 · revision</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Minimum buffers for a nested-loop join</b></td><td>2017 IS312, 2019 IS312, 2023 IS312</td><td>Broader idea</td><td>Always part (b) of the large problem.</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr><tr><td class="c"><b>3</b></td><td><b>ACID properties</b></td><td>2014 IS312, 2021 IS312, 2021 SIS312</td><td>Broader idea</td><td>“Explain the ACID properties” (2014); “Explain briefly the transaction properties” (both 2021 papers).</td><td><a href="#q-acid">Lecture 6 · Question 6.24</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Transaction states and state diagram</b></td><td>2013 IS312, 2019 IS312, 2021 SIS312</td><td>Broader idea</td><td>Draw the diagram (2013); explain two of its states (2019, 2021 SIS312).</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Dirty read problem</b></td><td>2014 IS312, 2021 SIS312, 2023 IS312</td><td>Broader idea</td><td>The key shows the same figure every time.</td><td><a href="#q-dirty">Lecture 6 · Question 6.20</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Query-tree reasoning (optimize a tree, compare two trees, SQL → tree)</b></td><td>2014 IS312, 2015 IS312, 2019 IS312</td><td>Group of related ideas</td><td>The 2014 tree figure is missing from the PDF.</td><td><a href="#q-sailors">Lecture 4 · Question 4.2</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Projection equivalences (commuting or pushing π)</b></td><td>2019 IS312, 2021 IS312, 2021 SIS312</td><td>Group of related ideas</td><td>Four different questions across three papers.</td><td><a href="#q-pi-comm">Lecture 4 · Question 4.8</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Dense vs sparse index for non-existent keys</b></td><td>2019 IS312, 2021 IS312</td><td>Broader idea</td><td>Same sentence in both papers.</td><td><a href="#q-dense-missing">Lecture 1 · Question 1.1</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Query-processing steps</b></td><td>2013 IS312, 2015 IS312</td><td>Broader idea</td><td>Diagram (2013); four steps with input and output (2015).</td><td><a href="#q-qp-steps">Lecture 2 · Question 2.1</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Sorting vs hashing (advantages and disadvantages)</b></td><td>2013 IS312, 2015 IS312</td><td>Broader idea</td><td>Not in the supplied slides; last asked in 2015.</td><td><a href="#q-sort-hash">Lecture 2 · Question 2.4</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Pipelining vs materialization</b></td><td>2013 IS312, 2015 IS312</td><td>Broader idea</td><td>Not in the supplied slides; last asked in 2015.</td><td><a href="#q-pipelining">Lecture 2 · Question 2.5</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Heuristic optimization rules</b></td><td>2013 IS312, 2021 SIS312</td><td>Broader idea</td><td>List the rules (2013); list three heuristics (2021 SIS312).</td><td><a href="#q-hrules">Lecture 4 · Question 4.4</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Heuristic optimization of a query tree</b></td><td>2014 IS312, 2019 IS312</td><td>Broader idea</td><td>The 2014 tree figure is missing from the PDF.</td><td><a href="#q-sailors">Lecture 4 · Question 4.2</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Transaction definition</b></td><td>2013 IS312, 2014 IS312</td><td>Broader idea</td><td>Always combined with another part (states in 2013, ACID in 2014).</td><td><a href="#q-acid">Lecture 6 · Question 6.24</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Partially committed vs committed</b></td><td>2019 IS312, 2021 SIS312</td><td>Broader idea</td><td>Same question with the same diagram.</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Lost update problem</b></td><td>2013 IS312, 2021 IS312</td><td>Broader idea</td><td>Same request for an example.</td><td><a href="#q-lost">Lecture 6 · Question 6.21</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Conflict-serializability and precedence graph</b></td><td>2014 IS312, 2017 IS312</td><td>Broader idea</td><td>Different schedules; not in the supplied slides.</td><td><a href="#q-confser-repeated">Lecture 6 · Question 6.18</a></td></tr>
+<tr class="hl"><td class="c"><b>7</b></td><td><b>Block nested-loop join cost</b></td><td>2014, 2015, 2017, 2019, 2021, 2021 SIS312, 2023</td><td>Broader idea</td><td>Formula only in 2014; 14 and 6 blocks with 3 buffers in 2015; the large R/S problem in the other five.</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr><tr class="hl"><td class="c"><b>6</b></td><td><b>Recoverability classification of a schedule</b></td><td>2014, 2017, 2019, 2021, 2021 SIS312, 2023</td><td>Broader idea</td><td>Different schedules in 2014 and 2021 SIS312; announced for the exam as multiple choice.</td><td><a href="#q-rec-repeated">Lecture 6 · Question 6.1</a></td></tr><tr class="hl"><td class="c"><b>6</b></td><td><b>Concurrency problems (lost update, dirty read or unrepeatable read)</b></td><td>2013, 2014, 2019, 2021, 2021 SIS312, 2023</td><td>Group of related ideas</td><td>Three different problems; each paper asks for an example of one.</td><td><a href="#q-dirty">Lecture 6 · Question 6.20</a></td></tr><tr class="hl"><td class="c"><b>4</b></td><td><b>MAX / MIN using a B-tree index</b></td><td>2014, 2021, 2021 SIS312, 2023</td><td>Broader idea</td><td>MAX in 2014, 2021 and 2023; MIN in 2021 SIS312.</td><td><a href="#q-btree-maxmin">Lecture 3 · Question 3.6</a></td></tr><tr class="hl"><td class="c"><b>4</b></td><td><b>Heuristic optimization before cost-based optimization</b></td><td>2014, 2015, 2017, 2021</td><td>Broader idea</td><td>2015 reverses the wording (“after”).</td><td><a href="#q-hbefore">Lecture 4 · Question 4.1</a></td></tr><tr class="hl"><td class="c"><b>4</b></td><td><b>Dense vs sparse indexes (any question)</b></td><td>2017, 2019, 2021, 2021 SIS312</td><td>Group of related ideas</td><td>Four different questions: aggregates, non-existent keys, primary index, heap files.</td><td><a href="#l1-b">Lecture 1 · revision</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Minimum buffers for a nested-loop join</b></td><td>2017, 2019, 2023</td><td>Broader idea</td><td>Always part (b) of the large problem.</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr><tr><td class="c"><b>3</b></td><td><b>ACID properties</b></td><td>2014, 2021, 2021 SIS312</td><td>Broader idea</td><td>“Explain the ACID properties” (2014); “Explain briefly the transaction properties” (both 2021 papers).</td><td><a href="#q-acid">Lecture 6 · Question 6.24</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Transaction states and state diagram</b></td><td>2013, 2019, 2021 SIS312</td><td>Broader idea</td><td>Draw the diagram (2013); explain two of its states (2019, 2021 SIS312).</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Dirty read problem</b></td><td>2014, 2021 SIS312, 2023</td><td>Broader idea</td><td>The key shows the same figure every time.</td><td><a href="#q-dirty">Lecture 6 · Question 6.20</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Query-tree reasoning (optimize a tree, compare two trees, SQL → tree)</b></td><td>2014, 2015, 2019</td><td>Group of related ideas</td><td>The 2014 tree figure is missing from the PDF.</td><td><a href="#q-sailors">Lecture 4 · Question 4.2</a></td></tr><tr><td class="c"><b>3</b></td><td><b>Projection equivalences (commuting or pushing π)</b></td><td>2019, 2021, 2021 SIS312</td><td>Group of related ideas</td><td>Four different questions across three papers.</td><td><a href="#q-pi-comm">Lecture 4 · Question 4.8</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Dense vs sparse index for non-existent keys</b></td><td>2019, 2021</td><td>Broader idea</td><td>Same sentence in both papers.</td><td><a href="#q-dense-missing">Lecture 1 · Question 1.1</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Query-processing steps</b></td><td>2013, 2015</td><td>Broader idea</td><td>Diagram (2013); four steps with input and output (2015).</td><td><a href="#q-qp-steps">Lecture 2 · Question 2.1</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Sorting vs hashing (advantages and disadvantages)</b></td><td>2013, 2015</td><td>Broader idea</td><td>Not in the supplied slides; last asked in 2015.</td><td><a href="#q-sort-hash">Lecture 2 · Question 2.4</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Pipelining vs materialization</b></td><td>2013, 2015</td><td>Broader idea</td><td>Not in the supplied slides; last asked in 2015.</td><td><a href="#q-pipelining">Lecture 2 · Question 2.5</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Heuristic optimization rules</b></td><td>2013, 2021 SIS312</td><td>Broader idea</td><td>List the rules (2013); list three heuristics (2021 SIS312).</td><td><a href="#q-hrules">Lecture 4 · Question 4.4</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Heuristic optimization of a query tree</b></td><td>2014, 2019</td><td>Broader idea</td><td>The 2014 tree figure is missing from the PDF.</td><td><a href="#q-sailors">Lecture 4 · Question 4.2</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Transaction definition</b></td><td>2013, 2014</td><td>Broader idea</td><td>Always combined with another part (states in 2013, ACID in 2014).</td><td><a href="#q-acid">Lecture 6 · Question 6.24</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Partially committed vs committed</b></td><td>2019, 2021 SIS312</td><td>Broader idea</td><td>Same question with the same diagram.</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Lost update problem</b></td><td>2013, 2021</td><td>Broader idea</td><td>Same request for an example.</td><td><a href="#q-lost">Lecture 6 · Question 6.21</a></td></tr><tr><td class="c"><b>2</b></td><td><b>Conflict-serializability and precedence graph</b></td><td>2014, 2017</td><td>Broader idea</td><td>Different schedules; not in the supplied slides.</td><td><a href="#q-confser-repeated">Lecture 6 · Question 6.18</a></td></tr>
 </table></div>
 
 <h3>2. Exact repeated questions and scenarios</h3>
 <p class="sub">These are counted separately from the broader ideas above: the same text, schedule or numbers repeated.</p>
 <div class="tw"><table class="c5">
 <tr><th class="c">Papers</th><th>Exact question or scenario</th><th>Years and papers</th><th>Note</th><th>Covered in</th></tr>
-<tr class="hl"><td class="c"><b>5</b></td><td>Large R/S nested-loop scenario (R 100,000 × 500 B; S 50,000 × 750 B; block 5,000 B; 6 buffers)</td><td>2017 IS312, 2019 IS312, 2021 IS312, 2021 SIS312, 2023 IS312</td><td>Identical text and numbers in all five papers.</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr><tr><td class="c"><b>3</b></td><td>Repeated schedule S: R1(x); R3(x); W1(z); W1(x); R3(z); R1(y); C1; W3(y); R2(y); W3(x); C3; R2(x); C2;</td><td>2017 IS312, 2021 IS312, 2023 IS312</td><td>Plus a close variation in 2019 (two extra reads).</td><td><a href="#q-rec-repeated">Lecture 6 · Question 6.1</a></td></tr><tr><td class="c"><b>3</b></td><td>“Is it practical to apply heuristic optimizations before cost-based optimization? Why or why not?”</td><td>2014 IS312, 2017 IS312, 2021 IS312</td><td>Word-for-word repeat.</td><td><a href="#q-hbefore">Lecture 4 · Question 4.1</a></td></tr><tr><td class="c"><b>3</b></td><td>“How can a database execute the MAX aggregate operator using a B-Tree index?”</td><td>2014 IS312, 2021 IS312, 2023 IS312</td><td>Word-for-word repeat.</td><td><a href="#q-btree-maxmin">Lecture 3 · Question 3.6</a></td></tr><tr><td class="c"><b>3</b></td><td>Dirty read problem (“Give an example that illustrates the ‘dirty read’ problem”)</td><td>2014 IS312, 2021 SIS312, 2023 IS312</td><td>Word-for-word repeat; the key always shows the same figure.</td><td><a href="#q-dirty">Lecture 6 · Question 6.20</a></td></tr><tr><td class="c"><b>3</b></td><td>Minimum buffers for a nested-loop join</td><td>2017 IS312, 2019 IS312, 2023 IS312</td><td>Always part (b) of the large scenario.</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr><tr><td class="c"><b>2</b></td><td>Partially committed vs committed</td><td>2019 IS312, 2021 SIS312</td><td>Same question with the same diagram.</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr><tr><td class="c"><b>2</b></td><td>Dense vs sparse index for non-existent keys</td><td>2019 IS312, 2021 IS312</td><td>Word-for-word repeat.</td><td><a href="#q-dense-missing">Lecture 1 · Question 1.1</a></td></tr><tr><td class="c"><b>2</b></td><td>Lost update problem</td><td>2013 IS312, 2021 IS312</td><td>Same request for an example.</td><td><a href="#q-lost">Lecture 6 · Question 6.21</a></td></tr>
+<tr class="hl"><td class="c"><b>5</b></td><td>Large R/S nested-loop scenario (R 100,000 × 500 B; S 50,000 × 750 B; block 5,000 B; 6 buffers)</td><td>2017, 2019, 2021, 2021 SIS312, 2023</td><td>Identical text and numbers in all five papers.</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr><tr><td class="c"><b>3</b></td><td>Repeated schedule S: R1(x); R3(x); W1(z); W1(x); R3(z); R1(y); C1; W3(y); R2(y); W3(x); C3; R2(x); C2;</td><td>2017, 2021, 2023</td><td>Plus a close variation in 2019 (two extra reads).</td><td><a href="#q-rec-repeated">Lecture 6 · Question 6.1</a></td></tr><tr><td class="c"><b>3</b></td><td>“Is it practical to apply heuristic optimizations before cost-based optimization? Why or why not?”</td><td>2014, 2017, 2021</td><td>Word-for-word repeat.</td><td><a href="#q-hbefore">Lecture 4 · Question 4.1</a></td></tr><tr><td class="c"><b>3</b></td><td>“How can a database execute the MAX aggregate operator using a B-Tree index?”</td><td>2014, 2021, 2023</td><td>Word-for-word repeat.</td><td><a href="#q-btree-maxmin">Lecture 3 · Question 3.6</a></td></tr><tr><td class="c"><b>3</b></td><td>Dirty read problem (“Give an example that illustrates the ‘dirty read’ problem”)</td><td>2014, 2021 SIS312, 2023</td><td>Word-for-word repeat; the key always shows the same figure.</td><td><a href="#q-dirty">Lecture 6 · Question 6.20</a></td></tr><tr><td class="c"><b>3</b></td><td>Minimum buffers for a nested-loop join</td><td>2017, 2019, 2023</td><td>Always part (b) of the large scenario.</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr><tr><td class="c"><b>2</b></td><td>Partially committed vs committed</td><td>2019, 2021 SIS312</td><td>Same question with the same diagram.</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr><tr><td class="c"><b>2</b></td><td>Dense vs sparse index for non-existent keys</td><td>2019, 2021</td><td>Word-for-word repeat.</td><td><a href="#q-dense-missing">Lecture 1 · Question 1.1</a></td></tr><tr><td class="c"><b>2</b></td><td>Lost update problem</td><td>2013, 2021</td><td>Same request for an example.</td><td><a href="#q-lost">Lecture 6 · Question 6.21</a></td></tr>
 </table></div>
 
 <h3>3. Ideas tested in one paper</h3>
 <ul class="cols tight">
-<li><a href="#q-idx-types">Primary vs secondary vs clustering index</a> — 2013 IS312</li>
-<li><a href="#q-primary-sd">Primary index: sparse or dense</a> — 2021 IS312</li>
+<li><a href="#q-idx-types">Primary vs secondary vs clustering index</a> — 2013</li>
+<li><a href="#q-primary-sd">Primary index: sparse or dense</a> — 2021</li>
 <li><a href="#q-heap-dense">Indexes on heap files must be dense</a> — 2021 SIS312</li>
 <li><a href="#q-why-ra">Why SQL is translated into relational algebra</a> — 2021 SIS312</li>
-<li><a href="#q-sailors">SQL to relational algebra</a> — 2019 IS312</li>
-<li><a href="#q-distinct">Cost of DISTINCT (duplicate elimination)</a> — 2021 IS312</li>
-<li><a href="#q-index-only">Index-only query</a> — 2023 IS312</li>
-<li><a href="#q-agg-dense-sparse">Dense and sparse indexes for aggregate operations</a> — 2017 IS312</li>
-<li><a href="#q-groupby-index">Suitable index for GROUP BY</a> — 2019 IS312</li>
-<li><a href="#q-join-algs">Join algorithms and their preconditions</a> — 2013 IS312</li>
-<li><a href="#q-tree-equiv">Query-tree equivalence and the SQL of a tree</a> — 2015 IS312</li>
-<li><a href="#q-pi-comm">Commutativity of projection</a> — 2019 IS312</li>
+<li><a href="#q-sailors">SQL to relational algebra</a> — 2019</li>
+<li><a href="#q-distinct">Cost of DISTINCT (duplicate elimination)</a> — 2021</li>
+<li><a href="#q-index-only">Index-only query</a> — 2023</li>
+<li><a href="#q-agg-dense-sparse">Dense and sparse indexes for aggregate operations</a> — 2017</li>
+<li><a href="#q-groupby-index">Suitable index for GROUP BY</a> — 2019</li>
+<li><a href="#q-join-algs">Join algorithms and their preconditions</a> — 2013</li>
+<li><a href="#q-tree-equiv">Query-tree equivalence and the SQL of a tree</a> — 2015</li>
+<li><a href="#q-pi-comm">Commutativity of projection</a> — 2019</li>
 <li><a href="#q-sigma-pi">Commuting selection with projection</a> — 2021 SIS312</li>
-<li><a href="#q-pi-diff">Projection over set difference</a> — 2021 IS312</li>
-<li><a href="#q-pi-push">Pushing projection down</a> — 2021 IS312</li>
-<li><a href="#q-stats">Selectivity, selection cardinality, blocking factor and join selectivity</a> — 2013 IS312</li>
-<li><a href="#q-single-loop">Single-loop join cost</a> — 2013 IS312</li>
+<li><a href="#q-pi-diff">Projection over set difference</a> — 2021</li>
+<li><a href="#q-pi-push">Pushing projection down</a> — 2021</li>
+<li><a href="#q-stats">Selectivity, selection cardinality, blocking factor and join selectivity</a> — 2013</li>
+<li><a href="#q-single-loop">Single-loop join cost</a> — 2013</li>
 <li><a href="#q-linear-vs-index">Linear scan vs index access</a> — 2021 SIS312</li>
-<li><a href="#q-unrepeatable">Unrepeatable read problem</a> — 2019 IS312</li>
-<li><a href="#q-rec-repeated">Modifying a schedule to make it strict</a> — 2017 IS312</li>
-<li><a href="#q-tsql-count">T-SQL stored procedure / user-defined function</a> — 2023 IS312</li>
-<li><a href="#q-tsql-trigger">T-SQL trigger</a> — 2023 IS312</li>
-<li><a href="#q-mac">Mandatory access control</a> — 2014 IS312</li>
+<li><a href="#q-unrepeatable">Unrepeatable read problem</a> — 2019</li>
+<li><a href="#q-rec-repeated">Modifying a schedule to make it strict</a> — 2017</li>
+<li><a href="#q-tsql-count">T-SQL stored procedure / user-defined function</a> — 2023</li>
+<li><a href="#q-tsql-trigger">T-SQL trigger</a> — 2023</li>
+<li><a href="#q-mac">Mandatory access control</a> — 2014</li>
 </ul>
 
 <h3>4. Lecture ideas with 0 verified exam papers</h3>
@@ -3028,7 +3028,7 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <p class="sub">Every visible question and subquestion of the supplied exam PDF: <b>74</b> entries in 8 papers, plus the missing ones marked in violet. Each entry links to the question that answers it.</p>
 <div class="tw"><table class="idx c5">
 <tr><th>Question</th><th class="c">PDF page</th><th>Main idea</th><th>Covered in</th><th>Consolidated?</th></tr>
-<tr class="newpaper"><th colspan="5">2013 IS312 — Midterm Exam – Spring 2013 (2 April 2013) · Dr. Ali H. El-Bastawissy, Dr. Mohamed Elwakil · 10 points · PDF page 1 · no answer key</th></tr><tr><td>Q1</td><td class="c">1</td><td>Lost update problem</td><td><a href="#q-lost">Question 6.21</a></td><td>Consolidated with 2021 IS312 Q3(b).</td></tr><tr><td>Q2</td><td class="c">1</td><td>Transaction definition; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Diagram consolidated with 2019 Q3(c), 2021 SIS312 Q3(c); the definition is also answered in <a href="#q-acid">Question 6.24</a>.</td></tr><tr><td>Q3</td><td class="c">1</td><td>Primary vs secondary vs clustering index</td><td><a href="#q-idx-types">Question 1.4</a></td><td>Not consolidated.</td></tr><tr><td>Q4(a)</td><td class="c">1</td><td>Join algorithms and their preconditions</td><td><a href="#q-join-algs">Question 3.11</a></td><td>Q4(a) and Q4(b) answered together.</td></tr><tr><td>Q4(b)</td><td class="c">1</td><td>Join algorithms and their preconditions</td><td><a href="#q-join-algs">Question 3.11</a></td><td>Q4(a) and Q4(b) answered together.</td></tr><tr><td>Q5</td><td class="c">1</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2015 Q1 and Q5.</td></tr><tr><td>Q6</td><td class="c">1</td><td>Query-processing steps</td><td><a href="#q-qp-steps">Question 2.1</a></td><td>Consolidated with 2015 Q2.</td></tr><tr><td>Q7</td><td class="c">1</td><td>Heuristic optimization rules</td><td><a href="#q-hrules">Question 4.4</a></td><td>Consolidated with 2021 SIS312 Q2(d).</td></tr><tr><td>Q8</td><td class="c">1</td><td>Selectivity, selection cardinality, blocking factor and join selectivity</td><td><a href="#q-stats">Question 5.1</a></td><td>Not consolidated.</td></tr><tr><td>Q9</td><td class="c">1</td><td>Single-loop join cost</td><td><a href="#q-single-loop">Question 5.2</a></td><td>Not consolidated.</td></tr><tr><td>Q10</td><td class="c">1</td><td>Pipelining vs materialization</td><td><a href="#q-pipelining">Question 2.5</a></td><td>Consolidated with 2015 Q6.</td></tr><tr class="newpaper"><th colspan="5">2014 IS312 — Midterm Exam – Spring 2014 (5 May 2014) · Dr. Mohamed Elwakil, Dr. Waleed Helmy · 10 points · PDF pages 2–3 · answer key</th></tr><tr><td>Q1</td><td class="c">2</td><td>Transaction definition; ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2021 IS312 Q3(a), 2021 SIS312 Q3(a).</td></tr><tr><td>Q2</td><td class="c">2</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2021 SIS312 Q3(b), 2023 Q3(a).</td></tr><tr><td>Q3</td><td class="c">2</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2021 IS312 Q1(a), 2021 SIS312 Q1(a), 2023 Q1(a).</td></tr><tr><td>Q4</td><td class="c">2–3</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-formula">Question 3.3</a></td><td>Not consolidated (formula only).</td></tr><tr><td>Q5</td><td class="c">3</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2015 Q8, 2017 Q3, 2021 IS312 Q2(d).</td></tr><tr><td>Q6</td><td class="c">3</td><td>Mandatory access control</td><td><a href="#q-mac">Question 7.3</a></td><td>Not consolidated.</td></tr><tr><td>Q7</td><td class="c">3</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-s52">Question 6.4</a></td><td>Not consolidated (own schedule S52).</td></tr><tr><td>Q8</td><td class="c">3</td><td>Conflict-serializability and precedence graph</td><td><a href="#q-confser-s3">Question 6.19</a></td><td>Not consolidated (own schedule S3).</td></tr><tr class="missing"><td>Q9</td><td class="c">3</td><td>Heuristic optimization of a query tree</td><td><a href="#q-tree-missing">Lecture 4 · missing-figure note</a></td><td>Method practised in the Sailors and tree-equivalence questions. <b>Query-tree figure is not in the PDF — question cannot be reproduced.</b></td></tr><tr class="newpaper"><th colspan="5">2015 IS312 — Midterm Exam – Spring 2015 (30 March 2015) · Dr. Mohamed Elwakil (page 6 also prints Dr. Ehab Ezzat) · 10 points · PDF pages 4–6 · answer key</th></tr><tr><td>Q1</td><td class="c">4</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2013 Q5 and 2015 Q5.</td></tr><tr><td>Q2</td><td class="c">4</td><td>Query-processing steps</td><td><a href="#q-qp-steps">Question 2.1</a></td><td>Consolidated with 2013 Q6.</td></tr><tr class="missing"><td>Q3</td><td class="c">—</td><td colspan="3"><b>Missing from the PDF</b> — the PDF jumps from Q2 to Q5; the question text is not available.</td></tr><tr class="missing"><td>Q4</td><td class="c">—</td><td colspan="3"><b>Missing from the PDF</b> — the PDF jumps from Q2 to Q5; the question text is not available.</td></tr><tr><td>Q5</td><td class="c">4</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2013 Q5 and 2015 Q1.</td></tr><tr><td>Q6</td><td class="c">4–5</td><td>Pipelining vs materialization</td><td><a href="#q-pipelining">Question 2.5</a></td><td>Consolidated with 2013 Q10.</td></tr><tr><td>Q7</td><td class="c">5</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-small">Question 3.2</a></td><td>Not consolidated (own numbers).</td></tr><tr><td>Q8</td><td class="c">5</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated (reversed wording: “after”).</td></tr><tr><td>Q9</td><td class="c">5–6</td><td>Query-tree equivalence and the SQL of a tree</td><td><a href="#q-tree-equiv">Question 4.3</a></td><td>Not consolidated (figure on PDF page 6 is readable).</td></tr><tr class="newpaper"><th colspan="5">2017 IS312 — Midterm Exam 2017 · Dr. Noha Nagy, Dr. Neveen El Gamal · 20 points · PDF pages 7–9 · no answer key</th></tr><tr><td>Q1</td><td class="c">7</td><td>Dense and sparse indexes for aggregate operations</td><td><a href="#q-agg-dense-sparse">Question 3.8</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">7</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2019, 2021 IS312, 2021 SIS312, 2023.</td></tr><tr><td>Q2(b)</td><td class="c">8</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2019 and 2023.</td></tr><tr><td>Q3</td><td class="c">8</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2014 Q5, 2015 Q8, 2021 IS312 Q2(d).</td></tr><tr><td>Q4(a)</td><td class="c">8</td><td>Conflict-serializability and precedence graph</td><td><a href="#q-confser-repeated">Question 6.18</a></td><td>Not consolidated.</td></tr><tr><td>Q4(b)</td><td class="c">9</td><td>Recoverability classification of a schedule; Modifying a schedule to make it strict</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2021 IS312 Q3(c), 2023 Q3(b); the “make it strict” part is 2017 only.</td></tr><tr class="newpaper"><th colspan="5">2019 IS312 — Midterm Exam 2019 · Dr. Noha Nagy · 20 points · PDF pages 10–13 · answer key for Q3(c) only (white text)</th></tr><tr><td>Q1.1(a)</td><td class="c">10</td><td>SQL to relational algebra</td><td><a href="#q-sailors">Question 4.2</a></td><td>Parts (a) and (b) answered together.</td></tr><tr><td>Q1.1(b)</td><td class="c">10</td><td>Heuristic optimization of a query tree</td><td><a href="#q-sailors">Question 4.2</a></td><td>Parts (a) and (b) answered together.</td></tr><tr><td>Q1.1(c)</td><td class="c">10</td><td>Commutativity of projection</td><td><a href="#q-pi-comm">Question 4.8</a></td><td>Not consolidated.</td></tr><tr><td>Q1.2(a)</td><td class="c">11</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2021 IS312, 2021 SIS312, 2023.</td></tr><tr><td>Q1.2(b)</td><td class="c">11</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017 and 2023.</td></tr><tr><td>Q2.3</td><td class="c">11</td><td>Dense vs sparse index for non-existent keys</td><td><a href="#q-dense-missing">Question 1.1</a></td><td>Consolidated with 2021 IS312 Q1(b).</td></tr><tr><td>Q2.4</td><td class="c">12</td><td>Suitable index for GROUP BY</td><td><a href="#q-groupby-index">Question 3.9</a></td><td>Not consolidated.</td></tr><tr><td>Q3(a)</td><td class="c">12</td><td>Unrepeatable read problem</td><td><a href="#q-unrepeatable">Question 6.22</a></td><td>Not consolidated.</td></tr><tr><td>Q3(b)</td><td class="c">12</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-2019">Question 6.2</a></td><td>Not consolidated (variation of the repeated schedule).</td></tr><tr><td>Q3(c)</td><td class="c">13</td><td>Partially committed vs committed; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Consolidated with 2021 SIS312 Q3(c) and 2013 Q2.</td></tr><tr class="newpaper"><th colspan="5">2021 IS312 — Midterm Exam 2021 — IS312: Database Systems II · Dr. Noha Nagy · 20 points · PDF pages 14–16 · no answer key</th></tr><tr><td>Q1(a)</td><td class="c">14</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2014 Q3, 2021 SIS312 Q1(a), 2023 Q1(a).</td></tr><tr><td>Q1(b)</td><td class="c">14</td><td>Dense vs sparse index for non-existent keys</td><td><a href="#q-dense-missing">Question 1.1</a></td><td>Consolidated with 2019 Q2.3.</td></tr><tr><td>Q1(c)</td><td class="c">14</td><td>Primary index: sparse or dense</td><td><a href="#q-primary-sd">Question 1.2</a></td><td>Not consolidated.</td></tr><tr><td>Q1(d)(1)</td><td class="c">14</td><td>Cost of DISTINCT (duplicate elimination)</td><td><a href="#q-distinct">Question 2.3</a></td><td>Parts (1) and (2) answered together.</td></tr><tr><td>Q1(d)(2)</td><td class="c">14</td><td>Cost of DISTINCT (duplicate elimination)</td><td><a href="#q-distinct">Question 2.3</a></td><td>Parts (1) and (2) answered together.</td></tr><tr><td>Q2(a)</td><td class="c">15</td><td>Pushing projection down</td><td><a href="#q-pi-push">Question 4.5</a></td><td>Not consolidated.</td></tr><tr><td>Q2(b)</td><td class="c">15</td><td>Projection over set difference</td><td><a href="#q-pi-diff">Question 4.6</a></td><td>Not consolidated.</td></tr><tr><td>Q2(c) — printed as a second “a)”</td><td class="c">15</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021 SIS312, 2023.</td></tr><tr><td>Q2(d) — printed as a second “b)”</td><td class="c">15</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2014 Q5, 2015 Q8, 2017 Q3.</td></tr><tr><td>Q3(a)</td><td class="c">16</td><td>ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2014 Q1, 2021 SIS312 Q3(a).</td></tr><tr><td>Q3(b)</td><td class="c">16</td><td>Lost update problem</td><td><a href="#q-lost">Question 6.21</a></td><td>Consolidated with 2013 Q1.</td></tr><tr><td>Q3(c)</td><td class="c">16</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2017 Q4(b), 2023 Q3(b).</td></tr><tr class="newpaper"><th colspan="5">2021 SIS312 — Midterm Exam 2021 — SIS312: DB Management Engineering · Dr. Noha Nagy · 20 points · PDF pages 17–19 · answer key</th></tr><tr><td>Q1(a)</td><td class="c">17</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated (MIN instead of MAX).</td></tr><tr><td>Q1(b)</td><td class="c">17</td><td>Indexes on heap files must be dense</td><td><a href="#q-heap-dense">Question 1.3</a></td><td>Not consolidated.</td></tr><tr><td>Q1(c)</td><td class="c">17</td><td>Linear scan vs index access</td><td><a href="#q-linear-vs-index">Question 5.3</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">17</td><td>Commuting selection with projection</td><td><a href="#q-sigma-pi">Question 4.7</a></td><td>Not consolidated.</td></tr><tr><td>Q2(b)</td><td class="c">17–18</td><td>Why SQL is translated into relational algebra</td><td><a href="#q-why-ra">Question 2.2</a></td><td>Not consolidated.</td></tr><tr><td>Q2(c) — printed as “a)”</td><td class="c">18</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021 IS312, 2023.</td></tr><tr><td>Q2(d)</td><td class="c">18</td><td>Heuristic optimization rules</td><td><a href="#q-hrules">Question 4.4</a></td><td>Consolidated with 2013 Q7.</td></tr><tr><td>Q3(a)</td><td class="c">18</td><td>ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2014 Q1, 2021 IS312 Q3(a).</td></tr><tr><td>Q3(b)</td><td class="c">19</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2014 Q2, 2023 Q3(a).</td></tr><tr><td>Q3(c)</td><td class="c">19</td><td>Partially committed vs committed; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Consolidated with 2019 Q3(c) and 2013 Q2.</td></tr><tr><td>Q3(d) — printed as “a)”, schedules S1 and S2</td><td class="c">19</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-s1s2">Question 6.3</a></td><td>Not consolidated (own schedules).</td></tr><tr class="newpaper"><th colspan="5">2023 IS312 — Midterm Exam 2023 · Dr. Noha Nagy · 20 points · PDF pages 21–23 · answer key</th></tr><tr><td>Q1(a)</td><td class="c">21</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2014 Q3, 2021 IS312 Q1(a), 2021 SIS312 Q1(a).</td></tr><tr><td>Q1(b)</td><td class="c">21</td><td>Index-only query</td><td><a href="#q-index-only">Question 3.7</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">21</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021 IS312, 2021 SIS312.</td></tr><tr><td>Q2(b) — printed as a second “a)”</td><td class="c">21</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017 and 2019.</td></tr><tr><td>Q3(a)</td><td class="c">22</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2014 Q2, 2021 SIS312 Q3(b).</td></tr><tr><td>Q3(b)</td><td class="c">22</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2017 Q4(b), 2021 IS312 Q3(c).</td></tr><tr><td>Q4.1</td><td class="c">22–23</td><td>T-SQL stored procedure / user-defined function</td><td><a href="#q-tsql-count">Question 7.1</a></td><td>Not consolidated.</td></tr><tr><td>Q4.2</td><td class="c">23</td><td>T-SQL trigger</td><td><a href="#q-tsql-trigger">Question 7.2</a></td><td>Not consolidated.</td></tr>
+<tr class="newpaper"><th colspan="5">2013 — Midterm Exam – Spring 2013 (2 April 2013) · Dr. Ali H. El-Bastawissy, Dr. Mohamed Elwakil · 10 points · PDF page 1 · no answer key</th></tr><tr><td>Q1</td><td class="c">1</td><td>Lost update problem</td><td><a href="#q-lost">Question 6.21</a></td><td>Consolidated with 2021 Q3(b).</td></tr><tr><td>Q2</td><td class="c">1</td><td>Transaction definition; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Diagram consolidated with 2019 Q3(c), 2021 SIS312 Q3(c); the definition is also answered in <a href="#q-acid">Question 6.24</a>.</td></tr><tr><td>Q3</td><td class="c">1</td><td>Primary vs secondary vs clustering index</td><td><a href="#q-idx-types">Question 1.4</a></td><td>Not consolidated.</td></tr><tr><td>Q4(a)</td><td class="c">1</td><td>Join algorithms and their preconditions</td><td><a href="#q-join-algs">Question 3.11</a></td><td>Q4(a) and Q4(b) answered together.</td></tr><tr><td>Q4(b)</td><td class="c">1</td><td>Join algorithms and their preconditions</td><td><a href="#q-join-algs">Question 3.11</a></td><td>Q4(a) and Q4(b) answered together.</td></tr><tr><td>Q5</td><td class="c">1</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2015 Q1 and Q5.</td></tr><tr><td>Q6</td><td class="c">1</td><td>Query-processing steps</td><td><a href="#q-qp-steps">Question 2.1</a></td><td>Consolidated with 2015 Q2.</td></tr><tr><td>Q7</td><td class="c">1</td><td>Heuristic optimization rules</td><td><a href="#q-hrules">Question 4.4</a></td><td>Consolidated with 2021 SIS312 Q2(d).</td></tr><tr><td>Q8</td><td class="c">1</td><td>Selectivity, selection cardinality, blocking factor and join selectivity</td><td><a href="#q-stats">Question 5.1</a></td><td>Not consolidated.</td></tr><tr><td>Q9</td><td class="c">1</td><td>Single-loop join cost</td><td><a href="#q-single-loop">Question 5.2</a></td><td>Not consolidated.</td></tr><tr><td>Q10</td><td class="c">1</td><td>Pipelining vs materialization</td><td><a href="#q-pipelining">Question 2.5</a></td><td>Consolidated with 2015 Q6.</td></tr><tr class="newpaper"><th colspan="5">2014 — Midterm Exam – Spring 2014 (5 May 2014) · Dr. Mohamed Elwakil, Dr. Waleed Helmy · 10 points · PDF pages 2–3 · answer key</th></tr><tr><td>Q1</td><td class="c">2</td><td>Transaction definition; ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2021 Q3(a), 2021 SIS312 Q3(a).</td></tr><tr><td>Q2</td><td class="c">2</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2021 SIS312 Q3(b), 2023 Q3(a).</td></tr><tr><td>Q3</td><td class="c">2</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2021 Q1(a), 2021 SIS312 Q1(a), 2023 Q1(a).</td></tr><tr><td>Q4</td><td class="c">2–3</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-formula">Question 3.3</a></td><td>Not consolidated (formula only).</td></tr><tr><td>Q5</td><td class="c">3</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2015 Q8, 2017 Q3, 2021 Q2(d).</td></tr><tr><td>Q6</td><td class="c">3</td><td>Mandatory access control</td><td><a href="#q-mac">Question 7.3</a></td><td>Not consolidated.</td></tr><tr><td>Q7</td><td class="c">3</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-s52">Question 6.4</a></td><td>Not consolidated (own schedule S52).</td></tr><tr><td>Q8</td><td class="c">3</td><td>Conflict-serializability and precedence graph</td><td><a href="#q-confser-s3">Question 6.19</a></td><td>Not consolidated (own schedule S3).</td></tr><tr class="missing"><td>Q9</td><td class="c">3</td><td>Heuristic optimization of a query tree</td><td><a href="#q-tree-missing">Lecture 4 · missing-figure note</a></td><td>Method practised in the Sailors and tree-equivalence questions. <b>Query-tree figure is not in the PDF — question cannot be reproduced.</b></td></tr><tr class="newpaper"><th colspan="5">2015 — Midterm Exam – Spring 2015 (30 March 2015) · Dr. Mohamed Elwakil (page 6 also prints Dr. Ehab Ezzat) · 10 points · PDF pages 4–6 · answer key</th></tr><tr><td>Q1</td><td class="c">4</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2013 Q5 and 2015 Q5.</td></tr><tr><td>Q2</td><td class="c">4</td><td>Query-processing steps</td><td><a href="#q-qp-steps">Question 2.1</a></td><td>Consolidated with 2013 Q6.</td></tr><tr class="missing"><td>Q3</td><td class="c">—</td><td colspan="3"><b>Missing from the PDF</b> — the PDF jumps from Q2 to Q5; the question text is not available.</td></tr><tr class="missing"><td>Q4</td><td class="c">—</td><td colspan="3"><b>Missing from the PDF</b> — the PDF jumps from Q2 to Q5; the question text is not available.</td></tr><tr><td>Q5</td><td class="c">4</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2013 Q5 and 2015 Q1.</td></tr><tr><td>Q6</td><td class="c">4–5</td><td>Pipelining vs materialization</td><td><a href="#q-pipelining">Question 2.5</a></td><td>Consolidated with 2013 Q10.</td></tr><tr><td>Q7</td><td class="c">5</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-small">Question 3.2</a></td><td>Not consolidated (own numbers).</td></tr><tr><td>Q8</td><td class="c">5</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated (reversed wording: “after”).</td></tr><tr><td>Q9</td><td class="c">5–6</td><td>Query-tree equivalence and the SQL of a tree</td><td><a href="#q-tree-equiv">Question 4.3</a></td><td>Not consolidated (figure on PDF page 6 is readable).</td></tr><tr class="newpaper"><th colspan="5">2017 — Midterm Exam 2017 · Dr. Noha Nagy, Dr. Neveen El Gamal · 20 points · PDF pages 7–9 · no answer key</th></tr><tr><td>Q1</td><td class="c">7</td><td>Dense and sparse indexes for aggregate operations</td><td><a href="#q-agg-dense-sparse">Question 3.8</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">7</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2019, 2021, 2021 SIS312, 2023.</td></tr><tr><td>Q2(b)</td><td class="c">8</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2019 and 2023.</td></tr><tr><td>Q3</td><td class="c">8</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2014 Q5, 2015 Q8, 2021 Q2(d).</td></tr><tr><td>Q4(a)</td><td class="c">8</td><td>Conflict-serializability and precedence graph</td><td><a href="#q-confser-repeated">Question 6.18</a></td><td>Not consolidated.</td></tr><tr><td>Q4(b)</td><td class="c">9</td><td>Recoverability classification of a schedule; Modifying a schedule to make it strict</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2021 Q3(c), 2023 Q3(b); the “make it strict” part is 2017 only.</td></tr><tr class="newpaper"><th colspan="5">2019 — Midterm Exam 2019 · Dr. Noha Nagy · 20 points · PDF pages 10–13 · answer key for Q3(c) only (white text)</th></tr><tr><td>Q1.1(a)</td><td class="c">10</td><td>SQL to relational algebra</td><td><a href="#q-sailors">Question 4.2</a></td><td>Parts (a) and (b) answered together.</td></tr><tr><td>Q1.1(b)</td><td class="c">10</td><td>Heuristic optimization of a query tree</td><td><a href="#q-sailors">Question 4.2</a></td><td>Parts (a) and (b) answered together.</td></tr><tr><td>Q1.1(c)</td><td class="c">10</td><td>Commutativity of projection</td><td><a href="#q-pi-comm">Question 4.8</a></td><td>Not consolidated.</td></tr><tr><td>Q1.2(a)</td><td class="c">11</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2021, 2021 SIS312, 2023.</td></tr><tr><td>Q1.2(b)</td><td class="c">11</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017 and 2023.</td></tr><tr><td>Q2.3</td><td class="c">11</td><td>Dense vs sparse index for non-existent keys</td><td><a href="#q-dense-missing">Question 1.1</a></td><td>Consolidated with 2021 Q1(b).</td></tr><tr><td>Q2.4</td><td class="c">12</td><td>Suitable index for GROUP BY</td><td><a href="#q-groupby-index">Question 3.9</a></td><td>Not consolidated.</td></tr><tr><td>Q3(a)</td><td class="c">12</td><td>Unrepeatable read problem</td><td><a href="#q-unrepeatable">Question 6.22</a></td><td>Not consolidated.</td></tr><tr><td>Q3(b)</td><td class="c">12</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-2019">Question 6.2</a></td><td>Not consolidated (variation of the repeated schedule).</td></tr><tr><td>Q3(c)</td><td class="c">13</td><td>Partially committed vs committed; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Consolidated with 2021 SIS312 Q3(c) and 2013 Q2.</td></tr><tr class="newpaper"><th colspan="5">2021 — Midterm Exam 2021 — Database Systems II · Dr. Noha Nagy · 20 points · PDF pages 14–16 · no answer key</th></tr><tr><td>Q1(a)</td><td class="c">14</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2014 Q3, 2021 SIS312 Q1(a), 2023 Q1(a).</td></tr><tr><td>Q1(b)</td><td class="c">14</td><td>Dense vs sparse index for non-existent keys</td><td><a href="#q-dense-missing">Question 1.1</a></td><td>Consolidated with 2019 Q2.3.</td></tr><tr><td>Q1(c)</td><td class="c">14</td><td>Primary index: sparse or dense</td><td><a href="#q-primary-sd">Question 1.2</a></td><td>Not consolidated.</td></tr><tr><td>Q1(d)(1)</td><td class="c">14</td><td>Cost of DISTINCT (duplicate elimination)</td><td><a href="#q-distinct">Question 2.3</a></td><td>Parts (1) and (2) answered together.</td></tr><tr><td>Q1(d)(2)</td><td class="c">14</td><td>Cost of DISTINCT (duplicate elimination)</td><td><a href="#q-distinct">Question 2.3</a></td><td>Parts (1) and (2) answered together.</td></tr><tr><td>Q2(a)</td><td class="c">15</td><td>Pushing projection down</td><td><a href="#q-pi-push">Question 4.5</a></td><td>Not consolidated.</td></tr><tr><td>Q2(b)</td><td class="c">15</td><td>Projection over set difference</td><td><a href="#q-pi-diff">Question 4.6</a></td><td>Not consolidated.</td></tr><tr><td>Q2(c) — printed as a second “a)”</td><td class="c">15</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021 SIS312, 2023.</td></tr><tr><td>Q2(d) — printed as a second “b)”</td><td class="c">15</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2014 Q5, 2015 Q8, 2017 Q3.</td></tr><tr><td>Q3(a)</td><td class="c">16</td><td>ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2014 Q1, 2021 SIS312 Q3(a).</td></tr><tr><td>Q3(b)</td><td class="c">16</td><td>Lost update problem</td><td><a href="#q-lost">Question 6.21</a></td><td>Consolidated with 2013 Q1.</td></tr><tr><td>Q3(c)</td><td class="c">16</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2017 Q4(b), 2023 Q3(b).</td></tr><tr class="newpaper"><th colspan="5">2021 SIS312 — Midterm Exam 2021 — SIS312: DB Management Engineering · Dr. Noha Nagy · 20 points · PDF pages 17–19 · answer key</th></tr><tr><td>Q1(a)</td><td class="c">17</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated (MIN instead of MAX).</td></tr><tr><td>Q1(b)</td><td class="c">17</td><td>Indexes on heap files must be dense</td><td><a href="#q-heap-dense">Question 1.3</a></td><td>Not consolidated.</td></tr><tr><td>Q1(c)</td><td class="c">17</td><td>Linear scan vs index access</td><td><a href="#q-linear-vs-index">Question 5.3</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">17</td><td>Commuting selection with projection</td><td><a href="#q-sigma-pi">Question 4.7</a></td><td>Not consolidated.</td></tr><tr><td>Q2(b)</td><td class="c">17–18</td><td>Why SQL is translated into relational algebra</td><td><a href="#q-why-ra">Question 2.2</a></td><td>Not consolidated.</td></tr><tr><td>Q2(c) — printed as “a)”</td><td class="c">18</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021, 2023.</td></tr><tr><td>Q2(d)</td><td class="c">18</td><td>Heuristic optimization rules</td><td><a href="#q-hrules">Question 4.4</a></td><td>Consolidated with 2013 Q7.</td></tr><tr><td>Q3(a)</td><td class="c">18</td><td>ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2014 Q1, 2021 Q3(a).</td></tr><tr><td>Q3(b)</td><td class="c">19</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2014 Q2, 2023 Q3(a).</td></tr><tr><td>Q3(c)</td><td class="c">19</td><td>Partially committed vs committed; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Consolidated with 2019 Q3(c) and 2013 Q2.</td></tr><tr><td>Q3(d) — printed as “a)”, schedules S1 and S2</td><td class="c">19</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-s1s2">Question 6.3</a></td><td>Not consolidated (own schedules).</td></tr><tr class="newpaper"><th colspan="5">2023 — Midterm Exam 2023 · Dr. Noha Nagy · 20 points · PDF pages 21–23 · answer key</th></tr><tr><td>Q1(a)</td><td class="c">21</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2014 Q3, 2021 Q1(a), 2021 SIS312 Q1(a).</td></tr><tr><td>Q1(b)</td><td class="c">21</td><td>Index-only query</td><td><a href="#q-index-only">Question 3.7</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">21</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021, 2021 SIS312.</td></tr><tr><td>Q2(b) — printed as a second “a)”</td><td class="c">21</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017 and 2019.</td></tr><tr><td>Q3(a)</td><td class="c">22</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2014 Q2, 2021 SIS312 Q3(b).</td></tr><tr><td>Q3(b)</td><td class="c">22</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2017 Q4(b), 2021 Q3(c).</td></tr><tr><td>Q4.1</td><td class="c">22–23</td><td>T-SQL stored procedure / user-defined function</td><td><a href="#q-tsql-count">Question 7.1</a></td><td>Not consolidated.</td></tr><tr><td>Q4.2</td><td class="c">23</td><td>T-SQL trigger</td><td><a href="#q-tsql-trigger">Question 7.2</a></td><td>Not consolidated.</td></tr>
 </table></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
@@ -3039,21 +3039,21 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <h3>1. Errors in the answer keys</h3>
 <div class="tw"><table class="c5">
 <tr><th>Question</th><th>Original key</th><th>Corrected result</th><th>Reason</th><th>See</th></tr>
-<tr><td>2015 IS312 Q7<br>nested-loop join, 14 and 6 blocks, 3 buffers</td><td>“smaller table (S) in the outer loop”, then 14 + 14/1 × 6 = <b>98</b></td><td><b>90</b> block reads with S outer (6 + 6 × 14), plus the output term</td><td>98 is the cost with R in the outer loop; the key put b<sub>R</sub> in the outer position</td><td><a href="#q-nlj-small">Lecture 3 · Question 3.2</a></td></tr>
-<tr><td>2023 IS312 Q4.2<br>trigger, maximum 6 courses</td><td>condition <code>&gt;= 3</code>, message “max num of regis is 3”, <code>sid = (select sid from inserted)</code></td><td>reject when the count is <b>&gt; 6</b>, for every student in <code>inserted</code></td><td>the question says 6; an AFTER trigger already counts the new row; <code>inserted</code> can hold several rows</td><td><a href="#q-tsql-trigger">Topic 7 · Question 7.2</a></td></tr>
+<tr><td>2015 Q7<br>nested-loop join, 14 and 6 blocks, 3 buffers</td><td>“smaller table (S) in the outer loop”, then 14 + 14/1 × 6 = <b>98</b></td><td><b>90</b> block reads with S outer (6 + 6 × 14), plus the output term</td><td>98 is the cost with R in the outer loop; the key put b<sub>R</sub> in the outer position</td><td><a href="#q-nlj-small">Lecture 3 · Question 3.2</a></td></tr>
+<tr><td>2023 Q4.2<br>trigger, maximum 6 courses</td><td>condition <code>&gt;= 3</code>, message “max num of regis is 3”, <code>sid = (select sid from inserted)</code></td><td>reject when the count is <b>&gt; 6</b>, for every student in <code>inserted</code></td><td>the question says 6; an AFTER trigger already counts the new row; <code>inserted</code> can hold several rows</td><td><a href="#q-tsql-trigger">Topic 7 · Question 7.2</a></td></tr>
 </table></div>
 
 <h3>2. Incomplete or imprecise keys</h3>
 <div class="tw"><table class="c4">
 <tr><th>Question</th><th>Original key</th><th>What to add</th><th>See</th></tr>
-<tr><td>2014 IS312 Q7 (S52)</td><td>“Recoverable”</td><td>Recoverable, <b>not cascadeless, not strict</b>: r1(X) and w1(X) use the X written by T2 before C2</td><td><a href="#q-rec-s52">Lecture 6 · Question 6.4</a></td></tr>
-<tr><td>2017 IS312 Q4(b), 2021 IS312 Q3(c), 2023 IS312 Q3(b)<br>repeated schedule S</td><td>2023: “Recoverable, Not cascadeless, Not strict” — verdicts only; no key in 2017 and 2021</td><td>The reason: <b>R3(z)</b> reads T1’s uncommitted z and <b>R2(y)</b> reads T3’s uncommitted y; commits C1 &lt; C3 &lt; C2. <b>x is not part of the reason</b> — R3(x) comes before W1(x), and W3(x), R2(x) come after the writer’s commit</td><td><a href="#q-rec-repeated">Lecture 6 · Question 6.1</a></td></tr>
-<tr><td>2014 IS312 Q8 (S3)</td><td>“Conflict-serializable”</td><td>The proof: not serial; one precedence edge T1 → T2, no cycle; equivalent to T1; T2</td><td><a href="#q-confser-s3">Lecture 6 · Question 6.19</a></td></tr>
-<tr><td>2019 IS312 Q3(c), 2021 SIS312 Q3(c)</td><td>partially committed = “not yet stored in hard disk”; committed = “stored in the hard disk”</td><td>Committed means the effects are permanent (durable, recoverable after a failure); it does not require every changed data block to be on disk already</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr>
+<tr><td>2014 Q7 (S52)</td><td>“Recoverable”</td><td>Recoverable, <b>not cascadeless, not strict</b>: r1(X) and w1(X) use the X written by T2 before C2</td><td><a href="#q-rec-s52">Lecture 6 · Question 6.4</a></td></tr>
+<tr><td>2017 Q4(b), 2021 Q3(c), 2023 Q3(b)<br>repeated schedule S</td><td>2023: “Recoverable, Not cascadeless, Not strict” — verdicts only; no key in 2017 and 2021</td><td>The reason: <b>R3(z)</b> reads T1’s uncommitted z and <b>R2(y)</b> reads T3’s uncommitted y; commits C1 &lt; C3 &lt; C2. <b>x is not part of the reason</b> — R3(x) comes before W1(x), and W3(x), R2(x) come after the writer’s commit</td><td><a href="#q-rec-repeated">Lecture 6 · Question 6.1</a></td></tr>
+<tr><td>2014 Q8 (S3)</td><td>“Conflict-serializable”</td><td>The proof: not serial; one precedence edge T1 → T2, no cycle; equivalent to T1; T2</td><td><a href="#q-confser-s3">Lecture 6 · Question 6.19</a></td></tr>
+<tr><td>2019 Q3(c), 2021 SIS312 Q3(c)</td><td>partially committed = “not yet stored in hard disk”; committed = “stored in the hard disk”</td><td>Committed means the effects are permanent (durable, recoverable after a failure); it does not require every changed data block to be on disk already</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr>
 <tr><td>2021 SIS312 Q1(b)</td><td>“True. As the file is not sorted so the block contains records not sorted”</td><td>The example that the question asks for</td><td><a href="#q-heap-dense">Lecture 1 · Question 1.3</a></td></tr>
 <tr><td>2021 SIS312 Q1(c)</td><td>no key text in the PDF</td><td>Example from the lecture exercise: σ<sub>dno&gt;5</sub> costs 5,004 blocks through the index and 2,000 by linear search</td><td><a href="#q-linear-vs-index">Lecture 5 · Question 5.3</a></td></tr>
-<tr><td>2021 SIS312 Q2(c), 2023 IS312 Q2(a)</td><td>b<sub>S</sub> / (n<sub>B</sub> − 2) written without rounding; b<sub>S</sub> = total bytes / block size = 7,500</td><td>The result 18,757,500 stands. Write the ceiling. With whole records per block b<sub>S</sub> would be 8,334 and R outer would be slightly cheaper</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr>
-<tr><td>2023 IS312 Q1(b), Q4.1</td><td>“Select max salary from employee”; parameter <code>varchar(5)</code></td><td>Valid SQL is <code>SELECT MAX(Salary) FROM EMPLOYEE</code>; use a longer parameter type for a course name</td><td><a href="#q-index-only">Lecture 3 · Question 3.7</a>, <a href="#q-tsql-count">Topic 7 · Question 7.1</a></td></tr>
+<tr><td>2021 SIS312 Q2(c), 2023 Q2(a)</td><td>b<sub>S</sub> / (n<sub>B</sub> − 2) written without rounding; b<sub>S</sub> = total bytes / block size = 7,500</td><td>The result 18,757,500 stands. Write the ceiling. With whole records per block b<sub>S</sub> would be 8,334 and R outer would be slightly cheaper</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr>
+<tr><td>2023 Q1(b), Q4.1</td><td>“Select max salary from employee”; parameter <code>varchar(5)</code></td><td>Valid SQL is <code>SELECT MAX(Salary) FROM EMPLOYEE</code>; use a longer parameter type for a course name</td><td><a href="#q-index-only">Lecture 3 · Question 3.7</a>, <a href="#q-tsql-count">Topic 7 · Question 7.1</a></td></tr>
 </table></div>
 
 <h3>3. Slips in the other supplied material</h3>
@@ -3067,7 +3067,7 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<footer>IS312 Database Systems II · Exam-night midterm revision · built from the supplied slides and the 2013–2023 midterm papers.</footer>
+<footer>Database Systems II · Exam-night midterm revision · built from the supplied slides and the 2013–2023 midterm papers.</footer>
 </main>
 <script>
 (function(){
