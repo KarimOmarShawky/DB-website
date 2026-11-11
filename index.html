@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f3ed">
   <meta name="description" content="A central hub for database engineering study guides, from indexing and query processing to midterm revision.">
-  <title>Database Engineering — Study Hub</title>
+  <title>Database Management System — Study Hub</title>
   <style>
     :root {
       color-scheme: light;
@@ -236,6 +236,7 @@
     .query { --accent: #477091; --tint: #e9f0f5; }
     .joins { --accent: #966a32; --tint: #f5efe3; }
     .optimization { --accent: #76609a; --tint: #f0edf5; }
+    .transactions { --accent: #5a6ca7; --tint: #edf1ff; }
     .revision { --accent: #a7543e; --tint: #f7ece6; }
 
     .card-top {
@@ -407,7 +408,7 @@
       <section id="study-guides" aria-labelledby="guides-title">
         <div class="section-heading">
           <h2 id="guides-title">Choose a study guide</h2>
-          <p>Five independent guides · open any topic to begin</p>
+          <p>Six independent guides · open any topic to begin</p>
         </div>
 
         <nav class="guide-grid" aria-label="Study guides">
@@ -482,6 +483,24 @@
             </span>
           </a>
 
+          <a class="guide-card transactions" href="Transaction_Processing_Study_Guide.html">
+            <span class="card-top">
+              <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7.5 7.5h9v9h-9z"></path>
+                  <path d="M4.5 10.5h3m9 0h3m-12 3h3m9 0h3"></path>
+                  <path d="M12 4.5v3m0 12v3"></path>
+                </svg>
+              </span>
+              <span class="card-index">05</span>
+            </span>
+            <h3>Transaction Processing</h3>
+            <p>Understand ACID guarantees, isolation levels, and reliable execution.</p>
+            <span class="card-action">Open guide
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+
           <a class="guide-card revision" href="Final_Midterm_Revision.html">
             <span class="card-top">
               <span class="icon-box" aria-hidden="true">
@@ -504,7 +523,7 @@
 
     <footer>
       <span>Database Engineering · Study Hub</span>
-      <span>Five topics. One place to start.</span>
+      <span>Six topics. One place to start.</span>
     </footer>
   </div>
 </body>
