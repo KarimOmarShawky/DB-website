@@ -287,7 +287,7 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
   </nav>
   <div class="section-nav">
     <div class="section-nav-inner">
-      <nav class="chips" aria-label="Sections"><a href="#l1" title="Lecture 1: Indexing">L1</a><a href="#l2" title="Lecture 2: Query processing">L2</a><a href="#l3" title="Lecture 3: Aggregates, GROUP BY and join algorithms">L3</a><a href="#l4" title="Lecture 4: Heuristic optimization and query trees">L4</a><a href="#l5" title="Lecture 5: Cost-based optimization">L5</a><a href="#l6" title="Lecture 6: Transaction processing">L6</a><a href="#t7" title="Topic 7: T-SQL objects and mandatory access control">T7</a><a href="#most-repeated">Most repeated</a><a href="#exam-index">Exam index</a><a href="#corrections">Corrections</a><a href="#sources">Sources</a></nav>
+      <nav class="chips" aria-label="Sections"><a href="#l1" title="Lecture 1: Indexing">L1</a><a href="#l2" title="Lecture 2: Query processing">L2</a><a href="#l3" title="Lecture 3: Aggregates, GROUP BY and join algorithms">L3</a><a href="#l4" title="Lecture 4: Heuristic optimization and query trees">L4</a><a href="#l5" title="Lecture 5: Cost-based optimization">L5</a><a href="#l6" title="Lecture 6: Transaction processing">L6</a><a href="#t7" title="Topic 7: T-SQL objects and mandatory access control">T7</a><a href="#most-repeated">Most repeated</a><a href="#exam-index">Exam index</a><a href="#corrections">Corrections</a></nav>
       <button class="tool-btn" id="toggle-all" type="button" data-open="0"><span id="toggle-verb">Show</span> <span class="wide">all </span>answers</button>
     </div>
   </div>
@@ -336,7 +336,6 @@ footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
 <li><span class="n">A</span><a href="#most-repeated">Most-Repeated Ideas<small>Ranked by number of papers</small></a></li>
 <li><span class="n">B</span><a href="#exam-index">Complete Exam-Question Index<small>Every visible question, with links</small></a></li>
 <li><span class="n">C</span><a href="#corrections">Answer-Key Corrections<small>Verified errors and incomplete keys</small></a></li>
-<li><span class="n">D</span><a href="#sources">Sources Used<small>Files inspected and what could not be read</small></a></li>
 </ol>
 <div class="note warn" style="margin-top:14px"><b>Study these first.</b>
 <a href="#q-nlj-large">Block nested-loop join cost</a> (7 papers; the same large problem in 5) ·
@@ -3064,48 +3063,6 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <li><b>Slides, W5&amp;6&amp;7.pdf PDF page 130 (Week 07 slide 31):</b> the banner says the summary uses “X value before T1 and Y value after T1”; the figure shows the opposite: T3 reads X after T1’s update (75) and Y before it (20), so the sum is 105 instead of 110.</li>
 <li><b>Final_Midterm_Revision_Full_Explanations.html:</b> solves the large nested-loop problem with b<sub>S</sub> = 8,334 and gets 20,848,334. The official keys use b<sub>S</sub> = 7,500 and get 18,757,500 (<a href="#q-nlj-large">Lecture 3 · Question 3.1</a>).</li>
 <li><b>Transaction_Processing_Study_Guide.html</b>, “Worked exam example (Midterm 2023)”: the verdict is right, but it justifies “not cascadeless” with R3(z) only. R2(y), read before C3, is a second dirty read (<a href="#q-rec-repeated">Lecture 6 · Question 6.1</a>).</li>
-</ul>
-<a class="backtop" href="#top">↑ Back to top</a>
-</section>
-
-<section class="sheet chapter" id="sources">
-<span class="kicker">Reference D</span>
-<h2>Sources Used</h2>
-
-<h3>1. Lecture files</h3>
-<div class="tw"><table class="c4">
-<tr><th>File</th><th>Deck</th><th>PDF pages</th><th>Used in</th></tr>
-<tr><td rowspan="3">W2&amp;3&amp;4.pdf (164 pages)</td><td>Week 02 — Indexing</td><td class="c">1–35</td><td><a href="#l1">Lecture 1</a></td></tr>
-<tr><td>Week 03 — Query Optimization Techniques (query processing, σ, π, set operations)</td><td class="c">36–99</td><td><a href="#l2">Lecture 2</a></td></tr>
-<tr><td>Week 04 — Query Optimization Techniques (aggregates, GROUP BY, joins, heuristics)</td><td class="c">100–164</td><td><a href="#l3">Lectures 3</a> and <a href="#l4">4</a></td></tr>
-<tr><td rowspan="3">W5&amp;6&amp;7.pdf (160 pages)</td><td>Week 05 — Query Optimization Techniques (heuristics repeated, cost components, σ cost S1–S2)</td><td class="c">1–41</td><td><a href="#l4">Lectures 4</a> and <a href="#l5">5</a></td></tr>
-<tr><td>Second deck, title slide also says “Week 05”; cited here as the Week 06 deck (σ cost S1–S6, exercises, join cost, quiz)</td><td class="c">42–99</td><td><a href="#l5">Lecture 5</a></td></tr>
-<tr><td>Week 07 — Transaction Processing</td><td class="c">100–160</td><td><a href="#l6">Lecture 6</a></td></tr>
-</table></div>
-<p class="sub">All slides are by Dr. Noha Nagy. Slide numbers are the printed ones; the quiz pages (PDF 93–98) have irregular printed numbers and are cited by PDF page. Every page was read as text, and the pages with figures were also viewed as images.</p>
-
-<h3>2. Exam PDF and answer keys</h3>
-<p><b>1- Midterm 2013_merged.pdf</b> (23 pages) — 8 papers. The answer keys are the ones printed inside this file; in several places they were hidden under white boxes or printed in white, and were read from the text layer.</p>
-<div class="tw"><table class="c5">
-<tr><th>Paper</th><th>Title on the paper</th><th>Instructors printed</th><th class="c">PDF pages</th><th>Answer key</th></tr>
-<tr><td><b>2013 IS312</b></td><td>Midterm Exam – Spring 2013 (2 April 2013)</td><td>Dr. Ali H. El-Bastawissy, Dr. Mohamed Elwakil</td><td class="c">1</td><td>no answer key</td></tr><tr><td><b>2014 IS312</b></td><td>Midterm Exam – Spring 2014 (5 May 2014)</td><td>Dr. Mohamed Elwakil, Dr. Waleed Helmy</td><td class="c">2–3</td><td>answer key</td></tr><tr><td><b>2015 IS312</b></td><td>Midterm Exam – Spring 2015 (30 March 2015)</td><td>Dr. Mohamed Elwakil (page 6 also prints Dr. Ehab Ezzat)</td><td class="c">4–6</td><td>answer key</td></tr><tr><td><b>2017 IS312</b></td><td>Midterm Exam 2017</td><td>Dr. Noha Nagy, Dr. Neveen El Gamal</td><td class="c">7–9</td><td>no answer key</td></tr><tr><td><b>2019 IS312</b></td><td>Midterm Exam 2019</td><td>Dr. Noha Nagy</td><td class="c">10–13</td><td>answer key for Q3(c) only (white text)</td></tr><tr><td><b>2021 IS312</b></td><td>Midterm Exam 2021 — IS312: Database Systems II</td><td>Dr. Noha Nagy</td><td class="c">14–16</td><td>no answer key</td></tr><tr><td><b>2021 SIS312</b></td><td>Midterm Exam 2021 — SIS312: DB Management Engineering</td><td>Dr. Noha Nagy</td><td class="c">17–19</td><td>answer key</td></tr><tr><td><b>2023 IS312</b></td><td>Midterm Exam 2023</td><td>Dr. Noha Nagy</td><td class="c">21–23</td><td>answer key</td></tr>
-</table></div>
-
-<h3>3. HTML files in the repository</h3>
-<ul>
-<li><b>Final_Midterm_Revision_Full_Explanations.html</b> — the existing detailed revision; used as a reference for lecture order, layout and styling. It has no transaction-processing part, and its question bank cites final exams that were not supplied, so none of its exam references were reused.</li>
-<li><b>Lecture explanation HTML files:</b> Database_Indexing_Study_Guide.html, Query_Processing_Study_Guide.html, QP_Join_Algorithms_Study_Guide.html, QP_Heuristics_and_Cost_Based_Study_Guide.html, Transaction_Processing_Study_Guide.html. Two questions are adapted from the last one; its twelve “which schedule is…?” questions were all re-checked.</li>
-<li><b>index.html</b> and <b>study-site.css</b> — the hub page and the shared style, used for the colours and navigation.</li>
-</ul>
-
-<h3>4. Missing or unreadable material</h3>
-<ul>
-<li><b>2014 IS312 Q9:</b> the query tree to optimize is not in the PDF (page 3 has no figure).</li>
-<li><b>2015 IS312 Q3 and Q4:</b> absent — the paper’s numbering goes from 2 to 5.</li>
-<li><b>PDF page 20</b> is blank.</li>
-<li><b>No answer key</b> for the 2013, 2017 and 2021 IS312 papers, or for 2019 except Q3(c). Their model answers were built from the slides and are marked as such.</li>
-<li><b>Topics asked in the exams but not in the supplied slides:</b> conflict-serializability and precedence graphs, sorting vs hashing, hash join, pipelining vs materialization, left-deep plans, T-SQL objects, mandatory access control. Each is marked “Outside the supplied slides”.</li>
-<li>No PowerPoint files were supplied; the lectures were read from the two PDFs only.</li>
 </ul>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
