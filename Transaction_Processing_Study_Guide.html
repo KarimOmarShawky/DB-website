@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transaction Processing: Illustrated Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1d1b26; --ink-2:#4a4658; --muted:#7a768a;
+  --paper:#fffdf8; --panel:#f6f2e9; --line:#d9d2c3;
+  --blue:#2459a8; --blue-soft:#e3ecfa;
+  --green:#1f7a4d; --green-soft:#e0f3e8;
+  --red:#b8322a; --red-soft:#fbe5e2;
+  --amber:#b5770c; --amber-soft:#fff1d1;
+  --violet:#6a3fb5; --violet-soft:#ece5fa;
+  --note:#fff4a8;
+  --hand:'Caveat', 'Comic Sans MS', cursive;
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, Consolas, monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:#e9e4d8;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62}
+.doc{max-width:900px;margin:0 auto;background:var(--paper);box-shadow:0 0 40px rgba(0,0,0,.12)}
+.sheet{padding:56px 64px;position:relative}
+.chapter{border-top:1px dashed var(--line)}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0 0 .4em}
+h2{font-size:34px;font-weight:800;letter-spacing:-.01em}
+h3{font-size:22px;font-weight:700;margin-top:1.6em;color:var(--blue)}
+h4{font-size:17px;font-family:var(--sans);font-weight:700;margin-top:1.2em}
+p{margin:.55em 0}
+ul,ol{padding-left:1.3em;margin:.5em 0}
+li{margin:.2em 0}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--panel);padding:1px 5px;border-radius:4px}
+b,strong{font-weight:700}
+.kicker{display:inline-block;font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--ink);padding:4px 10px;border-radius:3px;margin-bottom:12px}
+.lead{font-size:17px;color:var(--ink-2)}
+.hand{font-family:var(--hand);font-size:1.35em;line-height:1.1}
+.muted{color:var(--muted)}
+.c-blue{color:var(--blue)} .c-green{color:var(--green)} .c-red{color:var(--red)} .c-amber{color:var(--amber)} .c-violet{color:var(--violet)}
+.src{font-size:11.5px;color:var(--muted);font-style:italic}
+
+/* ---------- cover ---------- */
+.cover{min-height:1060px;display:flex;flex-direction:column;justify-content:space-between;background:
+ radial-gradient(circle at 85% 10%, #ffe9a8 0, transparent 40%),
+ radial-gradient(circle at 10% 90%, #d9e6fb 0, transparent 45%), var(--paper)}
+.cover h1{font-size:68px;font-weight:800;letter-spacing:-.02em;margin:10px 0 6px}
+.cover h1 span{color:var(--blue)}
+.cover .sub{font-size:19px;color:var(--ink-2);max-width:620px}
+.cover .badge{font-family:var(--hand);font-size:28px;color:var(--red);transform:rotate(-4deg);display:inline-block;margin-top:14px}
+.cover-tree{margin:20px auto 0;width:100%;max-width:720px}
+.cover-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;font-size:13px}
+.cover-meta div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.cover-meta b{display:block;font-family:var(--serif);font-size:24px}
+
+/* ---------- TOC ---------- */
+.toc{columns:2;column-gap:36px;padding:0;list-style:none;counter-reset:t}
+.toc li{break-inside:avoid;display:flex;gap:10px;padding:7px 0;border-bottom:1px dotted var(--line)}
+.toc li span.n{font-family:var(--serif);font-weight:800;color:var(--blue);min-width:28px}
+.toc a{color:inherit;text-decoration:none}
+
+/* ---------- boxes (Head-First style) ---------- */
+.box{border-radius:12px;padding:16px 20px;margin:18px 0;position:relative;break-inside:avoid}
+.box > .tag{position:absolute;top:-13px;left:16px;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;color:#fff}
+.brain{background:var(--violet-soft);border:2px solid var(--violet)} .brain>.tag{background:var(--violet)}
+.watch{background:var(--red-soft);border:2px solid var(--red)} .watch>.tag{background:var(--red)}
+.key{background:var(--green-soft);border:2px solid var(--green)} .key>.tag{background:var(--green)}
+.example{background:var(--blue-soft);border:2px solid var(--blue)} .example>.tag{background:var(--blue)}
+.lecture{background:var(--amber-soft);border:2px solid var(--amber)} .lecture>.tag{background:var(--amber)}
+.nodumb{background:#fff;border:2px dashed var(--ink-2)} .nodumb>.tag{background:var(--ink-2)}
+.nodumb dt{font-weight:700;margin-top:10px}
+.nodumb dt::before{content:"Q: ";color:var(--red);font-family:var(--serif)}
+.nodumb dd{margin:2px 0 0 0}
+.nodumb dd::before{content:"A: ";font-weight:700;color:var(--green);font-family:var(--serif)}
+.sticky{background:var(--note);font-family:var(--hand);font-size:22px;line-height:1.15;padding:14px 18px;box-shadow:2px 4px 10px rgba(0,0,0,.15);transform:rotate(-1.5deg);width:fit-content;max-width:330px;margin:14px 0;break-inside:avoid}
+.sticky.r{transform:rotate(1.8deg);margin-left:auto}
+.bubble{position:relative;background:#fff;border:2px solid var(--ink);border-radius:18px;padding:10px 14px;font-family:var(--hand);font-size:21px;line-height:1.15;width:fit-content;max-width:300px}
+.bubble::after{content:"";position:absolute;left:24px;bottom:-12px;border:6px solid transparent;border-top:8px solid var(--ink)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;break-inside:avoid}
+.card h4{margin-top:0}
+.figure{margin:20px 0;padding:16px;background:#fff;border:1.5px solid var(--line);border-radius:14px;break-inside:avoid}
+.figure figcaption,.caption{font-size:13px;color:var(--ink-2);margin-top:8px;text-align:center}
+svg{max-width:100%;height:auto;display:block;margin:0 auto}
+svg text{font-family:var(--sans)}
+svg .hand{font-family:var(--hand)}
+
+table.t{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;break-inside:avoid}
+table.t th,table.t td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+table.t th{background:var(--panel);font-weight:700}
+table.t.center td,table.t.center th{text-align:center}
+
+pre.code{font-family:var(--mono);font-size:13px;background:#1f1d2b;color:#f3efe2;padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.5;break-inside:avoid}
+pre.code .k{color:#ffb86b} pre.code .c{color:#8c88a3} pre.code .s{color:#a8e6a1}
+
+.formula{font-family:var(--serif);font-size:22px;text-align:center;background:#fff;border:2px solid var(--ink);border-radius:12px;padding:14px;margin:16px auto;max-width:560px}
+.formula small{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-2)}
+
+/* mini data blocks */
+.blk{display:inline-flex;flex-direction:column;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:#fff;min-width:70px;vertical-align:top}
+.blk .h{background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:2px 6px;text-align:center}
+.blk span{padding:2px 8px;border-top:1px solid var(--line);font-family:var(--mono);font-size:13px;text-align:center}
+.blk span.hit{background:#ffe17a;font-weight:700}
+
+/* flow */
+.flow{display:flex;flex-direction:column;gap:0;align-items:stretch;max-width:560px}
+.flow .step{display:flex;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 14px}
+.flow .step b.n{font-family:var(--serif);font-size:20px;color:var(--blue);min-width:26px}
+.flow .arrow{text-align:center;color:var(--muted);line-height:1;font-size:18px;padding:3px 0}
+
+/* bars */
+.bar{height:22px;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+
+/* quiz */
+.q{break-inside:avoid;margin:10px 0 14px;padding-left:38px;position:relative}
+.q .qn{position:absolute;left:0;top:0;font-family:var(--serif);font-weight:800;color:var(--blue);font-size:17px}
+.q ol.opts{list-style:none;padding:0;margin:6px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:3px 22px}
+.q ol.opts li::before{content:attr(data-l) ") ";font-weight:700;color:var(--ink-2)}
+.q .tf{font-weight:700;color:var(--ink-2);font-size:13px;margin-left:6px}
+.q .lines{border-bottom:1px solid var(--line);height:26px}
+.ans{break-inside:avoid;margin:8px 0;padding:8px 0 8px 38px;position:relative;border-bottom:1px dotted var(--line)}
+.ans .qn{position:absolute;left:0;top:8px;font-family:var(--serif);font-weight:800;color:var(--green)}
+.ans b.a{color:var(--green)}
+.ans-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-size:14px}
+.ans-grid div{background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.ans-grid b{color:var(--blue)}
+
+/* ---------- animation ---------- */
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes dash{to{stroke-dashoffset:-24}}
+@keyframes glow{0%,100%{fill:#fff}50%{fill:#ffe17a}}
+@keyframes pulseR{0%,100%{box-shadow:0 0 0 0 rgba(184,50,42,.35)}50%{box-shadow:0 0 0 8px rgba(184,50,42,0)}}
+@keyframes drop{0%{transform:translateY(-30px);opacity:0}60%{transform:translateY(4px);opacity:1}100%{transform:none;opacity:1}}
+@keyframes wiggle{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1deg)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes path1{0%,100%{fill:#fff}8%,30%{fill:#ffe17a}}
+@keyframes path2{0%,25%,100%{fill:#fff}33%,55%{fill:#ffe17a}}
+@keyframes path3{0%,50%,100%{fill:#fff}58%,80%{fill:#ffe17a}}
+@keyframes path4{0%,75%,100%{fill:#fff}83%,97%{fill:#b8f0c8}}
+
+html.js .reveal{opacity:0}
+html.js .reveal.in{animation:up .7s cubic-bezier(.2,.7,.2,1) both}
+.pop{animation:pop .6s cubic-bezier(.2,.7,.2,1) both}
+.flowline{stroke-dasharray:6 6;animation:dash 1.2s linear infinite}
+.sticky{animation:wiggle 5s ease-in-out infinite}
+.sticky.r{animation:none}
+.bar.anim{transform-origin:left;animation:grow 1.4s cubic-bezier(.2,.7,.2,1) both}
+.dropin{animation:drop 1s ease-out 0.4s both}
+.s1{animation:path1 4s infinite}.s2{animation:path2 4s infinite}.s3{animation:path3 4s infinite}.s4{animation:path4 4s infinite}
+.hit-pulse{animation:pulseR 1.8s infinite}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1}
+}
+
+/* ---------- small screens ---------- */
+@media (max-width:720px){
+  .sheet{padding:28px 16px}
+  .grid2,.grid3,.cover-meta{grid-template-columns:1fr}
+  .toc{columns:1}
+  .cover h1{font-size:44px}
+  h2{font-size:28px}
+  .q ol.opts{grid-template-columns:1fr}
+  .ans-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ---------- print ---------- */
+@page{size:A4;margin:13mm 12mm 14mm}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  .doc{box-shadow:none;max-width:none}
+  .sheet{padding:0 2mm}
+  .chapter{border-top:none;break-before:page}
+  .cover{min-height:265mm;padding-top:10mm}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1!important;transform:none!important}
+  .sticky{transform:rotate(-1.5deg)}
+  .sticky.r{transform:rotate(1.8deg)}
+  .flowline{stroke-dasharray:6 6}
+  .s1,.s2,.s3{fill:#ffe17a}.s4{fill:#b8f0c8}
+  h2,h3,h4{break-after:avoid}
+  .box,.figure,.card,table,pre,.q,.ans{break-inside:avoid}
+  .no-print{display:none!important}
+  .sheet{padding-top:3mm}
+  .box{padding-top:30px;margin-top:12px}
+  .box > .tag{top:8px}
+  pre.code{white-space:pre-wrap;word-break:break-word}
+  a{color:inherit;text-decoration:none}
+}
+.print-btn{position:fixed;right:18px;bottom:18px;z-index:9;background:var(--ink);color:#fff;border:0;border-radius:30px;padding:12px 18px;font:600 14px var(--sans);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.print-btn:hover{background:var(--blue)}
+
+/* ---------- interactive quiz (screen only; print output unchanged) ---------- */
+@media screen{
+  .quiz-on .q .tf{display:none}
+  .quiz-on .q ol.opts li{cursor:pointer;border:1.5px solid var(--line);border-radius:8px;padding:5px 10px;background:#fff;transition:background .2s,border-color .2s,transform .15s}
+  .quiz-on .q:not(.done) ol.opts li:hover,.quiz-on .q:not(.done) ol.opts li:focus-visible{border-color:var(--blue);background:var(--blue-soft);outline:none;transform:translateX(3px)}
+  .quiz-on .q.done ol.opts li{cursor:default}
+  .quiz-on .q ol.opts li.ok{background:var(--green-soft);border-color:var(--green);font-weight:600}
+  .quiz-on .q ol.opts li.bad{background:var(--red-soft);border-color:var(--red);text-decoration:line-through;text-decoration-color:var(--red)}
+  .qi{margin-top:8px}
+  .qi .tfb{display:flex;gap:8px}
+  .qi button{font:600 13px var(--sans);border:1.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:20px;padding:5px 14px;cursor:pointer;transition:background .2s,color .2s}
+  .qi button:hover:not(:disabled){background:var(--ink);color:#fff}
+  .qi button:disabled{cursor:default;opacity:.55}
+  .qi button.ok{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+  .qi button.bad{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+  .qi .fb{margin-top:8px;padding:8px 12px;border-radius:8px;font-size:14px;animation:up .4s ease both}
+  .qi .fb.ok{background:var(--green-soft);border-left:4px solid var(--green)}
+  .qi .fb.bad{background:var(--red-soft);border-left:4px solid var(--red)}
+  .qi .fb.model{background:var(--amber-soft);border-left:4px solid var(--amber)}
+  .qi .fb pre.code{margin:8px 0 0}
+  .qi textarea{width:100%;min-height:90px;font:14px/1.5 var(--sans);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink);resize:vertical}
+  .qi textarea:focus{outline:none;border-color:var(--blue)}
+  .qi .row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center}
+  .qi .self{font-size:13px;color:var(--ink-2)}
+  .quiz-intro{background:var(--blue-soft);border:2px solid var(--blue);border-radius:12px;padding:12px 16px;margin:14px 0;font-size:14px}
+  .scorebar{position:fixed;left:18px;bottom:18px;z-index:9;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px 14px;font:14px var(--sans);box-shadow:0 6px 18px rgba(0,0,0,.18);display:none;gap:12px;align-items:center}
+  .scorebar.show{display:flex}
+  .scorebar b{font-family:var(--serif);font-size:20px;color:var(--blue)}
+  .scorebar .meter{width:120px;height:8px;background:var(--panel);border-radius:5px;overflow:hidden}
+  .scorebar .meter i{display:block;height:100%;background:var(--green);width:0;transition:width .4s}
+  .scorebar button{font:600 12px var(--sans);border:1.5px solid var(--ink);background:#fff;border-radius:16px;padding:4px 10px;cursor:pointer}
+  .scorebar button:hover{background:var(--ink);color:#fff}
+}
+@media (max-width:720px){ .scorebar{left:8px;right:8px;bottom:70px;justify-content:space-between} }
+</style>
+<style>
+@media screen {
+  :root {
+    --ink: #203440;
+    --ink-2: #526570;
+    --muted: #71818a;
+    --paper: #f3f6f4;
+    --panel: #f0f4f2;
+    --line: #dce5e1;
+    --blue: #35627d;
+    --blue-soft: #e8f0f4;
+    --green: #327353;
+    --green-soft: #e8f2eb;
+    --red: #a94d43;
+    --red-soft: #f7ece9;
+    --amber: #946a2b;
+    --amber-soft: #f7f1e5;
+    --violet: #6a5a91;
+    --violet-soft: #efedf4;
+    --note: #f7f2dd;
+    --serif: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 84px;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse at 10% 0, #e1ece6 0, transparent 34rem),
+      #f3f6f4;
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.7;
+  }
+
+  .study-nav {
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    border-bottom: 1px solid #dfe7e3;
+    background: rgb(249 251 249 / 92%);
+    backdrop-filter: blur(14px);
+  }
+
+  .study-nav-inner {
+    display: flex;
+    width: min(1160px, calc(100% - 48px));
+    min-height: 66px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 auto;
+  }
+
+  .study-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: #435b64;
+    font-size: .75rem;
+    font-weight: 750;
+    letter-spacing: .1em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .study-brand-mark {
+    display: grid;
+    width: 35px;
+    height: 35px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #d8e2dc;
+    border-radius: 11px;
+    background: #eaf0eb;
+    color: #3e6c53;
+  }
+
+  .study-brand-mark svg { width: 19px; height: 19px; }
+
+  .back-home {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 16px;
+    border: 1px solid #31546a;
+    border-radius: 10px;
+    background: #284859;
+    color: #fff;
+    font-size: .84rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .back-home svg { width: 16px; height: 16px; }
+
+  .back-home:hover {
+    transform: translateY(-1px);
+    background: #1f3b4b;
+    box-shadow: 0 5px 14px rgb(32 52 64 / 18%);
+  }
+
+  a:focus-visible, button:focus-visible, textarea:focus-visible {
+    outline: 3px solid #57866d;
+    outline-offset: 3px;
+  }
+
+  main.doc {
+    width: min(1120px, calc(100% - 48px));
+    max-width: none;
+    margin: 28px auto 72px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .sheet {
+    position: relative;
+    margin: 0 0 18px;
+    padding: clamp(26px, 5vw, 54px);
+    border: 1px solid #e1e8e4;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 8px 26px rgb(34 58 48 / 6%);
+  }
+
+  .cover {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1.08fr) minmax(260px, .92fr);
+    align-items: center;
+    justify-content: initial;
+    gap: clamp(24px, 4vw, 46px);
+    overflow: hidden;
+    padding: clamp(30px, 6vw, 68px);
+    border-color: #284453;
+    background:
+      radial-gradient(ellipse at 88% 18%, rgb(94 139 130 / 40%), transparent 36%),
+      linear-gradient(120deg, #1d3441 0%, #294b57 100%);
+    color: #f4f7f4;
+  }
+
+  .cover h1 {
+    margin: 9px 0 12px;
+    font-size: clamp(2.7rem, 5.8vw, 4.65rem);
+    font-weight: 720;
+    letter-spacing: -.055em;
+    line-height: 1.04;
+  }
+
+  .cover h1 span { color: #a9d8bd; }
+
+  .cover .kicker {
+    border: 1px solid rgb(221 238 226 / 35%);
+    background: rgb(235 244 237 / 10%);
+    color: #d6e8d9;
+  }
+
+  .cover .sub {
+    max-width: 650px;
+    color: #d5e0df;
+    font-size: clamp(1rem, 1.7vw, 1.14rem);
+    line-height: 1.75;
+  }
+
+  .cover .badge {
+    transform: none;
+    color: #bdddc5;
+    font-family: var(--sans);
+    font-size: .95rem;
+    font-weight: 650;
+  }
+
+  .cover-tree {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 14px;
+    border: 1px solid rgb(222 235 228 / 20%);
+    border-radius: 18px;
+    background: rgb(244 249 245 / 7%);
+  }
+
+  .cover-meta {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .cover-meta div {
+    border-color: rgb(236 244 237 / 20%);
+    background: rgb(241 247 242 / 9%);
+    color: #e9f0e9;
+  }
+
+  .cover-meta b { color: #c3e2cc; }
+
+  .chapter {
+    border-top: 0;
+    scroll-margin-top: 84px;
+  }
+
+  h1, h2, h3, h4 {
+    color: #243a46;
+    font-family: var(--sans);
+    letter-spacing: -.025em;
+  }
+
+  h2 {
+    margin-bottom: .65em;
+    font-size: clamp(1.7rem, 3.2vw, 2.35rem);
+    font-weight: 730;
+    line-height: 1.2;
+  }
+
+  .cover h1 { color: #f4f7f4; }
+
+  h3 {
+    margin-top: 1.8em;
+    color: #315e76;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  h4 { font-size: 1.05rem; }
+
+  p, li { color: #3e515b; }
+  .lead { color: #526670; font-size: 1.12rem; }
+  .muted, .src { color: var(--muted); }
+
+  .kicker {
+    padding: 5px 11px;
+    border: 1px solid #d8e4dd;
+    border-radius: 999px;
+    background: #edf3ee;
+    color: #496d59;
+    font-size: .69rem;
+    letter-spacing: .11em;
+  }
+
+  .toc {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+    padding: 0;
+    columns: initial;
+  }
+
+  .toc li {
+    min-width: 0;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 11px 12px;
+    border: 1px solid #e7ece9;
+    border-radius: 11px;
+    background: #fbfcfb;
+    transition: border-color 150ms ease, background-color 150ms ease;
+  }
+
+  .toc li:hover {
+    border-color: #c9dbd0;
+    background: #f3f7f4;
+  }
+
+  .toc li span.n {
+    display: inline-flex;
+    min-width: 34px;
+    min-height: 26px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    border-radius: 7px;
+    background: #eaf1ec;
+    color: #426d53;
+    font-family: var(--sans);
+    font-size: .72rem;
+    font-weight: 750;
+  }
+
+  .toc a {
+    color: #35566a;
+    font-size: .9rem;
+    line-height: 1.5;
+    text-decoration: none;
+  }
+
+  .toc a:hover { color: #24485b; text-decoration: underline; }
+
+  .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .grid2 > *, .grid3 > * { min-width: 0; }
+
+  .card, .figure {
+    min-width: 0;
+    border: 1px solid #e1e8e4;
+    border-radius: 14px;
+    background: #fcfdfc;
+    box-shadow: 0 3px 12px rgb(34 58 48 / 4%);
+  }
+
+  .card { padding: 18px; }
+  .figure {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: clamp(12px, 2.5vw, 22px);
+  }
+  .figure figcaption, .caption { color: #63747c; }
+
+  .box {
+    padding: 18px 20px;
+    border-width: 1px;
+    border-radius: 13px;
+    box-shadow: 0 3px 12px rgb(34 58 48 / 4%);
+  }
+
+  .box > .tag {
+    position: static;
+    display: table;
+    margin: 0 0 10px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: .68rem;
+    letter-spacing: .07em;
+  }
+
+  .sticky {
+    max-width: 100%;
+    transform: none;
+    border: 1px solid #e8dfb8;
+    border-radius: 12px;
+    background: #fbf7e7;
+    box-shadow: 0 4px 12px rgb(57 51 24 / 8%);
+    font-family: var(--sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    animation: none;
+  }
+
+  .sticky.r { transform: none; }
+
+  .bubble {
+    border-width: 1px;
+    border-color: #dbe4df;
+    border-radius: 13px;
+    color: #354e5b;
+    font-family: var(--sans);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .bubble::after {
+    border-top-color: #dbe4df;
+    border-width: 6px;
+  }
+
+  table.t {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #dfe7e3;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  table.t th, table.t td { border-width: 0 1px 1px 0; border-color: #e3e9e6; padding: 10px 12px; }
+  table.t th { background: #f0f4f1; color: #334d59; }
+  table.t tr:last-child td { border-bottom: 0; }
+  table.t th:last-child, table.t td:last-child { border-right: 0; }
+
+  pre.code {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid #31424c;
+    border-radius: 13px;
+    box-shadow: 0 5px 16px rgb(20 30 38 / 9%);
+  }
+
+  code { background: #eef3f0; }
+
+  .formula {
+    border: 1px solid #dfe7e3;
+    border-radius: 13px;
+    background: #f8faf8;
+    color: #294858;
+  }
+
+  .flow { gap: 6px; }
+  .flow .step { border-radius: 11px; }
+
+  .bar {
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    min-height: 22px;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .print-btn {
+    right: 20px;
+    bottom: 20px;
+    border: 1px solid #31546a;
+    background: #284859;
+    font-size: .84rem;
+    box-shadow: 0 6px 18px rgb(27 49 61 / 20%);
+  }
+
+  .print-btn:hover { background: #1f3b4b; }
+
+  .scorebar {
+    border: 1px solid #dce5e1;
+    border-radius: 13px;
+    box-shadow: 0 6px 18px rgb(27 49 61 / 13%);
+  }
+
+  @media (max-width: 800px) {
+    .cover { grid-template-columns: minmax(0, 1fr); }
+    .cover-tree { max-width: 600px; margin: 0 auto; }
+    .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 620px) {
+    .study-nav-inner { width: calc(100% - 28px); min-height: 60px; }
+    .study-brand { gap: 8px; font-size: .65rem; letter-spacing: .07em; }
+    .study-brand-mark { width: 32px; height: 32px; }
+    .back-home { min-height: 40px; padding: 0 12px; font-size: .79rem; }
+    main.doc { width: calc(100% - 24px); margin-top: 16px; }
+    .sheet { margin-bottom: 12px; padding: 25px 20px; border-radius: 16px; }
+    .cover { gap: 24px; padding: 28px 22px; }
+    .cover h1 { font-size: clamp(2.45rem, 11vw, 3.3rem); }
+    .toc, .grid2, .grid3, .cover-meta { grid-template-columns: minmax(0, 1fr); }
+    .toc li { padding: 10px; }
+    .q ol.opts { grid-template-columns: minmax(0, 1fr); }
+    .ans-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .scorebar { right: 8px; bottom: 70px; left: 8px; justify-content: space-between; }
+    .print-btn { right: 12px; bottom: 12px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition-duration: .01ms !important; }
+  }
+}
+
+@media print {
+  .study-nav { display: none !important; }
+}
+
+</style>
+
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d1b26"/></marker>
+    <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2459a8"/></marker>
+    <marker id="ahR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b8322a"/></marker>
+    <marker id="ahG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f7a4d"/></marker>
+  </defs>
+</svg>
+
+<header class="study-nav">
+  <nav class="study-nav-inner" aria-label="Primary navigation">
+    <a class="study-brand" href="#top">
+      <span class="study-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5.5" rx="7.5" ry="3"></ellipse>
+          <path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13"></path>
+          <path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"></path>
+        </svg>
+      </span>
+      Database Engineering
+    </a>
+    <a class="back-home" href="#quiz">
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11.5 4 5.5 10l6 6M6 10h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Practice questions
+    </a>
+  </nav>
+</header>
+
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<main class="doc">
+
+<!-- =================== COVER =================== -->
+<section class="sheet cover">
+  <div>
+    <span class="kicker">Database Management Engineering · Week 07</span>
+    <h1>How <span>Transactions</span> Really Work</h1>
+    <p class="sub">A friendly, example-first guide to transactions, read and write operations, ACID, transaction states, concurrency problems, schedules, conflicting operations and recoverability. Ends with a 78-question practice set and a full answer key.</p>
+    <span class="badge">No prior knowledge needed. Really.</span>
+  </div>
+  <svg class="cover-tree" viewBox="0 0 370 190" role="img" aria-label="A B-Tree: one root, internal nodes, leaves, then data pages"><rect x="20" y="20" width="150" height="34" rx="9" fill="rgba(255,255,255,.12)" stroke="#a9d8bd"/><text x="95" y="42" text-anchor="middle" fill="#f4f7f4" font-size="13" font-family="sans-serif">Active</text><rect x="20" y="75" width="150" height="34" rx="9" fill="rgba(255,255,255,.12)" stroke="#a9d8bd"/><text x="95" y="97" text-anchor="middle" fill="#f4f7f4" font-size="13" font-family="sans-serif">Partially committed</text><rect x="20" y="130" width="150" height="34" rx="9" fill="rgba(255,255,255,.12)" stroke="#a9d8bd"/><text x="95" y="152" text-anchor="middle" fill="#f4f7f4" font-size="13" font-family="sans-serif">Committed</text><rect x="200" y="75" width="150" height="34" rx="9" fill="rgba(255,255,255,.12)" stroke="#a9d8bd"/><text x="275" y="97" text-anchor="middle" fill="#f4f7f4" font-size="13" font-family="sans-serif">Failed</text><rect x="200" y="130" width="150" height="34" rx="9" fill="rgba(255,255,255,.12)" stroke="#a9d8bd"/><text x="275" y="152" text-anchor="middle" fill="#f4f7f4" font-size="13" font-family="sans-serif">Terminated</text><path d="M95 54v21" stroke="#a9d8bd" stroke-width="1.6" fill="none"/><path d="M95 109v21" stroke="#a9d8bd" stroke-width="1.6" fill="none"/><path d="M170 37 L240 75" stroke="#a9d8bd" stroke-width="1.6" fill="none"/><path d="M170 92 L200 92" stroke="#a9d8bd" stroke-width="1.6" fill="none"/><path d="M170 147h30" stroke="#a9d8bd" stroke-width="1.6" fill="none"/><path d="M275 109v21" stroke="#a9d8bd" stroke-width="1.6" fill="none"/></svg>
+  <div class="cover-meta">
+    <div><b>8</b>illustrated lessons</div>
+    <div><b>78</b>practice questions</div>
+    <div><b>100%</b>of the lecture covered</div>
+  </div>
+</section>
+<section class="sheet chapter">
+<span class="kicker">Start here</span>
+<h2>What’s inside</h2>
+<ol class="toc">
+<li><span class="n">01</span><a href="#c1">What is a transaction?</a></li>
+<li><span class="n">02</span><a href="#c2">Read and write: how data really moves</a></li>
+<li><span class="n">03</span><a href="#c3">The ACID properties</a></li>
+<li><span class="n">04</span><a href="#c4">Transaction states and failures</a></li>
+<li><span class="n">05</span><a href="#c5">Why run transactions concurrently?</a></li>
+<li><span class="n">06</span><a href="#c6">The four concurrency problems</a></li>
+<li><span class="n">07</span><a href="#c7">Schedules and conflicting operations</a></li>
+<li><span class="n">08</span><a href="#c8">Recoverability: recoverable, cascadeless, strict</a></li>
+<li><span class="n">Q</span><a href="#quiz">Practice questions</a></li>
+<li><span class="n">KEY</span><a href="#key">Answer key and explanations</a></li>
+</ol>
+</section>
+<section class="sheet chapter" id="c1">
+<span class="kicker">Lesson 01</span>
+<h2>What is a transaction?</h2>
+<p class="lead">A transaction is how a database turns a real-world event, like moving money, into one safe unit of work.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><ul><li>A transaction is a <b>sequence of database actions considered as a unit of work</b>.</li><li>The actions are <b>read R(X)</b>, <b>write W(X)</b>, <b>commit</b> and <b>abort</b>.</li><li>It reflects a <b>single real-world transition</b>: in the real world it either happened <b>completely or not at all</b>.</li><li>Examples: transfer money between accounts, purchase a group of products, register for a class.</li></ul></div><h3>Example: transferring LE1000</h3><p>Move LE1000 from Account #1025 to Account #224. In database terms that is six small steps that must stay together:</p><table class="t"><tr><th>Step</th><th>Action</th><th>Account #1025</th><th>Account #224</th></tr><tr><td>1</td><td>read(#1025)</td><td>1,000 → in memory</td><td></td></tr><tr><td>2</td><td>#1025 := #1025 − 1000</td><td>after: 0</td><td></td></tr><tr><td>3</td><td>write(#1025)</td><td>0 saved</td><td></td></tr><tr><td>4</td><td>read(#224)</td><td></td><td>500 → in memory</td></tr><tr><td>5</td><td>#224 := #224 + 1000</td><td></td><td>after: 1,500</td></tr><tr><td>6</td><td>write(#224) then COMMIT</td><td>0</td><td>1,500</td></tr></table><p class="muted">Balances are invented to make the arithmetic visible.</p><div class="box watch"><span class="tag">What goes wrong</span>If the system crashes after step 3 but before step 6, LE1000 has left #1025 and never arrived in #224. Money has vanished. The transaction idea says: either <b>all six steps</b> happen, or <b>none</b> of them is kept.</div><h3>Transactions in SQL</h3><ul><li>In ad-hoc SQL the default is <b>each statement = one transaction</b>.</li><li>In a program, several statements are grouped between a <b>begin</b> and an <b>end</b> (slide labels: Begin Transaction, T-SQL DML, End Transaction).</li></ul><pre class="code">START TRANSACTION
+  UPDATE Bank SET amount = amount - 100 WHERE name = 'Bob'
+  UPDATE Bank SET amount = amount + 100 WHERE name = 'Joe'
+COMMIT</pre><div class="box example"><span class="tag">Example</span>Purchasing three products: reduce stock for each of the three and create the order. If the third stock update fails, the first two must not stay. The group is one transaction.</div><div class="box brain"><span class="tag">Brain power</span>Is a single <code>UPDATE</code> statement a transaction?<br><br><b>Answer: Yes</b>, by default each SQL statement is its own transaction.</div>
+</section>
+<section class="sheet chapter" id="c2">
+<span class="kicker">Lesson 02</span>
+<h2>Read and write: how data really moves</h2>
+<p class="lead">Transactions only ever do two things to data: read it and write it. Both go through a memory buffer.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><ul><li>The database is a set of <b>data items</b>. An item can be <b>one record or one disk block</b>.</li><li><b>read_item(X)</b> reads database item X into the program variable X.</li><li><b>write_item(X)</b> writes the value of program variable X into database item X.</li></ul></div><h3>read_item(X): three steps</h3><ol><li>Find the address of the <b>disk block</b> that contains X.</li><li>Copy that block into a <b>buffer in main memory</b> (if it is not already in some buffer).</li><li>Copy X from the buffer to the <b>program variable</b> X.</li></ol><h3>write_item(X): four steps</h3><ol><li>Find the block that contains X.</li><li>Copy the block into a memory buffer (if not already there).</li><li>Copy X from the <b>program variable</b> into its correct place in the buffer.</li><li>Store the updated block <b>back to disk</b>, either <b>immediately or at some later point in time</b>.</li></ol><h3>Example: X = 8 becomes X = 10</h3><table class="t"><tr><th>Moment</th><th>Disk</th><th>Memory buffer</th><th>Program variable X</th></tr><tr><td>Start</td><td>8</td><td>—</td><td>—</td></tr><tr><td>After read_item(X)</td><td>8</td><td>8</td><td>8</td></tr><tr><td>Program computes X := X + 2</td><td>8</td><td>8</td><td>10</td></tr><tr><td>After write_item(X) steps 1–3</td><td>8</td><td>10</td><td>10</td></tr><tr><td>After step 4 (flush)</td><td>10</td><td>10</td><td>10</td></tr></table><div class="box watch"><span class="tag">Watch out</span>Step 4 may happen <b>later</b>. Between steps 3 and 4 the new value exists only in memory. That gap is why the system needs a log and a recovery manager (Lessons 3 and 4).</div><div class="box brain"><span class="tag">Brain power</span>After step 3 of write_item(X) but before step 4, where is the new value of X?<br><br><b>Answer:</b> Only in the memory buffer and program variable; disk still holds the old value.</div><div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Why does the DBMS not always write to disk immediately?</dt><dd>The lecture only says the block is stored immediately or at some later time. The practical point for this course: until it is stored, the new value is not on disk.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c3">
+<span class="kicker">Lesson 03</span>
+<h2>The ACID properties</h2>
+<p class="lead">Four promises a DBMS makes about every transaction.</p>
+<table class="t"><tr><th>Property</th><th>Lecture meaning</th><th>Bank-transfer example</th></tr><tr><td><b>A</b>tomicity</td><td>Performed in its entirety or not at all. Two outcomes: it <b>commits</b> (all changes made) or it <b>aborts</b> (no changes made).</td><td>Both the debit and the credit happen, or neither.</td></tr><tr><td><b>C</b>onsistency preservation</td><td>A correct execution takes the database from one <b>consistent state to another</b>. Integrity constraints always hold (unique account number, stock cannot be negative).</td><td>Total money in the two accounts is unchanged.</td></tr><tr><td><b>I</b>solation</td><td>Updates are not visible to others until commit. The effect is <b>as if each transaction ran alone</b>.</td><td>Another transaction cannot see the half-done transfer.</td></tr><tr><td><b>D</b>urability</td><td>Once committed, changes <b>must never be lost</b>, even after crashes or power failure. Means: write data to disk.</td><td>After “transfer done”, a power cut cannot undo it.</td></tr></table><h3>Which property is broken?</h3><table class="t"><tr><th>Scenario</th><th>Property at risk</th></tr><tr><td>Crash after the debit, before the credit</td><td>Atomicity</td></tr><tr><td>Balance goes negative although the rule forbids it</td><td>Consistency</td></tr><tr><td>Two customers both buy the last item</td><td>Isolation</td></tr><tr><td>Confirmed order disappears after a power cut</td><td>Durability</td></tr><tr><td>Another user sees a half-finished transfer</td><td>Isolation</td></tr></table><h3>Who makes each one true?</h3><ul><li><b>Atomicity:</b> the DBMS <b>undoes partial transactions</b>. It keeps a <b>log</b> of all writes; the <b>recovery manager</b> is the component responsible.</li><li><b>Consistency:</b> the <b>programmer</b> must write a transaction that takes a consistent state to a consistent state, and the <b>system</b> makes sure it is atomic.</li><li><b>Durability:</b> the effect must persist after the transaction, after the program ends, and despite crashes. It means writing data to disk.</li></ul><div class="box example"><span class="tag">Example: atomicity in action</span>T writes X (80 → 75) and then the system crashes before T commits. On restart the recovery manager reads the log, sees T never committed, and <b>undoes</b> the write: X returns to 80.</div><div class="box watch"><span class="tag">Common confusion</span>Atomicity (all-or-nothing) and Isolation (not seeing others’ half-done work) are different. A lost update is an <b>isolation</b> failure: each transaction was atomic, but they interfered.</div><div class="box brain"><span class="tag">Brain power</span>A crash happens <b>after</b> COMMIT but before the data reached disk. Which property is under threat?<br><br><b>Answer: Durability.</b> Committed changes must survive, which is why the system relies on its log.</div><div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Does durability mean data can never change again?</dt><dd>No. It means committed changes are not lost by failures. Later transactions may update them.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c4">
+<span class="kicker">Lesson 04</span>
+<h2>Transaction states and failures</h2>
+<p class="lead">At every moment a transaction is in exactly one state. The system tracks them so it can recover.</p>
+<h3>The five states</h3><table class="t"><tr><th>State</th><th>Meaning</th></tr><tr><td>Active</td><td>Running; performs read and write operations</td></tr><tr><td>Partially committed</td><td>Its last operation (end transaction) has executed; the commit is not yet complete</td></tr><tr><td>Committed</td><td>Successfully finished; all changes are permanent</td></tr><tr><td>Failed</td><td>Normal execution cannot continue (abort)</td></tr><tr><td>Terminated</td><td>Left the system</td></tr></table><h3>The state diagram</h3><figure class="figure reveal"><svg viewBox="0 0 760 250" width="100%" role="img" style="max-width:760px"><defs><marker id="stArr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#526570"/></marker></defs><rect x="55" y="49" width="150" height="42" rx="10" fill="#e8f0f4" stroke="#35627d" stroke-width="1.5"/><text x="130" y="75" text-anchor="middle" font-size="14" font-weight="600" fill="#243a46" font-family="sans-serif">Active</text><rect x="325" y="49" width="150" height="42" rx="10" fill="#f7f1e5" stroke="#946a2b" stroke-width="1.5"/><text x="400" y="75" text-anchor="middle" font-size="14" font-weight="600" fill="#243a46" font-family="sans-serif">Partially committed</text><rect x="585" y="49" width="150" height="42" rx="10" fill="#e8f2eb" stroke="#327353" stroke-width="1.5"/><text x="660" y="75" text-anchor="middle" font-size="14" font-weight="600" fill="#243a46" font-family="sans-serif">Committed</text><rect x="325" y="179" width="150" height="42" rx="10" fill="#f7ece9" stroke="#a94d43" stroke-width="1.5"/><text x="400" y="205" text-anchor="middle" font-size="14" font-weight="600" fill="#243a46" font-family="sans-serif">Failed</text><rect x="585" y="179" width="150" height="42" rx="10" fill="#efedf4" stroke="#6a5a91" stroke-width="1.5"/><text x="660" y="205" text-anchor="middle" font-size="14" font-weight="600" fill="#243a46" font-family="sans-serif">Terminated</text><path d="M10 70H53" fill="none" stroke="#526570" stroke-width="1.6" marker-end="url(#stArr)"/><text x="40" y="52" text-anchor="middle" font-size="12" fill="#526570" font-family="sans-serif">Begin</text><path d="M205 70H323" fill="none" stroke="#526570" stroke-width="1.6" marker-end="url(#stArr)"/><text x="264" y="58" text-anchor="middle" font-size="12" fill="#526570" font-family="sans-serif">End transaction</text><path d="M475 70H583" fill="none" stroke="#526570" stroke-width="1.6" marker-end="url(#stArr)"/><text x="530" y="58" text-anchor="middle" font-size="12" fill="#526570" font-family="sans-serif">Commit</text><path d="M130 91V200H323" fill="none" stroke="#526570" stroke-width="1.6" marker-end="url(#stArr)"/><text x="158" y="150" text-anchor="middle" font-size="12" fill="#526570" font-family="sans-serif">Abort</text><path d="M400 91V179" fill="none" stroke="#526570" stroke-width="1.6" marker-end="url(#stArr)"/><text x="425" y="140" text-anchor="middle" font-size="12" fill="#526570" font-family="sans-serif">Abort</text><path d="M475 200H583" fill="none" stroke="#526570" stroke-width="1.6" marker-end="url(#stArr)"/><path d="M660 91V179" fill="none" stroke="#526570" stroke-width="1.6" marker-end="url(#stArr)"/><path d="M95 49C95 8 165 8 165 49" fill="none" stroke="#526570" stroke-width="1.6" marker-end="url(#stArr)"/><text x="130" y="10" text-anchor="middle" font-size="12" fill="#526570" font-family="sans-serif">Read, Write</text></svg><figcaption>The lecture’s state transition diagram. Read it left to right: a healthy transaction follows the top row; any problem drops it to Failed.</figcaption></figure><h3>Transitions (the state diagram)</h3><table class="t"><tr><th>From</th><th>Event</th><th>To</th></tr><tr><td>(start)</td><td>Begin transaction</td><td>Active</td></tr><tr><td>Active</td><td>Read, Write</td><td>Active</td></tr><tr><td>Active</td><td>End transaction</td><td>Partially committed</td></tr><tr><td>Partially committed</td><td>Commit</td><td>Committed</td></tr><tr><td>Active</td><td>Abort</td><td>Failed</td></tr><tr><td>Partially committed</td><td>Abort</td><td>Failed</td></tr><tr><td>Failed</td><td>—</td><td>Terminated</td></tr><tr><td>Committed</td><td>—</td><td>Terminated</td></tr></table><h3>Three example journeys</h3><ul><li><b>Success:</b> Active → Partially committed → Committed → Terminated.</li><li><b>Error while running</b> (for example stock would go negative): Active → Failed → Terminated.</li><li><b>Failure at the last moment:</b> Active → Partially committed → Failed → Terminated.</li></ul><h3>Why recovery is needed: types of failure</h3><ul><li>A computer failure (system crash)</li><li>A transaction or system error</li><li>A local error or exception condition detected by the transaction</li><li>Concurrency control enforcement</li><li>Disk failure</li><li>Physical problems and catastrophes</li></ul><div class="box key"><span class="tag">Key point</span>Committed and Failed are the two ways a transaction ends: <b>COMMIT</b> = every change is reflected in the database; <b>ABORT</b> = none of the changes is. Transactions are motivated by two DBMS properties: <b>recoverability</b> and <b>concurrency</b>.</div><div class="box brain"><span class="tag">Brain power</span>Can a transaction go from <b>Committed</b> back to <b>Failed</b>?<br><br><b>Answer: No.</b> The diagram has no abort arrow out of Committed. Once committed, the changes are permanent (durability).</div><div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>What is the difference between Partially committed and Committed?</dt><dd>Partially committed: the last operation has run but the commit is not complete, so a failure can still abort it. Committed: it is finished and safe.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c5">
+<span class="kicker">Lesson 05</span>
+<h2>Why run transactions concurrently?</h2>
+<p class="lead">Real systems have many users at once. The challenge is letting them share data without corrupting it.</p>
+<h3>Single-user vs multi-user</h3><table class="t"><tr><th></th><th>Single-user</th><th>Multi-user</th></tr><tr><td>Example</td><td>Phonebook</td><td>Banks, flight reservation, hospitals, stock market</td></tr><tr><td>Concern here</td><td>Not our concern</td><td><b>Our main concern</b></td></tr></table><h3>Interleaving vs parallel processing</h3><ul><li><b>Parallel processing</b>: several CPUs really execute operations at the same instant.</li><li><b>Interleaving</b> (our concern): at any instant only the operations of <b>one</b> transaction execute; the system does a <b>context switch</b> to run operations of another transaction.</li></ul><h3>Why not just run one after another?</h3><p>Serial-only execution gives <b>low throughput, long response time</b> and <b>poor resource utilization</b> (CPU, disks). Concurrency improves waiting time, response time, resource utilization and efficiency.</p><div class="box example"><span class="tag">Example</span>T1 is waiting for a disk read. A serial system leaves the CPU idle. An interleaved system switches to T2 and uses the CPU meanwhile. Both finish sooner overall.</div><div class="box watch"><span class="tag">Price of concurrency</span>Interleaving can produce wrong results. The next lesson shows the four classic problems.</div><div class="box brain"><span class="tag">Brain power</span>Name one benefit of interleaving over strictly serial execution.<br><br><b>Answer:</b> Better throughput and resource use: while T1 waits for disk, the CPU works on T2.</div><div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Does interleaving always give wrong answers?</dt><dd>No. Only some interleavings are unsafe, and the next lessons show how to recognise them.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c6">
+<span class="kicker">Lesson 06</span>
+<h2>The four concurrency problems</h2>
+<p class="lead">Every example uses the lecture’s numbers: X = 80, Y = 20, N = 5, M = 4. T1 transfers N from X to Y; T2 does something else with X.</p>
+<h3>1. Lost update</h3><p>T1: read X; X := X − N; write X. T2: read X; X := X + M; write X.</p><table class="t"><tr><th>Time</th><th>T1</th><th>T2</th><th>X in database</th></tr><tr><td>1</td><td>read_item(X) → 80</td><td></td><td>80</td></tr><tr><td>2</td><td></td><td>read_item(X) → 80</td><td>80</td></tr><tr><td>3</td><td>X := 80 − 5 = 75</td><td></td><td></td></tr><tr><td>4</td><td></td><td>X := 80 + 4 = 84</td><td></td></tr><tr><td>5</td><td>write_item(X)</td><td></td><td>75</td></tr><tr><td>6</td><td></td><td>write_item(X)</td><td>84</td></tr></table><figure class="figure reveal"><svg viewBox="0 0 600 274" width="100%" role="img" style="max-width:600px"><defs><marker id="lm1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#6b7c85"/></marker></defs><path d="M24 34V268" stroke="#6b7c85" marker-end="url(#lm1)"/><text x="30" y="26" font-size="12" fill="#6b7c85" font-family="sans-serif">Time</text><text x="185.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T1</text><text x="455.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T2</text><rect x="60" y="36" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="56" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">read_item(X) → 80</text><rect x="330" y="74" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="455.0" y="94" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">read_item(X) → 80</text><rect x="60" y="112" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="132" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">X := 80 − 5 = 75</text><rect x="330" y="150" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="455.0" y="170" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">X := 80 + 4 = 84</text><rect x="60" y="188" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="208" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">write_item(X): X = 75</text><rect x="330" y="226" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="455.0" y="246" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">write_item(X): X = 84</text></svg><figcaption>Lost update: T2’s write overwrites T1’s without ever seeing it.</figcaption></figure><p><b>Result:</b> X = 84. <b>Correct</b> (either serial order): 80 − 5 + 4 = <b>79</b>. T1’s update was overwritten, i.e. <b>lost</b>.</p><h3>2. Dirty read (temporary update)</h3><p>T1 updates X, T2 reads it, then T1 <b>aborts</b>.</p><table class="t"><tr><th>Time</th><th>T1</th><th>T2</th><th>X</th></tr><tr><td>1</td><td>read X → 80; X := 75; write X</td><td></td><td>75</td></tr><tr><td>2</td><td></td><td>read X → <b>75</b> (dirty)</td><td></td></tr><tr><td>3</td><td></td><td>X := 75 + 4 = 79; write X; COMMIT</td><td>79</td></tr><tr><td>4</td><td>ABORT (X should go back to 80)</td><td></td><td>?</td></tr></table><figure class="figure reveal"><svg viewBox="0 0 600 198" width="100%" role="img" style="max-width:600px"><defs><marker id="lm2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#6b7c85"/></marker></defs><path d="M24 34V192" stroke="#6b7c85" marker-end="url(#lm2)"/><text x="30" y="26" font-size="12" fill="#6b7c85" font-family="sans-serif">Time</text><text x="185.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T1</text><text x="455.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T2</text><rect x="60" y="36" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="56" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">X := 75; write_item(X)</text><rect x="330" y="74" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="455.0" y="94" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">read_item(X) → 75</text><rect x="330" y="112" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="455.0" y="132" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">X := 79; write_item(X); commit</text><rect x="60" y="150" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="185.0" y="170" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">ABORT</text></svg><figcaption>Dirty read: T2 built on a value that T1 later rolled back.</figcaption></figure><p><b>Result:</b> T2 used a value that never officially existed. Without T1, X should be 80 + 4 = 84, but the database holds 79.</p><h3>3. Unrepeatable read</h3><p>T2 reads X twice and gets different values.</p><table class="t"><tr><th>Time</th><th>T1</th><th>T2</th></tr><tr><td>1</td><td></td><td>read X → 80</td></tr><tr><td>2</td><td>read X; X := 75; write X</td><td></td></tr><tr><td>3</td><td></td><td>read X → <b>75</b></td></tr></table><figure class="figure reveal"><svg viewBox="0 0 600 160" width="100%" role="img" style="max-width:600px"><defs><marker id="lm3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#6b7c85"/></marker></defs><path d="M24 34V154" stroke="#6b7c85" marker-end="url(#lm3)"/><text x="30" y="26" font-size="12" fill="#6b7c85" font-family="sans-serif">Time</text><text x="185.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T1</text><text x="455.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T2</text><rect x="330" y="36" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="455.0" y="56" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">read_item(X) → 80</text><rect x="60" y="74" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="94" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">write_item(X): X = 75</text><rect x="330" y="112" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="455.0" y="132" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">read_item(X) → 75</text></svg><figcaption>Unrepeatable read: two reads of X inside T2 disagree.</figcaption></figure><h3>4. Incorrect summary</h3><p>Database: X = 80, Y = 20, A = 10. T2 computes sum = A + X + Y while T1 moves 5 from X to Y.</p><table class="t"><tr><th>Time</th><th>T1</th><th>T2</th><th>Sum</th></tr><tr><td>1</td><td></td><td>sum := 0; read A; sum := 10</td><td>10</td></tr><tr><td>2</td><td>read X; X := 75; write X</td><td></td><td></td></tr><tr><td>3</td><td></td><td>read X → 75; sum := 85</td><td>85</td></tr><tr><td>4</td><td></td><td>read Y → 20; sum := 105</td><td>105</td></tr><tr><td>5</td><td>read Y; Y := 25; write Y</td><td></td><td></td></tr></table><figure class="figure reveal"><svg viewBox="0 0 600 236" width="100%" role="img" style="max-width:600px"><defs><marker id="lm4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#6b7c85"/></marker></defs><path d="M24 34V230" stroke="#6b7c85" marker-end="url(#lm4)"/><text x="30" y="26" font-size="12" fill="#6b7c85" font-family="sans-serif">Time</text><text x="185.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T1</text><text x="455.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T2</text><rect x="330" y="36" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="455.0" y="56" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">sum := 0 + A = 10</text><rect x="60" y="74" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="94" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">write_item(X): X = 75</text><rect x="330" y="112" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="455.0" y="132" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">sum := 10 + X = 85</text><rect x="330" y="150" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="455.0" y="170" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">sum := 85 + Y(20) = 105</text><rect x="60" y="188" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="208" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">write_item(Y): Y = 25</text></svg><figcaption>Incorrect summary: T2 sees X after T1 but Y before T1.</figcaption></figure><p><b>Result:</b> 105. <b>Correct:</b> 10 + 80 + 20 = 10 + 75 + 25 = <b>110</b>. T1’s effect was only <b>partially considered</b> (the slide’s caption names the mix as X-before / Y-after, while its figure shows X after and Y before; either mix is wrong).</p><table class="t"><tr><th>Problem</th><th>Memory trick</th><th>Typical cause</th></tr><tr><td>Lost update</td><td>Overwritten by a stale value</td><td>Both read before either writes</td></tr><tr><td>Dirty read</td><td>Read uncommitted data that later aborts</td><td>Read between write and abort</td></tr><tr><td>Unrepeatable read</td><td>Same item, two reads, two values</td><td>Another transaction writes in between</td></tr><tr><td>Incorrect summary</td><td>Aggregate sees half of an update</td><td>Sum overlaps a running update</td></tr></table><div class="box brain"><span class="tag">Brain power</span>Why does the lost update end at 84 and not 79?<br><br><b>Answer:</b> Both transactions computed from the <b>same starting value 80</b>. The later write (84) replaces the earlier one (75) instead of building on it.</div><div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Is a dirty read the same as a lost update?</dt><dd>No. A dirty read reads data that may be <b>rolled back</b>. A lost update <b>overwrites</b> another transaction’s write.</dd><dt>Do these problems happen in serial execution?</dt><dd>No. Serial schedules always ensure consistency; the problems come from unsafe interleaving.</dd></dl></div>
+</section>
+<section class="sheet chapter" id="c7">
+<span class="kicker">Lesson 07</span>
+<h2>Schedules and conflicting operations</h2>
+<p class="lead">A schedule is the order in which operations of several transactions actually run. Conflicts are what make some orders dangerous.</p>
+<div class="box lecture"><span class="tag">From the lecture</span><ul><li>A <b>schedule S</b> of n transactions T1…Tn is an ordering of execution of the operations of those transactions.</li><li>A <b>serial</b> schedule runs T1 completely, then T2: it ensures consistency, so there is no risk.</li></ul></div><h3>Notation</h3><p><b>r</b> = read, <b>w</b> = write, <b>c</b> = commit, <b>a</b> = abort. In <b>r<sub>1</sub>(X)</b>: r is the operation, 1 is the transaction ID and X is the data item.</p><pre class="code">Sc: r1(X); r2(X); w1(X); r1(Y); w2(X); c2; w1(Y); c1;</pre><figure class="figure reveal"><svg viewBox="0 0 600 350" width="100%" role="img" style="max-width:600px"><defs><marker id="lm5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#6b7c85"/></marker></defs><path d="M24 34V344" stroke="#6b7c85" marker-end="url(#lm5)"/><text x="30" y="26" font-size="12" fill="#6b7c85" font-family="sans-serif">Time</text><text x="185.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T1</text><text x="455.0" y="22" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">T2</text><rect x="60" y="36" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="185.0" y="56" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">r1(X)</text><rect x="330" y="74" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="455.0" y="94" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">r2(X)</text><rect x="60" y="112" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="185.0" y="132" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">w1(X)</text><rect x="60" y="150" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="170" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">r1(Y)</text><rect x="330" y="188" width="250" height="30" rx="8" fill="#f7ece9" stroke="#a94d43"/><text x="455.0" y="208" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">w2(X)</text><rect x="330" y="226" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="455.0" y="246" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">c2</text><rect x="60" y="264" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="284" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">w1(Y)</text><rect x="60" y="302" width="250" height="30" rx="8" fill="#e8f0f4" stroke="#35627d"/><text x="185.0" y="322" text-anchor="middle" font-size="13" fill="#243a46" font-family="sans-serif">c1</text></svg><figcaption>Sc drawn as lanes. The red operations all touch X from different transactions; Y is only used by T1.</figcaption></figure><h3>Conflicting operations</h3><div class="box key"><span class="tag">Rule</span>Two operations conflict iff <b>(1)</b> they belong to <b>different transactions</b>, <b>(2)</b> they access the <b>same data item</b>, and <b>(3)</b> <b>at least one is a write</b>.</div><table class="t"><tr><th>Pair</th><th>Conflict?</th><th>Why</th></tr><tr><td>r1(X), r2(X)</td><td>No</td><td>Both reads</td></tr><tr><td>r1(X), w2(X)</td><td>Yes (read-write)</td><td>Different transactions, same item, one write</td></tr><tr><td>w1(X), r2(X)</td><td>Yes (write-read)</td><td>Same</td></tr><tr><td>w1(X), w2(X)</td><td>Yes (write-write)</td><td>Same</td></tr><tr><td>r1(X), w2(Y)</td><td>No</td><td>Different items</td></tr><tr><td>r1(X), w1(X)</td><td>No</td><td>Same transaction</td></tr></table><h3>Worked example: find the conflicts in Sc</h3><ul><li>Item X is touched by both transactions: r2(X) with w1(X) (read-write).</li><li>r1(X) with w2(X) (read-write).</li><li>w1(X) with w2(X) (write-write).</li><li>Item Y is used only by T1, so it has <b>no</b> conflicts.</li></ul><p><b>Three conflicting pairs.</b> Because Sc is not serial and has conflicts, it carries a risk of inconsistency.</p><h3>Is a schedule proper?</h3><p>A <b>proper (complete) schedule</b> contains all operations of all transactions and keeps each transaction’s own order. With T1 = r1(X), w1(X), r1(Y), w1(Y) and T2 = r2(X), w2(X):</p><table class="t"><tr><th>Schedule</th><th>Proper?</th><th>Reason</th></tr><tr><td>r1(X); w1(X); r1(Y); w1(Y); r2(X); w2(X)</td><td>Yes</td><td>Serial, all operations in order</td></tr><tr><td>r1(X); w1(X); r2(X); r1(Y); w1(Y); w2(X)</td><td>Yes</td><td>T1 and T2 keep their own order</td></tr><tr><td>r1(X); w1(X); r2(X); w1(Y); r1(Y); w2(X)</td><td>No</td><td>w1(Y) appears before r1(Y), breaking T1’s order</td></tr></table><h3>More practice: count the conflicting pairs</h3><table class="t"><tr><th>Schedule</th><th>Conflicting pairs</th><th>Count</th></tr><tr><td>r1(X); w2(X); w1(Y); r2(Y)</td><td>r1(X) – w2(X), w1(Y) – r2(Y)</td><td>2</td></tr><tr><td>r1(X); r2(X); r1(Y); r2(Y)</td><td>none</td><td>0</td></tr><tr><td>w1(X); w2(X); w1(Y); w2(Y)</td><td>w1(X) – w2(X), w1(Y) – w2(Y)</td><td>2</td></tr><tr><td>r1(X); w2(Y); w1(X); r2(Y)</td><td>none</td><td>0</td></tr><tr><td>w1(X); r2(X); w2(X); r1(X)</td><td>w1(X) – r2(X), w1(X) – w2(X), w2(X) – r1(X)</td><td>3</td></tr></table><div class="box brain"><span class="tag">Brain power</span>Why does <code>r1(X); r2(X); r1(Y); r2(Y)</code> have zero conflicts even though both transactions use both items?<br><br><b>Answer:</b> Every operation is a read. A conflict needs at least one write.</div><h3>Step 0: is it a proper schedule?</h3><p>Before classifying any schedule, check that it is <b>proper</b>. Exam choices often hide an improper schedule among the options, and an improper schedule is never the right answer.</p><table class="t"><tr><th>What to check</th><th>How an improper schedule looks</th><th>Example (T1 = r1(X); w1(X); c1)</th></tr><tr><td>Every operation present, exactly once</td><td>An operation is missing or repeated</td><td>r1(X); c1; (w1(X) missing)</td></tr><tr><td>Each transaction keeps its own order</td><td>Two operations of the same transaction are swapped</td><td>w1(X); r1(X); c1;</td></tr><tr><td>Commit/abort is the last operation</td><td>A transaction acts after it has committed</td><td>r1(X); c1; w1(X);</td></tr></table><div class="box key"><span class="tag">Quick method</span>For each transaction, read only its operations from the schedule, left to right, and compare with the transaction as given. If they differ in any way, the schedule is improper.</div>
+</section>
+<section class="sheet chapter" id="c8">
+<span class="kicker">Lesson 08</span>
+<h2>Recoverability: recoverable, cascadeless, strict</h2>
+<p class="lead">From the recoverability perspective there are three types of schedules, each stricter than the last.</p>
+<h3>Why it matters</h3><p>If T1 writes X, T2 reads X and then T1 aborts, T2 has used dirty data. Can the system still repair things? That is the recoverability question.</p><h3>1. Recoverable</h3><div class="box lecture"><span class="tag">Definition</span>No transaction T commits until <b>all transactions that wrote an item T read have committed</b>. So T2 must wait for T1 to commit first.</div><div class="box key"><span class="tag">Test</span><ul><li>Find the <b>write-read</b> conflicts.</li><li>Find the order in which the transactions terminate.</li><li>If the transaction that <b>wrote</b> did <b>not</b> terminate first, the schedule is <b>not recoverable</b>; otherwise it is recoverable.</li></ul></div><h3>2. Cascadeless (avoids cascading abort)</h3><div class="box lecture"><span class="tag">Definition</span>Transactions read only items written by <b>committed</b> transactions. T1 must commit (or abort) <b>before T2 reads</b> X.</div><p><b>Cascading rollback:</b> an uncommitted transaction is forced to roll back because it read an item written by a failed transaction. Example: r1(X); w1(X); r2(X); a1; a2; T2 must abort because it read data that is no longer valid.</p><div class="box key"><span class="tag">Test</span><ul><li>Find the write-read conflicts.</li><li>If the writer <b>terminates before the read</b> takes place, the schedule is cascadeless; otherwise it is not.</li></ul></div><h3>3. Strict</h3><div class="box lecture"><span class="tag">Definition</span>Transactions <b>read and write</b> only items written by committed/aborted transactions. T1 must terminate before T2 reads <b>or writes</b> X.</div><div class="box key"><span class="tag">Test</span><ul><li>Find the <b>write-read and write-write</b> conflicts.</li><li>If the first writer terminates before the other operation on that item, the schedule is strict; otherwise it is not.</li></ul></div><h3>Venn relationship</h3><p><b>Strict ⊂ Cascadeless ⊂ Recoverable ⊂ all schedules.</b> So every strict schedule is cascadeless and recoverable, and every cascadeless schedule is recoverable. The reverse is false.</p><table class="t"><tr><th>Schedule</th><th>Recoverable</th><th>Cascadeless</th><th>Strict</th></tr><tr><td>w1(X); c1; r2(X); w2(X); c2</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>w1(X); w2(X); c1; c2</td><td>Yes</td><td>Yes</td><td>No</td></tr><tr><td>w1(X); r2(X); c1; c2</td><td>Yes</td><td>No</td><td>No</td></tr><tr><td>w1(X); r2(X); c2; c1</td><td>No</td><td>No</td><td>No</td></tr></table><h3>Lecture examples, worked</h3><table class="t"><tr><th>Schedule</th><th>Verdict</th><th>Reasoning</th></tr><tr><td>r1(X); r2(X); w1(X); r1(Y); w2(X); c2; w1(Y); c1</td><td>Recoverable, cascadeless, <b>not strict</b></td><td>No write-read conflict (w1(X) comes after r2(X)). Write-write w1(X) then w2(X) happens before c1, so not strict.</td></tr><tr><td>r1(X); w1(X); r2(X); r1(Y); w2(X); c2; w1(Y); c1</td><td><b>Not recoverable</b></td><td>T2 read X from T1 and committed before T1.</td></tr><tr><td>r1(X); w1(X); r2(X); r1(Y); w2(X); w1(Y); c1; c2</td><td>Recoverable (not cascadeless)</td><td>T1 commits before T2, but r2(X) came before c1.</td></tr><tr><td>…w2(X); c1; w1(Y); c2</td><td>Invalid</td><td>T1 performs w1(Y) after it has already committed, so this is not a proper schedule.</td></tr><tr><td>r1(X); r2(X); w1(X); r1(Y); w1(Y); c1; w2(X); c2</td><td>Strict</td><td>T1 terminates before T2 writes X.</td></tr></table><figure class="figure reveal"><svg viewBox="0 0 620 330" width="100%" style="max-width:620px" role="img"><rect x="4" y="4" width="612" height="322" rx="14" fill="#f7ece9" stroke="#a94d43"/><text x="20" y="28" font-size="13" font-weight="700" fill="#a94d43" font-family="sans-serif">Not recoverable</text><ellipse cx="310" cy="185" rx="285" ry="130" fill="#e8f0f4" stroke="#35627d" stroke-width="1.6"/><text x="310" y="75" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">Recoverable</text><ellipse cx="310" cy="210" rx="200" ry="95" fill="#f7f1e5" stroke="#946a2b" stroke-width="1.6"/><text x="310" y="135" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">Cascadeless</text><ellipse cx="310" cy="235" rx="105" ry="55" fill="#e8f2eb" stroke="#327353" stroke-width="1.6"/><text x="310" y="230" text-anchor="middle" font-weight="700" font-size="14" fill="#243a46" font-family="sans-serif">Strict</text></svg><figcaption>Every strict schedule is cascadeless, and every cascadeless schedule is recoverable.</figcaption></figure><h3>Worked exam example (Midterm 2023)</h3><pre class="code">S: R1(x); R3(x); W1(z); W1(x); R3(z); R1(y); C1; W3(y); R2(y); W3(x); C3; R2(x); C2;</pre><ul><li><b>Write-read conflicts:</b> W1(z)→R3(z); W3(y)→R2(y); W3(x)→R2(x).</li><li><b>Recoverable?</b> Writers T1, T3, T3 commit before their readers T3, T2, T2 do (C1 &lt; C3 &lt; C2). <b>Yes.</b></li><li><b>Cascadeless?</b> R3(z) happens before C1. <b>No.</b></li><li><b>Strict?</b> The same read of z before C1 breaks it. <b>No.</b></li></ul><p>Answer: <b>Recoverable, not cascadeless, not strict</b> (this matches the lecturer’s key).</p><div class="box watch"><span class="tag">Common mistakes</span><ul><li>Checking only the order of <b>commits</b> and forgetting that cascadeless is about when the <b>read</b> happens.</li><li>Forgetting write-write conflicts when testing for strict.</li><li>Declaring “not recoverable” when the writer commits first: then it <b>is</b> recoverable.</li></ul></div><h3>Practice walkthrough: six more schedules classified</h3><table class="t"><tr><th>Schedule</th><th>Reasoning and verdict</th></tr><tr><td>w1(X); c1; r2(X); w2(X); c2</td><td>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Strict</b>.</td></tr><tr><td>w1(X); w2(X); c1; c2</td><td>Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Cascadeless but not strict</b>.</td></tr><tr><td>w1(X); r2(X); c1; c2</td><td>Write-read / write-write conflicts: w1(X)→r2(X) (WR). Commit order: c1 &lt; c2. Verdict: <b>Recoverable but not cascadeless</b>.</td></tr><tr><td>w1(X); r2(X); c2; c1</td><td>Write-read / write-write conflicts: w1(X)→r2(X) (WR). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</td></tr><tr><td>r1(X); w1(X); r2(X); w2(X); c2; c1</td><td>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</td></tr><tr><td>w1(X); w1(Y); r2(Y); w2(X); c2; c1</td><td>Write-read / write-write conflicts: w1(X)→w2(X) (WW), w1(Y)→r2(Y) (WR). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</td></tr></table><div class="box brain"><span class="tag">Brain power</span>Is <code>w1(X); r2(X); c1; c2</code> recoverable? Cascadeless?<br><br><b>Recoverable: yes</b> (T1 commits before T2). <b>Cascadeless: no</b>, because r2(X) happens before c1.</div><div class="box nodumb"><span class="tag">No dumb questions</span><dl><dt>Why is every cascadeless schedule also recoverable?</dt><dd>Cascadeless means every read sees only committed data, so the writer has already committed before any reader commits. That is exactly the recoverable condition.</dd><dt>Why is strict stricter than cascadeless?</dt><dd>Strict also restricts <b>writes</b>: nobody may overwrite an item until its last writer has terminated.</dd></dl></div><h3>How to answer “Which schedule is strict / cascadeless / recoverable?”</h3><ul><li><b>Eliminate improper schedules first.</b> Check each transaction’s operations against its definition.</li><li>For the proper ones, list the <b>write-read</b> (and, for strict, <b>write-write</b>) conflicts.</li><li>Check where each writer’s <b>commit</b> falls: before the later operation (strict/cascadeless) or before the reader’s commit (recoverable).</li><li>Pick the one choice that meets the stated property.</li></ul><h4>Worked example</h4><p>T1: r1(X); w1(X); r1(Y); w1(Y); c1; T2: r2(X); w2(X); c2; Which schedule is <b>strict</b>?</p><table class="t"><tr><th>Choice</th><th>Proper?</th><th>Verdict</th></tr><tr><td><b>A</b> <code>r2(X); r1(X); w1(X); r1(Y); w1(Y); c1; w2(X); c2;</code></td><td>Yes</td><td>Strict ← answer</td></tr><tr><td><b>B</b> <code>r2(X); r1(X); w1(X); w1(Y); r1(Y); c1; w2(X); c2;</code></td><td>No: the operations of T1 are not in their original order</td><td>—</td></tr><tr><td><b>C</b> <code>r1(X); r2(X); r1(Y); w1(X); w1(Y); c1; w2(X); c2;</code></td><td>No: the operations of T1 are not in their original order</td><td>—</td></tr><tr><td><b>D</b> <code>r2(X); r1(X); w1(X); r1(Y); w2(X); w1(Y); c2; c1;</code></td><td>Yes</td><td>Cascadeless but not strict</td></tr></table><div class="box watch"><span class="tag">Common mistakes</span><ul><li>Classifying an improper schedule and picking it because it “looks” strict.</li><li>Forgetting that a <b>strict</b> schedule is also cascadeless and recoverable, so on a question that asks only for “recoverable”, check whether more than one choice qualifies and read the stem carefully.</li><li>Counting only commits and ignoring where the <b>read</b> happens.</li></ul></div>
+</section>
+<section class="sheet chapter" id="quiz">
+<span class="kicker">Practice</span>
+<h2>78 questions</h2>
+<p class="lead">12 True/False · 49 Multiple choice · 17 Written and worked problems. Try them all before you look at the answer key.</p>
+<h3>Part A · True or False</h3>
+<div class="q"><span class="qn">1</span>A transaction is a sequence of database actions treated as one unit of work.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">2</span>In ad-hoc SQL, each statement is by default its own transaction.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">3</span>write_item(X) always stores the updated block on disk immediately.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">4</span>If a transaction aborts, none of its changes should be reflected in the database.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">5</span>The recovery manager uses the log to undo the actions of partial transactions.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">6</span>A transaction in the partially committed state can still move to the failed state.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">7</span>In interleaved execution, operations of two transactions run at exactly the same instant.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">8</span>r1(X) and r2(X) are conflicting operations.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">9</span>A recoverable schedule can contain a transaction that commits before the transaction it read from.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">10</span>Every strict schedule is cascadeless.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">11</span>A schedule in which one transaction’s operations appear out of order is still a proper schedule.<span class="tf">T / F</span></div>
+<div class="q"><span class="qn">12</span>An improper schedule can still be the correct answer to “which schedule is strict?”.<span class="tf">T / F</span></div>
+<h3>Part B · Exam-style: which schedule is…?</h3><p class="muted">Choices are schedules. Some are not proper schedules, and a not-proper schedule is never the right answer.</p>
+<div class="q"><span class="qn">13</span>Given T1: r1(X); w1(X); r1(Y); w1(Y); c1; and T2: r2(X); w2(X); c2;<br>Which of the following schedules is strict? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r2(X); r1(X); w1(X); r1(Y); w1(Y); c1; w2(X); c2;</code></li><li data-l="b"><code>r2(X); r1(X); w1(X); w1(Y); r1(Y); c1; w2(X); c2;</code></li><li data-l="c"><code>r1(X); r2(X); r1(Y); w1(X); w1(Y); c1; w2(X); c2;</code></li><li data-l="d"><code>r2(X); r1(X); w1(X); r1(Y); w2(X); w1(Y); c2; c1;</code></li></ol></div>
+<div class="q"><span class="qn">14</span>Given T1: r1(X); w1(X); r1(Y); w1(Y); c1; and T2: r2(X); w2(X); c2;<br>Which of the following schedules is cascadeless? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r2(X); w2(X); r1(X); w1(X); r1(Y); w1(Y); c1; c2;</code></li><li data-l="b"><code>w1(X); r1(X); r1(Y); w1(Y); c1; r2(X); w2(X); c2;</code></li><li data-l="c"><code>r2(X); r1(X); w2(X); w1(X); c2; r1(Y); w1(Y); c1;</code></li><li data-l="d"><code>r1(X); r2(X); w1(X); w1(Y); r1(Y); w2(X); c1; c2;</code></li></ol></div>
+<div class="q"><span class="qn">15</span>Given T1: r1(X); w1(X); r1(Y); w1(Y); c1; and T2: r2(X); w2(X); c2;<br>Which of the following schedules is recoverable? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r1(X); w1(X); r2(X); r1(Y); w1(Y); w2(X); c2; c1;</code></li><li data-l="b"><code>r2(X); r1(X); w1(X); r1(Y); w1(Y); c2; w2(X); c1;</code></li><li data-l="c"><code>r1(X); w1(X); r2(X); w1(Y); c1; w2(X); c2;</code></li><li data-l="d"><code>r1(X); w1(X); r1(Y); r2(X); w1(Y); c1; w2(X); c2;</code></li></ol></div>
+<div class="q"><span class="qn">16</span>Given T1: r1(X); w1(X); r1(Y); w1(Y); c1; and T2: r2(X); w2(X); c2;<br>Which of the following schedules is <b>not recoverable</b>? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r1(X); w1(X); r1(Y); r2(X); c2; w1(Y); c1;</code></li><li data-l="b"><code>r2(X); r1(X); w1(X); r1(Y); w2(X); c2; w1(Y); c1;</code></li><li data-l="c"><code>r1(X); w1(X); r1(Y); w1(Y); r2(X); w2(X); c2; c1;</code></li><li data-l="d"><code>r2(X); w2(X); r1(X); w1(X); w1(Y); r1(Y); c1; c2;</code></li></ol></div>
+<div class="q"><span class="qn">17</span>Given T1: r1(X); w1(X); r1(Y); w1(Y); c1; and T2: r2(X); w2(X); c2;<br>Which of the following schedules is recoverable but <b>not cascadeless</b>? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r1(X); w1(X); r1(Y); r2(X); w1(Y); w2(X); c1; c2;</code></li><li data-l="b"><code>r1(X); r1(Y); w1(X); r2(X); w1(Y); w2(X); c1; c2;</code></li><li data-l="c"><code>r1(X); w1(X); w1(Y); r1(Y); r2(X); c1; w2(X); c2;</code></li><li data-l="d"><code>r1(X); w1(X); r2(X); r1(Y); w2(X); w1(Y); c2; c1;</code></li></ol></div>
+<div class="q"><span class="qn">18</span>Given T1: r1(X); w1(X); r1(Y); w1(Y); c1; and T2: r2(X); w2(X); c2;<br>Which of the following schedules is cascadeless but <b>not strict</b>? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r2(X); r1(X); w2(X); c2; w1(X); r1(Y); w1(Y); c1;</code></li><li data-l="b"><code>r1(X); r2(X); w1(X); w2(X); c2; r1(Y); w1(Y); c1;</code></li><li data-l="c"><code>r1(X); w2(X); r2(X); w1(X); r1(Y); c2; w1(Y); c1;</code></li><li data-l="d"><code>r2(X); r1(X); w2(X); r1(Y); w1(X); c2; w1(Y); c1;</code></li></ol></div>
+<div class="q"><span class="qn">19</span>Given T1: w1(X); w1(Y); c1; and T2: r2(Y); w2(X); c2;<br>Which of the following schedules is strict? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r2(Y); w1(X); w1(Y); c2; c1;</code></li><li data-l="b"><code>w1(X); r2(Y); w1(Y); w2(X); c2; c1;</code></li><li data-l="c"><code>w1(X); r2(Y); w1(Y); c1; w2(X); c2;</code></li><li data-l="d"><code>w2(X); r2(Y); c2; w1(X); w1(Y); c1;</code></li></ol></div>
+<div class="q"><span class="qn">20</span>Given T1: w1(X); w1(Y); c1; and T2: r2(Y); w2(X); c2;<br>Which of the following schedules is cascadeless? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r2(Y); w2(X); w1(X); c2; w1(Y); c1;</code></li><li data-l="b"><code>w1(X); w1(Y); r2(Y); w2(X); c2; c1;</code></li><li data-l="c"><code>w1(X); r2(Y); c2; w1(Y); c1;</code></li><li data-l="d"><code>r2(Y); w2(X); w1(Y); w1(X); c2; c1;</code></li></ol></div>
+<div class="q"><span class="qn">21</span>Given T1: w1(X); w1(Y); c1; and T2: r2(Y); w2(X); c2;<br>Which of the following schedules is recoverable? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r2(Y); w1(X); w1(Y); c1; c2;</code></li><li data-l="b"><code>r2(Y); w1(Y); w1(X); w2(X); c1; c2;</code></li><li data-l="c"><code>w1(X); r2(Y); w1(Y); w2(X); c2; c1;</code></li><li data-l="d"><code>w1(X); w1(Y); r2(Y); w2(X); c2; c1;</code></li></ol></div>
+<div class="q"><span class="qn">22</span>Given T1: w1(X); w1(Y); c1; and T2: r2(Y); w2(X); c2;<br>Which of the following schedules is <b>not recoverable</b>? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>r2(Y); w2(X); w1(X); c2; w1(Y); c1;</code></li><li data-l="b"><code>w1(X); w1(Y); r2(Y); c2; c1;</code></li><li data-l="c"><code>w1(X); w1(Y); r2(Y); c2; w2(X); c1;</code></li><li data-l="d"><code>w1(X); w1(Y); r2(Y); w2(X); c2; c1;</code></li></ol></div>
+<div class="q"><span class="qn">23</span>Given T1: w1(X); w1(Y); c1; and T2: r2(Y); w2(X); c2;<br>Which of the following schedules is recoverable but <b>not cascadeless</b>? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>w1(X); w1(Y); r2(Y); c1; c2; w2(X);</code></li><li data-l="b"><code>w1(Y); w1(X); r2(Y); c1; w2(X); c2;</code></li><li data-l="c"><code>r2(Y); w1(X); w2(X); w1(Y); c1; c2;</code></li><li data-l="d"><code>w1(X); w1(Y); r2(Y); c1; w2(X); c2;</code></li></ol></div>
+<div class="q"><span class="qn">24</span>Given T1: w1(X); w1(Y); c1; and T2: r2(Y); w2(X); c2;<br>Which of the following schedules is cascadeless but <b>not strict</b>? (Some choices may not be proper schedules; a schedule that is not proper cannot be the answer.)<ol class="opts"><li data-l="a"><code>w1(X); w2(X); w1(Y); c1; c2;</code></li><li data-l="b"><code>w1(X); r2(Y); w1(Y); c1; w2(X); c2;</code></li><li data-l="c"><code>w1(X); r2(Y); w2(X); w1(Y); c2; c1;</code></li><li data-l="d"><code>r2(Y); w1(X); w2(X); c1; c2;</code></li></ol></div>
+<h3>Part C · More multiple choice</h3>
+<div class="q"><span class="qn">25</span>Which is <b>not</b> a database action of a transaction?<ol class="opts"><li data-l="a">read</li><li data-l="b">write</li><li data-l="c">commit</li><li data-l="d">sort</li></ol></div>
+<div class="q"><span class="qn">26</span>Money is never debited without being credited. Which ACID property?<ol class="opts"><li data-l="a">Atomicity</li><li data-l="b">Consistency</li><li data-l="c">Isolation</li><li data-l="d">Durability</li></ol></div>
+<div class="q"><span class="qn">27</span>“Stock amount cannot be negative” is an example of:<ol class="opts"><li data-l="a">Atomicity</li><li data-l="b">Consistency</li><li data-l="c">Isolation</li><li data-l="d">Durability</li></ol></div>
+<div class="q"><span class="qn">28</span>Other transactions should not see a transaction’s updates until it commits. This is:<ol class="opts"><li data-l="a">Atomicity</li><li data-l="b">Consistency</li><li data-l="c">Isolation</li><li data-l="d">Durability</li></ol></div>
+<div class="q"><span class="qn">29</span>After COMMIT the power fails. The changes must still exist. This is:<ol class="opts"><li data-l="a">Atomicity</li><li data-l="b">Consistency</li><li data-l="c">Isolation</li><li data-l="d">Durability</li></ol></div>
+<div class="q"><span class="qn">30</span>When a transaction in the partially committed state is committed, it goes to:<ol class="opts"><li data-l="a">Active</li><li data-l="b">Failed</li><li data-l="c">Committed</li><li data-l="d">Terminated</li></ol></div>
+<div class="q"><span class="qn">31</span>From which states can a transaction move to Failed?<ol class="opts"><li data-l="a">Active only</li><li data-l="b">Active and Partially committed</li><li data-l="c">Committed</li><li data-l="d">Partially committed and Committed</li></ol></div>
+<div class="q"><span class="qn">32</span>X = 80, N = 5, M = 4. T1 and T2 both read X = 80, then T1 writes 80−N and T2 writes 80+M (in that order). Final X?<ol class="opts"><li data-l="a">75</li><li data-l="b">79</li><li data-l="c">80</li><li data-l="d">84</li></ol></div>
+<div class="q"><span class="qn">33</span>T1 writes X = 75 (from 80), T2 reads 75, adds M = 4, writes 79 and commits, then T1 aborts. What should X have been?<ol class="opts"><li data-l="a">75</li><li data-l="b">79</li><li data-l="c">80</li><li data-l="d">84</li></ol></div>
+<div class="q"><span class="qn">34</span>T2 reads X = 80, T1 then changes X to 75, T2 reads X again and gets 75. Problem?<ol class="opts"><li data-l="a">Lost update</li><li data-l="b">Dirty read</li><li data-l="c">Unrepeatable read</li><li data-l="d">Incorrect summary</li></ol></div>
+<div class="q"><span class="qn">35</span>A = 10, X = 80, Y = 20. T1 moves 5 from X to Y. T2 reads A, then X after T1 wrote X, then Y before T1 writes Y. T2’s sum?<ol class="opts"><li data-l="a">100</li><li data-l="b">105</li><li data-l="c">110</li><li data-l="d">115</li></ol></div>
+<div class="q"><span class="qn">36</span>Which pair of operations conflicts?<ol class="opts"><li data-l="a">r1(X), r2(X)</li><li data-l="b">r1(X), w1(X)</li><li data-l="c">r1(X), w2(Y)</li><li data-l="d">r1(X), w2(X)</li></ol></div>
+<div class="q"><span class="qn">37</span>How many conflicting pairs are in r1(X); w2(X); w1(Y); r2(Y)?<ol class="opts"><li data-l="a">0</li><li data-l="b">1</li><li data-l="c">2</li><li data-l="d">3</li></ol></div>
+<div class="q"><span class="qn">38</span>A proper (complete) schedule must:<ol class="opts"><li data-l="a">contain all operations and keep each transaction’s own order</li><li data-l="b">contain only writes</li><li data-l="c">be serial</li><li data-l="d">contain no conflicts</li></ol></div>
+<div class="q"><span class="qn">39</span>w1(X); r2(X); c2; c1 is:<ol class="opts"><li data-l="a">Recoverable</li><li data-l="b">Not recoverable</li><li data-l="c">Strict</li><li data-l="d">Cascadeless</li></ol></div>
+<div class="q"><span class="qn">40</span>w1(X); r2(X); c1; c2 is best described as:<ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">41</span>w1(X); c1; r2(X); c2 is:<ol class="opts"><li data-l="a">Strict</li><li data-l="b">Only recoverable</li><li data-l="c">Not recoverable</li><li data-l="d">Not proper</li></ol></div>
+<div class="q"><span class="qn">42</span>w1(X); w2(X); c1; c2 is:<ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Not recoverable</li><li data-l="d">Not cascadeless</li></ol></div>
+<div class="q"><span class="qn">43</span>Cascading rollback occurs when:<ol class="opts"><li data-l="a">a transaction reads an item written by a transaction that later fails and must itself roll back</li><li data-l="b">two transactions write different items</li><li data-l="c">a transaction commits twice</li><li data-l="d">the disk fails</li></ol></div>
+<div class="q"><span class="qn">44</span>Which relationship is correct?<ol class="opts"><li data-l="a">Recoverable ⊂ Cascadeless ⊂ Strict</li><li data-l="b">Strict ⊂ Cascadeless ⊂ Recoverable</li><li data-l="c">Cascadeless ⊂ Strict ⊂ Recoverable</li><li data-l="d">They are unrelated</li></ol></div>
+<div class="q"><span class="qn">45</span>Classify the schedule: <code>w1(X); c1; r2(X); w2(X); c2</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">46</span>Classify the schedule: <code>w1(X); w2(X); c1; c2</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">47</span>Classify the schedule: <code>w1(X); r2(X); c1; c2</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">48</span>Classify the schedule: <code>w1(X); r2(X); c2; c1</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">49</span>Classify the schedule: <code>r1(X); w1(X); r2(X); w2(X); c2; c1</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">50</span>Classify the schedule: <code>w1(X); w1(Y); r2(Y); w2(X); c2; c1</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">51</span>Classify the schedule: <code>w1(X); r2(X); w2(Y); c1; r3(Y); c2; c3</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">52</span>Classify the schedule: <code>r1(X); w2(X); c2; w1(X); c1</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">53</span>Classify the schedule: <code>r1(X); r2(X); w1(X); w2(X); c1; c2</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">54</span>Classify the schedule: <code>r1(X); w1(X); r1(Y); w1(Y); c1; r2(X); r2(Y); c2</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">55</span>Classify the schedule: <code>w1(X); w1(Y); r2(X); r2(Y); c2; c1</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">56</span>Classify the schedule: <code>w1(X); c1; w2(X); r3(X); c2; c3</code><ol class="opts"><li data-l="a">Strict</li><li data-l="b">Cascadeless but not strict</li><li data-l="c">Recoverable but not cascadeless</li><li data-l="d">Not recoverable</li></ol></div>
+<div class="q"><span class="qn">57</span>How many conflicting pairs are in <code>r1(X); w2(X); w1(Y); r2(Y)</code>?<ol class="opts"><li data-l="a">3</li><li data-l="b">2</li><li data-l="c">4</li><li data-l="d">5</li></ol></div>
+<div class="q"><span class="qn">58</span>How many conflicting pairs are in <code>r1(X); r2(X); r1(Y); r2(Y)</code>?<ol class="opts"><li data-l="a">1</li><li data-l="b">0</li><li data-l="c">2</li><li data-l="d">3</li></ol></div>
+<div class="q"><span class="qn">59</span>How many conflicting pairs are in <code>w1(X); w2(X); w1(Y); w2(Y)</code>?<ol class="opts"><li data-l="a">3</li><li data-l="b">2</li><li data-l="c">4</li><li data-l="d">5</li></ol></div>
+<div class="q"><span class="qn">60</span>How many conflicting pairs are in <code>w1(X); r2(X); w2(Y); r1(Y)</code>?<ol class="opts"><li data-l="a">3</li><li data-l="b">2</li><li data-l="c">4</li><li data-l="d">5</li></ol></div>
+<div class="q"><span class="qn">61</span>Which statement about the relationship between schedule types is true?<ol class="opts"><li data-l="a">A strict schedule may be not recoverable</li><li data-l="b">A cascadeless schedule is always recoverable</li><li data-l="c">A recoverable schedule is always cascadeless</li><li data-l="d">A strict schedule is never cascadeless</li></ol></div>
+<h3>Part D · Written and worked problems</h3>
+<div class="q"><span class="qn">62</span>Define a transaction and list its actions. Use the LE1000 transfer to show why the steps must stay together.</div>
+<div class="q"><span class="qn">63</span>Explain each ACID property with a banking example, and say who or what makes it hold.</div>
+<div class="q"><span class="qn">64</span>Describe the transaction state diagram and trace the path of (a) a successful transaction and (b) one that fails at the last moment.</div>
+<div class="q"><span class="qn">65</span>Explain read_item(X) and write_item(X). Why can a write be lost in a crash?</div>
+<div class="q"><span class="qn">66</span>What is the difference between interleaving and parallel processing, and why do systems allow concurrency?</div>
+<div class="q"><span class="qn">67</span>Show a lost update with X = 80, N = 5, M = 4. Give the final value and the correct value.</div>
+<div class="q"><span class="qn">68</span>Explain the dirty read problem with an example. Why does recoverability matter here?</div>
+<div class="q"><span class="qn">69</span>Classify S: r1(x); w1(x); r2(x); w2(x); c2; c1.</div>
+<div class="q"><span class="qn">70</span>Classify S: r1(X); w1(X); c1; r2(X); w2(X); c2.</div>
+<div class="q"><span class="qn">71</span>Midterm 2023: classify S: R1(x); R3(x); W1(z); W1(x); R3(z); R1(y); C1; W3(y); R2(y); W3(x); C3; R2(x); C2;</div>
+<div class="q"><span class="qn">72</span>Classify <code>r1(X); w1(X); r2(X); r1(Y); w1(Y); c1; w2(X); c2</code> and justify each answer (recoverable, cascadeless, strict).</div>
+<div class="q"><span class="qn">73</span>Classify <code>w1(X); r2(X); w2(Y); r3(Y); c1; c3; c2</code> and justify each answer (recoverable, cascadeless, strict).</div>
+<div class="q"><span class="qn">74</span>Classify <code>r1(X); w2(X); c2; w1(X); c1</code> and justify each answer (recoverable, cascadeless, strict).</div>
+<div class="q"><span class="qn">75</span>Classify <code>w1(X); w2(Y); r1(Y); r2(X); c1; c2</code> and justify each answer (recoverable, cascadeless, strict).</div>
+<div class="q"><span class="qn">76</span>Draw the interleaved timeline of a lost update using X = 80, N = 5, M = 4, and write the schedule in r/w notation.</div>
+<div class="q"><span class="qn">77</span>Explain why a dirty read is dangerous, using the schedule w1(X); r2(X); c2; c1.</div>
+<div class="q"><span class="qn">78</span>List the checks that decide whether a schedule is <b>proper</b>, and give one example of an improper schedule for T1 = r1(X); w1(X); c1;</div>
+</section>
+<section class="sheet chapter" id="key">
+<span class="kicker">Answer key</span>
+<h2>Answers &amp; explanations</h2>
+<h3>Part A · True / False</h3>
+<div class="ans-grid">
+<div><b>1</b> T</div><div><b>2</b> T</div><div><b>3</b> F</div><div><b>4</b> T</div><div><b>5</b> T</div><div><b>6</b> T</div><div><b>7</b> F</div><div><b>8</b> F</div><div><b>9</b> F</div><div><b>10</b> T</div><div><b>11</b> F</div><div><b>12</b> F</div></div>
+<div style="font-size:13.5px;margin-top:10px">
+<div class="ans"><span class="qn">1</span><b class="a">True.</b> The lecture’s own definition. The actions are read, write, commit and abort.</div><div class="ans"><span class="qn">2</span><b class="a">True.</b> Grouping several statements needs an explicit begin and end.</div><div class="ans"><span class="qn">3</span><b class="a">False.</b> Step 4 stores the block back “immediately or at some later point in time”.</div><div class="ans"><span class="qn">4</span><b class="a">True.</b> That is atomicity: commit means all changes, abort means none.</div><div class="ans"><span class="qn">5</span><b class="a">True.</b> This is how a DBMS ensures atomicity.</div><div class="ans"><span class="qn">6</span><b class="a">True.</b> Abort can occur from both Active and Partially committed.</div><div class="ans"><span class="qn">7</span><b class="a">False.</b> Only one transaction’s operation runs at any instant; the system context-switches.</div><div class="ans"><span class="qn">8</span><b class="a">False.</b> Both are reads; at least one write is required.</div><div class="ans"><span class="qn">9</span><b class="a">False.</b> Recoverable means the writer commits first.</div><div class="ans"><span class="qn">10</span><b class="a">True.</b> Strict ⊂ Cascadeless ⊂ Recoverable.</div><div class="ans"><span class="qn">11</span><b class="a">False.</b> A proper schedule must keep the order of operations inside each transaction.</div><div class="ans"><span class="qn">12</span><b class="a">False.</b> Classification only makes sense for proper schedules, so an improper choice is always a wrong answer.</div></div>
+<h3>Parts B and C · Multiple choice</h3>
+<div class="ans-grid"><div><b>13</b> a</div><div><b>14</b> c</div><div><b>15</b> d</div><div><b>16</b> c</div><div><b>17</b> a</div><div><b>18</b> b</div><div><b>19</b> c</div><div><b>20</b> a</div><div><b>21</b> c</div><div><b>22</b> d</div><div><b>23</b> d</div><div><b>24</b> c</div><div><b>25</b> d</div><div><b>26</b> a</div><div><b>27</b> b</div><div><b>28</b> c</div><div><b>29</b> d</div><div><b>30</b> c</div><div><b>31</b> b</div><div><b>32</b> d</div><div><b>33</b> d</div><div><b>34</b> c</div><div><b>35</b> b</div><div><b>36</b> d</div><div><b>37</b> c</div><div><b>38</b> a</div><div><b>39</b> b</div><div><b>40</b> c</div><div><b>41</b> a</div><div><b>42</b> b</div><div><b>43</b> a</div><div><b>44</b> b</div><div><b>45</b> a</div><div><b>46</b> b</div><div><b>47</b> c</div><div><b>48</b> d</div><div><b>49</b> d</div><div><b>50</b> d</div><div><b>51</b> c</div><div><b>52</b> a</div><div><b>53</b> b</div><div><b>54</b> a</div><div><b>55</b> d</div><div><b>56</b> c</div><div><b>57</b> b</div><div><b>58</b> b</div><div><b>59</b> b</div><div><b>60</b> b</div><div><b>61</b> b</div></div>
+<div style="font-size:13.5px;margin-top:10px">
+<div class="ans"><span class="qn">13</span><b>A</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Strict</b>.<br><b>B</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.<br><b>C</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.<br><b>D</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.</div><div class="ans"><span class="qn">14</span><b>A</b>: Write-read / write-write conflicts: w2(X)→r1(X) (WR), w2(X)→w1(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Not recoverable</b>.<br><b>B</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.<br><b>C</b>: Write-read / write-write conflicts: w2(X)→w1(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.<br><b>D</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.</div><div class="ans"><span class="qn">15</span><b>A</b>: Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.<br><b>B</b>: <b>not a proper schedule</b>: the operations of T2 are not in their original order.<br><b>C</b>: <b>not a proper schedule</b>: T1 has missing or extra operations.<br><b>D</b>: Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Recoverable but not cascadeless</b>.</div><div class="ans"><span class="qn">16</span><b>A</b>: <b>not a proper schedule</b>: T2 has missing or extra operations.<br><b>B</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.<br><b>C</b>: Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.<br><b>D</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.</div><div class="ans"><span class="qn">17</span><b>A</b>: Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Recoverable but not cascadeless</b>.<br><b>B</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.<br><b>C</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.<br><b>D</b>: Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">18</span><b>A</b>: Write-read / write-write conflicts: w2(X)→w1(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Strict</b>.<br><b>B</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.<br><b>C</b>: <b>not a proper schedule</b>: the operations of T2 are not in their original order.<br><b>D</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.</div><div class="ans"><span class="qn">19</span><b>A</b>: <b>not a proper schedule</b>: T2 has missing or extra operations.<br><b>B</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.<br><b>C</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Strict</b>.<br><b>D</b>: <b>not a proper schedule</b>: the operations of T2 are not in their original order.</div><div class="ans"><span class="qn">20</span><b>A</b>: Write-read / write-write conflicts: w2(X)→w1(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.<br><b>B</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW), w1(Y)→r2(Y) (WR). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.<br><b>C</b>: <b>not a proper schedule</b>: T2 has missing or extra operations.<br><b>D</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.</div><div class="ans"><span class="qn">21</span><b>A</b>: <b>not a proper schedule</b>: T2 has missing or extra operations.<br><b>B</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.<br><b>C</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.<br><b>D</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW), w1(Y)→r2(Y) (WR). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">22</span><b>A</b>: Write-read / write-write conflicts: w2(X)→w1(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.<br><b>B</b>: <b>not a proper schedule</b>: T2 has missing or extra operations.<br><b>C</b>: <b>not a proper schedule</b>: the operations of T2 are not in their original order.<br><b>D</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW), w1(Y)→r2(Y) (WR). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">23</span><b>A</b>: <b>not a proper schedule</b>: the operations of T2 are not in their original order.<br><b>B</b>: <b>not a proper schedule</b>: the operations of T1 are not in their original order.<br><b>C</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Cascadeless but not strict</b>.<br><b>D</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW), w1(Y)→r2(Y) (WR). Commit order: c1 &lt; c2. Verdict: <b>Recoverable but not cascadeless</b>.</div><div class="ans"><span class="qn">24</span><b>A</b>: <b>not a proper schedule</b>: T2 has missing or extra operations.<br><b>B</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Strict</b>.<br><b>C</b>: Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Cascadeless but not strict</b>.<br><b>D</b>: <b>not a proper schedule</b>: T1 has missing or extra operations.</div><div class="ans"><span class="qn">25</span>Actions are read, write, commit and abort.</div><div class="ans"><span class="qn">26</span>All-or-nothing is atomicity.</div><div class="ans"><span class="qn">27</span>An integrity constraint that every consistent state must satisfy.</div><div class="ans"><span class="qn">28</span>Isolation.</div><div class="ans"><span class="qn">29</span>Durability means writing data to disk so it persists.</div><div class="ans"><span class="qn">30</span>Committed, and from there to Terminated.</div><div class="ans"><span class="qn">31</span>Abort is possible from both Active and Partially committed.</div><div class="ans"><span class="qn">32</span>The last write (T2) wins: 84. The correct serial result is 79, so T1’s update is lost.</div><div class="ans"><span class="qn">33</span>Without T1, only T2’s effect remains: 80 + 4 = 84. The database holds 79 because of the dirty read.</div><div class="ans"><span class="qn">34</span>Same item, two reads, two values.</div><div class="ans"><span class="qn">35</span>10 + 75 + 20 = 105. The correct sum is 110.</div><div class="ans"><span class="qn">36</span>Different transactions, same item, one write.</div><div class="ans"><span class="qn">37</span>r1(X)–w2(X) and w1(Y)–r2(Y).</div><div class="ans"><span class="qn">38</span>That is the lecture’s two properties.</div><div class="ans"><span class="qn">39</span>T2 read X from T1 and committed before T1.</div><div class="ans"><span class="qn">40</span>Writer commits first (recoverable), but r2(X) precedes c1.</div><div class="ans"><span class="qn">41</span>T1 terminates before T2 touches X.</div><div class="ans"><span class="qn">42</span>No write-read conflict, but T2 writes X before T1 terminates.</div><div class="ans"><span class="qn">43</span>An uncommitted reader is forced to abort.</div><div class="ans"><span class="qn">44</span>Each class is stricter than the next.</div><div class="ans"><span class="qn">45</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Strict</b>.</div><div class="ans"><span class="qn">46</span>Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Cascadeless but not strict</b>.</div><div class="ans"><span class="qn">47</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR). Commit order: c1 &lt; c2. Verdict: <b>Recoverable but not cascadeless</b>.</div><div class="ans"><span class="qn">48</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">49</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">50</span>Write-read / write-write conflicts: w1(X)→w2(X) (WW), w1(Y)→r2(Y) (WR). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">51</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w2(Y)→r3(Y) (WR). Commit order: c1 &lt; c2 &lt; c3. Verdict: <b>Recoverable but not cascadeless</b>.</div><div class="ans"><span class="qn">52</span>Write-read / write-write conflicts: w2(X)→w1(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Strict</b>.</div><div class="ans"><span class="qn">53</span>Write-read / write-write conflicts: w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Cascadeless but not strict</b>.</div><div class="ans"><span class="qn">54</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(Y)→r2(Y) (WR). Commit order: c1 &lt; c2. Verdict: <b>Strict</b>.</div><div class="ans"><span class="qn">55</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(Y)→r2(Y) (WR). Commit order: c2 &lt; c1. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">56</span>Write-read / write-write conflicts: w1(X)→w2(X) (WW), w1(X)→r3(X) (WR), w2(X)→r3(X) (WR). Commit order: c1 &lt; c2 &lt; c3. Verdict: <b>Recoverable but not cascadeless</b>.</div><div class="ans"><span class="qn">57</span>Write-read / write-write conflicts: w1(Y)→r2(Y) (WR). Total conflicting pairs (including read-write): 2.</div><div class="ans"><span class="qn">58</span>Write-read / write-write conflicts: none. Total conflicting pairs (including read-write): 0.</div><div class="ans"><span class="qn">59</span>Write-read / write-write conflicts: w1(X)→w2(X) (WW), w1(Y)→w2(Y) (WW). Total conflicting pairs (including read-write): 2.</div><div class="ans"><span class="qn">60</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w2(Y)→r1(Y) (WR). Total conflicting pairs (including read-write): 2.</div><div class="ans"><span class="qn">61</span>Strict ⊂ Cascadeless ⊂ Recoverable.</div></div>
+<h3>Part D · Model answers</h3>
+<p class="muted">A good answer covers the points below; wording can differ.</p>
+<div class="ans"><span class="qn">62</span>A transaction is a sequence of database actions treated as one unit of work; actions are read, write, commit and abort. The transfer reads #1025, subtracts 1000, writes it, reads #224, adds 1000, writes it and commits. If a crash happens after the first write, the money left #1025 but never reached #224, so either all steps happen or none is kept.</div><div class="ans"><span class="qn">63</span><b>Atomicity:</b> debit and credit both happen or neither; the recovery manager undoes partial work using the log. <b>Consistency:</b> constraints such as non-negative balances hold before and after; the programmer writes consistent transactions and the system guarantees atomicity. <b>Isolation:</b> others do not see the half-finished transfer. <b>Durability:</b> after commit the transfer survives crashes because data is written to disk.</div><div class="ans"><span class="qn">64</span>States: Active, Partially committed, Committed, Failed, Terminated. (a) Active → Partially committed → Committed → Terminated. (b) Active → Partially committed → Failed → Terminated. Abort is possible from Active and from Partially committed.</div><div class="ans"><span class="qn">65</span>read: find block, copy to buffer if needed, copy X to the program variable. write: find block, copy to buffer, copy X from program variable into the buffer, then store the block to disk immediately or later. Until the block is stored, the new value exists only in memory, so a crash can lose it unless the log and recovery manager can redo or undo it.</div><div class="ans"><span class="qn">66</span>Parallel processing runs operations at the same instant on several processors. Interleaving runs one operation at a time and context-switches between transactions; this is the lecture’s concern. Concurrency reduces waiting and response time and improves resource utilization, efficiency and throughput compared with serial execution.</div><div class="ans"><span class="qn">67</span>T1 reads 80; T2 reads 80; T1 computes 75 and T2 computes 84; T1 writes 75; T2 writes 84. Final X = 84. Any serial order gives 80 − 5 + 4 = 79, so T1’s update is lost.</div><div class="ans"><span class="qn">68</span>T1 writes X = 75, T2 reads 75 and commits with 79, then T1 aborts. T2 used a value that never became permanent. In a recoverable schedule T2 would have to wait for T1 to commit before committing itself, so T2 can still be undone if T1 aborts.</div><div class="ans"><span class="qn">69</span>Write-read conflict w1(x)→r2(x). T2 commits before T1 terminates, so the schedule is <b>not recoverable</b>. It is therefore also not cascadeless (r2(x) before c1) and not strict.</div><div class="ans"><span class="qn">70</span>T1 terminates before T2 reads or writes X, so the schedule is <b>strict</b>, and therefore also cascadeless and recoverable. It is also serial.</div><div class="ans"><span class="qn">71</span>Write-read conflicts: W1(z)→R3(z), W3(y)→R2(y), W3(x)→R2(x). Writers commit before their readers (C1 &lt; C3 &lt; C2) so it is <b>recoverable</b>. R3(z) precedes C1, so it is <b>not cascadeless</b> and therefore <b>not strict</b>.</div><div class="ans"><span class="qn">72</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w1(X)→w2(X) (WW). Commit order: c1 &lt; c2. Verdict: <b>Recoverable but not cascadeless</b>.</div><div class="ans"><span class="qn">73</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w2(Y)→r3(Y) (WR). Commit order: c1 &lt; c3 &lt; c2. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">74</span>Write-read / write-write conflicts: w2(X)→w1(X) (WW). Commit order: c2 &lt; c1. Verdict: <b>Strict</b>.</div><div class="ans"><span class="qn">75</span>Write-read / write-write conflicts: w1(X)→r2(X) (WR), w2(Y)→r1(Y) (WR). Commit order: c1 &lt; c2. Verdict: <b>Not recoverable</b>.</div><div class="ans"><span class="qn">76</span><b>Timeline:</b> T1 reads 80; T2 reads 80; T1 writes 75; T2 writes 84. <b>Notation:</b> r1(X); r2(X); w1(X); w2(X). Final X = 84 instead of 79. Conflicts: r1(X)–w2(X), r2(X)–w1(X), w1(X)–w2(X).</div><div class="ans"><span class="qn">77</span>T2 read an uncommitted value from T1 and committed first. If T1 aborts, T2’s result is based on data that never became permanent and cannot be undone (committed). That is why the schedule is not recoverable.</div><div class="ans"><span class="qn">78</span>Check that every operation of every transaction appears exactly once, and that each transaction’s operations keep their original order (commit or abort last). Example of an improper schedule: w1(X); r1(X); c1; (the order of r1(X) and w1(X) is swapped), or r1(X); c1; (w1(X) is missing).</div>
+</section></main>
+
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  function showAll(){ els.forEach(function(e){ e.classList.add('in'); }); }
+  if (!('IntersectionObserver' in window)) { showAll(); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, {threshold: 0.12});
+  els.forEach(function(e){ io.observe(e); });
+  window.addEventListener('beforeprint', showAll);
+  if (window.matchMedia) { var mq = window.matchMedia('print'); if (mq.addEventListener) mq.addEventListener('change', function(m){ if (m.matches) showAll(); }); }
+})();
+</script>
+
+<div class="scorebar no-print" id="scorebar" aria-live="polite">
+  <div>Score <b id="sc">0</b> / <span id="st">61</span><div class="muted" style="font-size:12px"><span id="sa">0</span> of 61 auto-marked answered</div></div>
+  <div class="meter"><i id="sm"></i></div>
+  <button type="button" id="sreset">Reset quiz</button>
+</div>
+<script>
+(function(){
+  var quiz=document.getElementById('quiz'); if(!quiz) return;
+  var STORE='tp-quiz-v1', state={};
+  try{ state=JSON.parse(localStorage.getItem(STORE)||'{}')||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+
+  // answer letters from the key grids
+  var key={};
+  document.querySelectorAll('#key .ans-grid div').forEach(function(d){
+    var n=parseInt(d.querySelector('b').textContent,10);
+    key[n]=d.textContent.replace(/^\s*\d+\s*/,'').trim().toLowerCase();
+  });
+  // explanations / model answers
+  var expl={};
+  document.querySelectorAll('.ans').forEach(function(a){
+    var q=a.querySelector('.qn'); if(!q) return;
+    var m=q.textContent.match(/(\d+)(?:\s*[–-]\s*(\d+))?/); if(!m) return;
+    var c=a.cloneNode(true); c.querySelector('.qn').remove();
+    for(var i=+m[1]; i<=(m[2]?+m[2]:+m[1]); i++) expl[i]=c.innerHTML;
+  });
+
+  document.documentElement.classList.add('quiz-on');
+  var intro=document.createElement('div');
+  intro.className='quiz-intro no-print';
+  intro.innerHTML='<b>Interactive mode.</b> Click an answer for True/False and multiple-choice questions to mark it right away. For the written and practical questions, write your answer, then reveal the model answer and mark yourself. Your progress is saved in this browser. Printing still gives the clean paper version.';
+  var lead=quiz.querySelector('.lead'); lead.parentNode.insertBefore(intro, lead.nextSibling);
+
+  function fb(cls, html){ var d=document.createElement('div'); d.className='fb '+cls; d.innerHTML=html; return d; }
+  var auto=[];
+
+  quiz.parentNode.querySelectorAll('.q').forEach(function(q){
+    var n=parseInt(q.querySelector('.qn').textContent,10);
+    var box=document.createElement('div'); box.className='qi no-print'; q.appendChild(box);
+
+    if(n<=61){
+      auto.push(n);
+      var correct=key[n];
+      var show=function(choice, initial){
+        q.classList.add('done');
+        var ok=(choice===correct);
+        var exp=expl[n]?' '+expl[n]:'';
+        var label=(n<=12)?(correct==='t'?'True':'False'):correct.toUpperCase()+')';
+        box.querySelectorAll('.fb').forEach(function(x){x.remove();});
+        box.appendChild(fb(ok?'ok':'bad', ok?'<b>Correct!</b>'+exp:'<b>Not quite.</b> The answer is <b>'+label+'</b>.'+exp));
+        if(!initial){ state[n]=choice; save(); score(); }
+      };
+      if(n<=12){
+        var row=document.createElement('div'); row.className='tfb';
+        ['t','f'].forEach(function(v){
+          var b=document.createElement('button'); b.type='button'; b.textContent=v==='t'?'True':'False'; b.dataset.v=v;
+          b.onclick=function(){ if(q.classList.contains('done')) return; mark(v); };
+          row.appendChild(b);
+        });
+        box.appendChild(row);
+        var mark=function(v, initial){
+          row.querySelectorAll('button').forEach(function(b){ b.disabled=true;
+            if(b.dataset.v===key[n]) b.classList.add('ok'); else if(b.dataset.v===v) b.classList.add('bad'); });
+          show(v, initial);
+        };
+        if(state[n]) mark(state[n], true);
+      } else {
+        var lis=q.querySelectorAll('ol.opts li');
+        var pick=function(v, initial){
+          lis.forEach(function(li){ li.setAttribute('aria-disabled','true');
+            if(li.dataset.l===correct) li.classList.add('ok'); else if(li.dataset.l===v) li.classList.add('bad'); });
+          show(v, initial);
+        };
+        lis.forEach(function(li){
+          li.tabIndex=0; li.setAttribute('role','button');
+          li.onclick=function(){ if(!q.classList.contains('done')) pick(li.dataset.l); };
+          li.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); li.onclick(); } };
+        });
+        if(state[n]) pick(state[n], true);
+      }
+    } else {
+      var ta=document.createElement('textarea');
+      ta.placeholder=n<=68?'Write your answer here…':'Show your working here…';
+      ta.value=state['t'+n]||'';
+      var tmr; ta.oninput=function(){ clearTimeout(tmr); tmr=setTimeout(function(){ state['t'+n]=ta.value; save(); },300); };
+      var row2=document.createElement('div'); row2.className='row';
+      var btn=document.createElement('button'); btn.type='button'; btn.textContent='Show model answer';
+      var self=document.createElement('span'); self.className='self';
+      var model=null;
+      btn.onclick=function(){
+        if(model){ model.remove(); model=null; btn.textContent='Show model answer'; return; }
+        model=fb('model','<b>Model answer:</b> '+(expl[n]||'')); box.appendChild(model);
+        btn.textContent='Hide model answer';
+      };
+      var good=document.createElement('button'); good.type='button'; good.textContent='I got it ✓';
+      var nope=document.createElement('button'); nope.type='button'; nope.textContent='Not yet ✗';
+      var setSelf=function(v){ state['s'+n]=v; save();
+        good.classList.toggle('ok', v==='y'); nope.classList.toggle('bad', v==='n');
+        self.textContent=v==='y'?'Marked as understood':'Marked for review'; };
+      good.onclick=function(){ setSelf('y'); }; nope.onclick=function(){ setSelf('n'); };
+      if(state['s'+n]) setSelf(state['s'+n]);
+      row2.appendChild(btn); row2.appendChild(good); row2.appendChild(nope); row2.appendChild(self);
+      box.appendChild(ta); box.appendChild(row2);
+    }
+  });
+
+  var bar=document.getElementById('scorebar');
+  function score(){
+    var c=0,a=0; auto.forEach(function(n){ if(state[n]){ a++; if(state[n]===key[n]) c++; } });
+    document.getElementById('sc').textContent=c; document.getElementById('sa').textContent=a;
+    document.getElementById('sm').style.width=(c/61*100)+'%';
+  }
+  score();
+  if('IntersectionObserver' in window){
+    var start=quiz, end=document.getElementById('key');
+    new IntersectionObserver(function(){
+      var r1=start.getBoundingClientRect(), r2=end.getBoundingClientRect();
+      bar.classList.toggle('show', r1.top<innerHeight && r2.top>0);
+    }).observe(start);
+    addEventListener('scroll', function(){
+      var r1=start.getBoundingClientRect(), r2=end.getBoundingClientRect();
+      bar.classList.toggle('show', r1.top<innerHeight*0.6 && r2.top>innerHeight*0.4);
+    }, {passive:true});
+  } else { bar.classList.add('show'); }
+  document.getElementById('sreset').onclick=function(){
+    if(!confirm('Clear all your quiz answers?')) return;
+    state={}; save(); location.reload();
+  };
+})();
+</script>
+</body>
+</html>
