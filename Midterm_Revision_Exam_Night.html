@@ -404,7 +404,7 @@ button.opt .ot{min-width:0;overflow-wrap:anywhere}
   </nav>
   <div class="section-nav">
     <div class="section-nav-inner">
-      <nav class="chips" aria-label="Sections"><a href="#l1" title="Lecture 1: Indexing">L1</a><a href="#l2" title="Lecture 2: Query processing">L2</a><a href="#l3" title="Lecture 3: Aggregates, GROUP BY and join algorithms">L3</a><a href="#l4" title="Lecture 4: Heuristic optimization and query trees">L4</a><a href="#l5" title="Lecture 5: Cost-based optimization">L5</a><a href="#l6" title="Lecture 6: Transaction processing">L6</a><a href="#mock-exam" title="Full mock exam: 30 MCQ + 10 written">Exam</a><a href="#most-repeated">Most repeated</a><a href="#exam-index">Exam index</a><a href="#corrections">Corrections</a></nav>
+      <nav class="chips" aria-label="Sections"><a href="#l1" title="Lecture 1: Indexing">L1</a><a href="#l2" title="Lecture 2: Query processing">L2</a><a href="#l3" title="Lecture 3: Aggregates, GROUP BY and join algorithms">L3</a><a href="#l4" title="Lecture 4: Heuristic optimization and query trees">L4</a><a href="#l5" title="Lecture 5: Cost-based optimization">L5</a><a href="#l6" title="Lecture 6: Transaction processing">L6</a><a href="#mock-exam" title="Full mock exam: 30 MCQ + 10 written">Exam</a><a href="#most-repeated">Most repeated</a><a href="#exam-index">Exam index</a></nav>
       <button class="tool-btn" id="toggle-all" type="button" data-open="0"><span id="toggle-verb">Show</span> <span class="wide">all </span>answers</button>
     </div>
   </div>
@@ -453,7 +453,6 @@ button.opt .ot{min-width:0;overflow-wrap:anywhere}
 <li><span class="n">★</span><a href="#mock-exam">Full Mock Exam<small>30 multiple choice + 10 written · timed · marked for you</small></a></li>
 <li><span class="n">A</span><a href="#most-repeated">Most-Repeated Ideas<small>Ranked by number of papers</small></a></li>
 <li><span class="n">B</span><a href="#exam-index">Complete Exam-Question Index<small>Every visible question, with links</small></a></li>
-<li><span class="n">C</span><a href="#corrections">Answer-Key Corrections<small>Verified errors and incomplete keys</small></a></li>
 </ol>
 <div class="note warn" style="margin-top:14px"><b>Study these first.</b>
 <a href="#q-nlj-large">Block nested-loop join cost</a> (7 papers; the same large problem in 5) ·
@@ -3714,39 +3713,6 @@ Where dno='3'</pre></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet chapter" id="corrections">
-<span class="kicker">Reference C</span>
-<h2>Answer-Key Corrections</h2>
-<h3>1. Errors in the answer keys</h3>
-<div class="tw"><table class="c5">
-<tr><th>Question</th><th>Original key</th><th>Corrected result</th><th>Reason</th><th>See</th></tr>
-<tr><td>2015 Q7<br>nested-loop join, 14 and 6 blocks, 3 buffers</td><td>“smaller table (S) in the outer loop”, then 14 + 14/1 × 6 = <b>98</b></td><td><b>90</b> block reads with S outer (6 + 6 × 14), plus the output term</td><td>98 is the cost with R in the outer loop; the key put b<sub>R</sub> in the outer position</td><td><a href="#q-nlj-small">Lecture 3 · Question 3.2</a></td></tr>
-
-</table></div>
-
-<h3>2. Incomplete or imprecise keys</h3>
-<div class="tw"><table class="c4">
-<tr><th>Question</th><th>Original key</th><th>What to add</th><th>See</th></tr>
-<tr><td>2014 Q7 (S52)</td><td>“Recoverable”</td><td>Recoverable, <b>not cascadeless, not strict</b>: r1(X) and w1(X) use the X written by T2 before C2</td><td><a href="#q-rec-s52">Lecture 6 · Question 6.4</a></td></tr>
-<tr><td>2017 Q4(b), 2021 Q3(c), 2023 Q3(b)<br>repeated schedule S</td><td>2023: “Recoverable, Not cascadeless, Not strict” — verdicts only; no key in 2017 and 2021</td><td>The reason: <b>R3(z)</b> reads T1’s uncommitted z and <b>R2(y)</b> reads T3’s uncommitted y; commits C1 &lt; C3 &lt; C2. <b>x is not part of the reason</b> — R3(x) comes before W1(x), and W3(x), R2(x) come after the writer’s commit</td><td><a href="#q-rec-repeated">Lecture 6 · Question 6.1</a></td></tr>
-<tr><td>2014 Q8 (S3)</td><td>“Conflict-serializable”</td><td>The proof: not serial; one precedence edge T1 → T2, no cycle; equivalent to T1; T2</td><td><a href="#q-confser-s3">Lecture 6 · Question 6.19</a></td></tr>
-<tr><td>2019 Q3(c), 2021 SIS312 Q3(c)</td><td>partially committed = “not yet stored in hard disk”; committed = “stored in the hard disk”</td><td>Committed means the effects are permanent (durable, recoverable after a failure); it does not require every changed data block to be on disk already</td><td><a href="#q-states">Lecture 6 · Question 6.25</a></td></tr>
-<tr><td>2021 SIS312 Q1(b)</td><td>“True. As the file is not sorted so the block contains records not sorted”</td><td>The example that the question asks for</td><td><a href="#q-heap-dense">Lecture 1 · Question 1.3</a></td></tr>
-<tr><td>2021 SIS312 Q1(c)</td><td>no key text in the PDF</td><td>Example from the lecture exercise: σ<sub>dno&gt;5</sub> costs 5,004 blocks through the index and 2,000 by linear search</td><td><a href="#q-linear-vs-index">Lecture 5 · Question 5.3</a></td></tr>
-<tr><td>2021 SIS312 Q2(c), 2023 Q2(a)</td><td>b<sub>S</sub> / (n<sub>B</sub> − 2) written without rounding; b<sub>S</sub> = total bytes / block size = 7,500</td><td>The result 18,757,500 stands. Write the ceiling. With whole records per block b<sub>S</sub> would be 8,334 and R outer would be slightly cheaper</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr>
-
-</table></div>
-
-<h3>3. Slips in the other supplied material</h3>
-<ul>
-<li><b>Slides, W5&amp;6&amp;7.pdf PDF pages 85, 86, 88:</b> the printed join costs 40,500, 38,513 and 12,763 do not match the slides’ own formulas, which give 30,500, 28,513 and 12,888 (<a href="#q-emp-dept">Lecture 5 · Question 5.5</a>).</li>
-<li><b>Slides, W2&amp;3&amp;4.pdf PDF page 114 (Week 04 slide 15):</b> numbers the join methods J1 sort-merge, J2 single-loop, J3 nested-loop; all other slides use J1 nested-loop, J2 single-loop, J3 sort-merge.</li>
-<li><b>Slides, W5&amp;6&amp;7.pdf PDF page 130 (Week 07 slide 31):</b> the banner says the summary uses “X value before T1 and Y value after T1”; the figure shows the opposite: T3 reads X after T1’s update (75) and Y before it (20), so the sum is 105 instead of 110.</li>
-<li><b>Final_Midterm_Revision_Full_Explanations.html:</b> solves the large nested-loop problem with b<sub>S</sub> = 8,334 and gets 20,848,334. The official keys use b<sub>S</sub> = 7,500 and get 18,757,500 (<a href="#q-nlj-large">Lecture 3 · Question 3.1</a>).</li>
-<li><b>Transaction_Processing_Study_Guide.html</b>, “Worked exam example (Midterm 2023)”: the verdict is right, but it justifies “not cascadeless” with R3(z) only. R2(y), read before C3, is a second dirty read (<a href="#q-rec-repeated">Lecture 6 · Question 6.1</a>).</li>
-</ul>
-<a class="backtop" href="#top">↑ Back to top</a>
-</section>
 
 <footer>Database Systems II · Exam-night midterm revision · built from the supplied slides and the 2013–2023 midterm papers.</footer>
 </main>
