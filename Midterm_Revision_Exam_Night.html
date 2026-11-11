@@ -6,66 +6,94 @@
 <meta name="theme-color" content="#f3f6f4">
 <meta name="description" content="IS312 Database Systems II — exam-night midterm revision with a verified, source-based question bank (past midterms 2013–2023).">
 <title>IS312 Database Systems II — Exam-Night Midterm Revision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
+/* Exam-night revision page.
+   study-site.css, the shared site skin, is linked after this block, as in the other guides.
+   The parts of that skin this page uses are repeated here with the same values, so the page
+   also looks right when it is opened on its own, without that file. */
 :root{
-  --ink:#203440;--ink2:#3e515b;--muted:#6b7c85;--paper:#f3f6f4;--card:#fff;--panel:#f5f8f6;--line:#dce5e1;
-  --blue:#35627d;--blue-s:#e8f0f4;--green:#327353;--green-s:#e8f2eb;--red:#a94d43;--red-s:#f7ece9;
-  --amber:#8a6223;--amber-s:#f8f1e2;--violet:#6a5a91;--violet-s:#efedf4;
-  --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --ink:#203440;--ink-2:#526570;--muted:#71818a;--paper:#f3f6f4;--panel:#f0f4f2;--line:#dce5e1;
+  --blue:#35627d;--green:#327353;--red:#a94d43;--amber:#946a2b;--violet:#6a5a91;
+  --ink2:#3e515b;--soft:#63747c;--card:#fff;
+  --blue-s:#e8f0f4;--green-s:#e8f2eb;--red-s:#f7ece9;--amber-s:#f8f1e2;--violet-s:#efedf4;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:112px;-webkit-text-size-adjust:100%}
-body{margin:0;background:radial-gradient(ellipse at 10% 0,#e1ece6 0,transparent 34rem),var(--paper);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.6;overflow-wrap:break-word}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html:root{scroll-padding-top:128px}
+body{margin:0;background:radial-gradient(ellipse at 10% 0,#e1ece6 0,transparent 34rem),#f3f6f4;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7;overflow-wrap:break-word}
 a{color:var(--blue)}
-a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #57866d;outline-offset:2px}
-h1,h2,h3,h4{color:#243a46;letter-spacing:-.015em;line-height:1.25;margin:0}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #57866d;outline-offset:3px}
+h1,h2,h3,h4{margin:0;color:#243a46;font-family:var(--sans);letter-spacing:-.025em;line-height:1.25}
+h2{margin-bottom:.65em;font-size:clamp(1.7rem,3.2vw,2.35rem);font-weight:730;line-height:1.2}
+h3{margin:1.8em 0 .55em;padding-bottom:6px;border-bottom:2px solid #e3ebe6;color:#315e76;font-size:1.3rem;font-weight:700;line-height:1.3}
+h4{margin:1.25em 0 .35em;font-size:1.05rem;font-weight:700}
+h4 .tag{margin-left:6px}
 p{margin:.5em 0}
+p,li{color:#3e515b}
 ul,ol{margin:.45em 0;padding-left:1.3em}
 li{margin:.18em 0}
-code,.sch,pre{font-family:var(--mono)}
-code{font-size:.9em;background:var(--panel);border:1px solid #e6ece9;border-radius:5px;padding:0 .3em;overflow-wrap:anywhere}
+code,.sch,pre,.formula,table.sched{font-family:var(--mono);font-variant-ligatures:none}
+code{font-size:.88em;background:#eef3f0;border:1px solid #e6ece9;border-radius:5px;padding:0 .3em;overflow-wrap:anywhere}
 sub,sup{font-size:.72em;line-height:0}
+.sub{color:var(--soft);font-size:.86rem}
 
-/* ---------- top navigation */
-.topnav{position:sticky;top:0;z-index:30;background:rgb(249 251 249 / 95%);backdrop-filter:blur(12px);border-bottom:1px solid #dfe7e3}
-.topnav-in{width:min(1080px,calc(100% - 28px));margin:0 auto;padding:8px 0 7px}
-.navrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.brand{display:inline-flex;align-items:center;gap:9px;color:#435b64;font-size:.74rem;font-weight:750;letter-spacing:.09em;text-decoration:none;text-transform:uppercase;min-width:0}
-.brand span.t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand-mark{display:grid;place-items:center;width:32px;height:32px;flex:0 0 auto;border:1px solid #d8e2dc;border-radius:10px;background:#eaf0eb;color:#3e6c53}
-.brand-mark svg{width:18px;height:18px}
-.navbtns{display:flex;gap:8px;flex:0 0 auto}
-.btn{appearance:none;display:inline-flex;align-items:center;min-height:36px;padding:0 13px;border:1px solid #31546a;border-radius:9px;background:#284859;color:#fff;font:700 .8rem var(--sans);text-decoration:none;cursor:pointer}
-.btn.ghost{background:#fff;color:#284859;border-color:#c9d6d0}
-.btn:hover{background:#1f3b4b;color:#fff}
-.chips{display:flex;gap:6px;margin-top:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:thin}
-.chips a{flex:0 0 auto;padding:4px 10px;border:1px solid #dbe5e0;border-radius:999px;background:#fff;color:#35566a;font-size:.78rem;font-weight:650;text-decoration:none;white-space:nowrap}
+/* ---------- site header: same markup and values as the other guides */
+.study-nav{position:sticky;z-index:20;top:0;border-bottom:1px solid #dfe7e3;background:rgb(249 251 249 / 92%);backdrop-filter:blur(14px)}
+.study-nav-inner{display:flex;width:min(1160px,calc(100% - 48px));min-height:66px;align-items:center;justify-content:space-between;gap:16px;margin:0 auto}
+.study-brand{display:inline-flex;align-items:center;gap:11px;color:#435b64;font-size:.75rem;font-weight:750;letter-spacing:.1em;text-decoration:none;text-transform:uppercase}
+.study-brand-mark{display:grid;width:35px;height:35px;flex:0 0 auto;place-items:center;border:1px solid #d8e2dc;border-radius:11px;background:#eaf0eb;color:#3e6c53}
+.study-brand-mark svg{width:19px;height:19px}
+.back-home{display:inline-flex;min-height:42px;align-items:center;justify-content:center;gap:9px;padding:0 16px;border:1px solid #31546a;border-radius:10px;background:#284859;color:#fff;font-size:.84rem;font-weight:700;text-decoration:none;transition:background-color 160ms ease,transform 160ms ease,box-shadow 160ms ease}
+.back-home svg{width:16px;height:16px}
+.back-home:hover{transform:translateY(-1px);background:#1f3b4b;box-shadow:0 5px 14px rgb(32 52 64 / 18%)}
+
+/* ---------- section shortcuts and the answers switch: second row of the header, this page only */
+.section-nav{border-top:1px solid #e3eae6}
+.section-nav-inner{display:flex;align-items:center;gap:12px;width:min(1160px,calc(100% - 48px));margin:0 auto;padding:7px 0}
+.chips{position:relative;display:flex;flex:1 1 auto;min-width:0;gap:6px;margin:-5px 0 -5px -5px;padding:5px 26px 5px 5px;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent)}
+.chips::-webkit-scrollbar{display:none}
+.chips a{flex:0 0 auto;min-width:40px;padding:4px 11px;border:1px solid #dbe5e0;border-radius:999px;background:#fff;color:#35566a;font-size:.78rem;font-weight:650;line-height:1.5;text-align:center;text-decoration:none;white-space:nowrap}
 .chips a:hover,.chips a.on{background:#284859;border-color:#284859;color:#fff}
+.chips a:focus-visible{outline-offset:1px}
+.tool-btn{appearance:none;flex:0 0 auto;min-height:32px;padding:0 13px;border:1px solid #c5d3cd;border-radius:9px;background:#fff;color:#284859;font:700 .79rem var(--sans);white-space:nowrap;cursor:pointer;transition:background-color 160ms ease,color 160ms ease}
+.tool-btn:hover,.tool-btn[data-open="1"]{background:#284859;border-color:#284859;color:#fff}
 
-/* ---------- layout */
-main{width:min(1000px,calc(100% - 28px));margin:18px auto 64px}
-.sheet{margin:0 0 16px;padding:clamp(18px,3.6vw,38px);border:1px solid #e1e8e4;border-radius:18px;background:var(--card);box-shadow:0 8px 26px rgb(34 58 48 / 6%)}
-.hero{border-color:#284453;background:radial-gradient(ellipse at 88% 18%,rgb(94 139 130 / 40%),transparent 36%),linear-gradient(120deg,#1d3441 0%,#294b57 100%);color:#f4f7f4}
-.hero h1{color:#f4f7f4;font-size:clamp(1.55rem,4vw,2.3rem);font-weight:730;letter-spacing:-.035em}
-.hero h1 span{color:#a9d8bd}
-.hero .kicker{display:inline-block;margin-bottom:8px;padding:4px 10px;border:1px solid rgb(221 238 226 / 35%);border-radius:999px;color:#d6e8d9;font-size:.68rem;font-weight:750;letter-spacing:.11em;text-transform:uppercase}
-.hero p{color:#d5e0df;margin:.5em 0 0;max-width:780px}
-.legend{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:12px;font-size:.78rem}
-.legend span{padding:3px 9px;border:1px solid rgb(236 244 237 / 25%);border-radius:999px;background:rgb(241 247 242 / 10%);color:#e9f0e9}
-.tocgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px;padding:0;list-style:none}
-.tocgrid li{margin:0}
-.tocgrid a{display:flex;align-items:flex-start;gap:10px;height:100%;padding:10px 12px;border:1px solid #e3eae6;border-radius:12px;background:#fbfcfb;color:#2b4656;text-decoration:none;font-size:.9rem;line-height:1.4}
-.tocgrid a:hover{border-color:#c2d6ca;background:#f1f6f2}
-.tocgrid .n{flex:0 0 auto;min-width:30px;padding:2px 6px;border-radius:7px;background:#eaf1ec;color:#426d53;font-size:.72rem;font-weight:800;text-align:center}
-.tocgrid small{display:block;color:var(--muted);font-size:.76rem;margin-top:2px}
-h2{font-size:clamp(1.35rem,3vw,1.85rem);font-weight:740;margin-bottom:.55em}
-h2 .ln{display:inline-block;margin-right:8px;padding:3px 10px;border-radius:8px;background:#284859;color:#fff;font-size:.62em;font-weight:750;letter-spacing:.04em;vertical-align:middle}
-h2 .wk{margin-left:6px;color:var(--muted);font-size:.55em;font-weight:650;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle;white-space:nowrap}
-h3{margin:1.7em 0 .55em;padding-bottom:6px;border-bottom:2px solid #e3ebe6;color:#2d566c;font-size:1.16rem;font-weight:740}
-h4{margin:1.25em 0 .35em;color:#243a46;font-size:1rem;font-weight:740}
-h4 .tag{margin-left:6px}
-.sub{color:var(--muted);font-size:.86rem}
+/* ---------- layout, cover and contents: same components as the other guides */
+main.doc{width:min(1120px,calc(100% - 48px));max-width:none;margin:28px auto 72px}
+.sheet{position:relative;margin:0 0 18px;padding:clamp(26px,5vw,54px);border:1px solid #e1e8e4;border-radius:20px;background:#fff;box-shadow:0 8px 26px rgb(34 58 48 / 6%)}
+.chapter{border-top:0}
+.doc .chapter{scroll-margin-top:0}
+.kicker{display:inline-block;margin-bottom:12px;padding:5px 11px;border:1px solid #d8e4dd;border-radius:999px;background:#edf3ee;color:#496d59;font-size:.69rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase}
+.cover{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(260px,.92fr);align-items:center;gap:clamp(24px,4vw,46px);overflow:hidden;padding:clamp(30px,6vw,68px);border-color:#284453;background:radial-gradient(ellipse at 88% 18%,rgb(94 139 130 / 40%),transparent 36%),linear-gradient(120deg,#1d3441 0%,#294b57 100%);color:#f4f7f4}
+.cover h1{margin:9px 0 12px;color:#f4f7f4;font-size:clamp(2.7rem,5.8vw,4.65rem);font-weight:720;letter-spacing:-.055em;line-height:1.04}
+.cover h1 span{color:#a9d8bd}
+.cover .kicker{border:1px solid rgb(221 238 226 / 35%);background:rgb(235 244 237 / 10%);color:#d6e8d9}
+.cover .sub{max-width:650px;margin:.55em 0;color:#d5e0df;font-size:clamp(1rem,1.7vw,1.14rem);line-height:1.75}
+.cover .sub b{color:#f4f7f4}
+.cover .badge{display:inline-block;margin-top:14px;padding:0;border-radius:0;background:none;color:#bdddc5;font-family:var(--sans);font-size:.95rem;font-weight:650;letter-spacing:0;white-space:normal}
+.cover-tree{display:block;width:100%;max-width:100%;height:auto;margin:0;padding:14px;border:1px solid rgb(222 235 228 / 20%);border-radius:18px;background:rgb(244 249 245 / 7%)}
+.cover-tree text{font-family:var(--sans)}
+.cover-meta{display:grid;grid-column:1 / -1;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;font-size:13px}
+.cover-meta div{padding:12px 14px;border:1px solid rgb(236 244 237 / 20%);border-radius:10px;background:rgb(241 247 242 / 9%);color:#e9f0e9}
+.cover-meta b{display:block;color:#c3e2cc;font-size:24px}
+.toc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:.5em 0;padding:0;list-style:none}
+.toc li{position:relative;display:flex;min-width:0;align-items:flex-start;gap:11px;margin:.2em 0;padding:11px 12px;border:1px solid #e7ece9;border-radius:11px;background:#fbfcfb;transition:border-color 150ms ease,background-color 150ms ease}
+.toc li:hover{border-color:#c9dbd0;background:#f3f7f4}
+.toc li span.n{display:inline-flex;min-width:34px;min-height:26px;align-items:center;justify-content:center;padding:0 6px;border-radius:7px;background:#eaf1ec;color:#426d53;font-family:var(--sans);font-size:.72rem;font-weight:750}
+.toc a{color:#35566a;font-size:.9rem;line-height:1.5;text-decoration:none}
+.toc a:hover{color:#24485b;text-decoration:underline}
+.toc a::after{content:"";position:absolute;inset:0}
+.toc a small{display:block;color:var(--soft);font-size:.76rem}
+.keylist{margin:14px 0 0;padding:0;list-style:none;font-size:.86rem;line-height:2}
+.keylist li{margin:.2em 0;color:var(--soft)}
+.keylist b{color:#3e515b}
+.print-btn{position:fixed;right:20px;bottom:20px;z-index:9;padding:12px 18px;border:1px solid #31546a;border-radius:30px;background:#284859;color:#fff;font:600 .84rem var(--sans);cursor:pointer;box-shadow:0 6px 18px rgb(27 49 61 / 20%)}
+.print-btn:hover{background:#1f3b4b}
 
 /* ---------- badges */
 .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.03em;white-space:nowrap;vertical-align:middle}
@@ -83,13 +111,13 @@ h4 .tag{margin-left:6px}
 .prio ul{margin-bottom:0}
 
 /* ---------- notes */
-.note{margin:.8em 0;padding:11px 14px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;background:var(--blue-s);font-size:.95em}
+.note{margin:.8em 0;padding:11px 14px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;background:var(--blue-s);color:#3e515b;font-size:.95em}
 .note>:first-child{margin-top:0}.note>:last-child{margin-bottom:0}
 .note.warn{border-left-color:var(--red);background:var(--red-s)}
 .note.fix{border-left-color:var(--amber);background:var(--amber-s)}
 .note.ok{border-left-color:var(--green);background:var(--green-s)}
 .note.gap{border-left-color:var(--violet);background:var(--violet-s)}
-.formula{margin:.6em 0;padding:10px 14px;border:1px solid #d7e3ea;border-radius:10px;background:#f2f7fa;color:#1f3d4f;font-family:var(--mono);font-size:.92em;overflow-x:auto;white-space:normal;overflow-wrap:break-word}
+.formula{margin:.6em 0;padding:10px 14px;border:1px solid #dfe7e3;border-radius:13px;background:#f8faf8;color:#294858;font-size:.92em;overflow-x:auto;white-space:normal;overflow-wrap:break-word}
 .formula.wrap{white-space:normal;overflow-wrap:anywhere}
 .sch{display:block;margin:.5em 0;padding:9px 12px;border:1px solid #dfe6e2;border-radius:9px;background:#f6f8f7;color:#1f3d4f;font-size:.9em;line-height:1.75;overflow-wrap:anywhere}
 span.sch,code.sch{display:inline;margin:0;padding:1px 6px;border-radius:6px}
@@ -98,14 +126,14 @@ pre{margin:.6em 0;padding:12px 14px;border:1px solid #dfe6e2;border-radius:10px;
 
 /* ---------- tables */
 .tw{margin:.7em 0;overflow-x:auto;border:1px solid var(--line);border-radius:11px}
-table{width:100%;border-collapse:collapse;font-size:.9em;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:.92em;line-height:1.55;background:#fff}
 th,td{padding:7px 10px;border-bottom:1px solid #e6ece9;border-right:1px solid #eef2f0;text-align:left;vertical-align:top}
 th{background:#eef4f1;color:#2b4656;font-weight:750;white-space:nowrap}
 tr:last-child td{border-bottom:0}
 td:last-child,th:last-child{border-right:0}
 td.c,th.c{text-align:center}
 td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-table.sched td,table.sched th{font-family:var(--mono);font-size:.92em;white-space:nowrap}
+table.sched td,table.sched th{font-size:.92em;white-space:nowrap}
 table.sched td.v{font-family:var(--sans);white-space:normal;color:var(--ink2)}
 tr.hl td{background:#fdf3f1}
 tr.ok td{background:#e9f5ed}
@@ -141,7 +169,7 @@ figure{margin:0}
 
 /* ---------- questions */
 .qs{margin-top:.4em}
-.q{margin:14px 0;border:1px solid #dfe7e3;border-radius:14px;background:#fff;box-shadow:0 3px 12px rgb(34 58 48 / 4%);scroll-margin-top:112px}
+.q{margin:14px 0;border:1px solid #dfe7e3;border-radius:14px;background:#fff;box-shadow:0 3px 12px rgb(34 58 48 / 4%)}
 .q:target{border-color:#7fa890;box-shadow:0 0 0 3px #d9eadf}
 .qh{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid #e8eeeb;border-radius:14px 14px 0 0;background:#f6f9f7}
 .qn{font-weight:800;color:#243a46;font-size:1.02rem;margin-right:2px}
@@ -169,68 +197,163 @@ details.ans[open]>summary{border-bottom:1px solid #d9e7de;border-radius:11px 11p
 .ab{padding:10px 14px 12px}
 .ab>:first-child{margin-top:0}.ab>:last-child{margin-bottom:0}
 .verdict{font-weight:800;color:#243a46}
-.backtop{display:inline-block;margin-top:14px;font-size:.84rem;color:var(--muted)}
+.backtop{display:inline-block;margin-top:14px;font-size:.84rem;color:var(--soft)}
 ul.tight li{margin:.08em 0}
 .cols{columns:2;column-gap:28px}
 .cols li{break-inside:avoid}
-footer{margin:22px 4px 0;color:var(--muted);font-size:.8rem;text-align:center}
-
+footer{margin:22px 4px 0;color:var(--soft);font-size:.8rem;text-align:center}
+@media (max-width:800px){
+  .cover{grid-template-columns:minmax(0,1fr)}
+  .cover-tree{max-width:600px;margin:0 auto}
+}
 @media (max-width:720px){
-  body{font-size:15px}
-  html{scroll-padding-top:104px}
-  .tocgrid,.two{grid-template-columns:1fr}
+  .two{grid-template-columns:1fr}
   .cols{columns:1}
-  .brand span.t{display:none}
-  .sheet{border-radius:14px}
   th{white-space:normal}
   table.c3{min-width:460px}
   table.c4{min-width:560px}
   table.c5,table.c6{min-width:660px}
   .formula{white-space:normal;overflow-wrap:anywhere}
 }
+@media (max-width:620px){
+  html:root{scroll-padding-top:120px}
+  .study-nav-inner{width:calc(100% - 28px);min-height:60px}
+  .study-brand{gap:8px;font-size:.65rem;letter-spacing:.07em}
+  .study-brand-mark{width:32px;height:32px}
+  .back-home{min-height:40px;padding:0 12px;font-size:.79rem}
+  .section-nav-inner{width:calc(100% - 28px);gap:8px}
+  .tool-btn{padding:0 11px}
+  .tool-btn .wide{display:none}
+  main.doc{width:calc(100% - 24px);margin-top:16px}
+  .sheet{margin-bottom:12px;padding:25px 20px;border-radius:16px}
+  .cover{gap:24px;padding:28px 22px}
+  .cover h1{font-size:clamp(2.45rem,11vw,3.3rem)}
+  .toc,.cover-meta{grid-template-columns:minmax(0,1fr)}
+  .toc li{padding:10px}
+  .print-btn{right:12px;bottom:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms!important}
+}
+@page{size:A4;margin:13mm 12mm 14mm}
 @media print{
-  .topnav,.backtop,.navbtns{display:none}
-  body{background:#fff;font-size:11pt}
-  main{width:100%;margin:0}
-  .sheet{border:0;box-shadow:none;padding:0 0 12px}
-  .hero{background:#fff;color:#000;border:0}.hero h1,.hero p,.hero h1 span{color:#000}
-  .q,.note,.tw,.fig{break-inside:avoid}
+  .study-nav,.no-print,.backtop{display:none!important}
+  body{background:#fff;font-size:10.5pt;line-height:1.5}
+  main.doc{width:100%;margin:0}
+  .sheet{margin:0;padding:0 0 10px;border:0;border-radius:0;box-shadow:none}
+  .chapter{break-before:page}
+  #contents{break-before:auto}
+  .cover{display:block;padding:0 0 14px;border:0;background:none;color:#000}
+  .cover h1,.cover h1 span,.cover .sub,.cover .sub b,.cover .badge{color:#000}
+  .cover h1{font-size:30pt}
+  .cover .kicker{border-color:#999;background:none;color:#333}
+  .cover-tree{display:none}
+  .cover-meta{margin-top:10px}
+  .cover-meta div{border-color:#bbb;background:none;color:#000}
+  .cover-meta b{color:#000}
+  .toc a::after{display:none}
+  h2,h3,h4,.qh,.lbl,summary{break-after:avoid}
+  .note,.fig,.prio,.formula,.sch,pre,tr,.optx li,.toc li{break-inside:avoid}
+  .q{box-shadow:none}
+  .tw,.fig{overflow:visible}
+  table.sched th.c,table.sched td.c{padding:5px 3px;font-size:8pt}
+  pre{overflow:visible;white-space:pre-wrap;overflow-wrap:anywhere}
+  .tw.scrollable::after,.fig.scrollable::after{display:none}
+  details.ans>summary::before{content:""}
   a{color:inherit;text-decoration:none}
 }
 </style>
+<link rel="stylesheet" href="study-site.css">
 </head>
-<body>
-<header class="topnav" id="top">
-<div class="topnav-in">
-<div class="navrow">
-<a class="brand" href="index.html" title="Back to the study hub"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span><span class="t">IS312 · Exam-Night Midterm Revision</span></a>
-<div class="navbtns"><button class="btn ghost" id="toggle-all" type="button" data-open="0">Show all answers</button><a class="btn" href="index.html">Back to Home</a></div>
-</div>
-<nav class="chips" aria-label="Sections"><a href="#l1">L1 Indexing</a><a href="#l2">L2 Query processing</a><a href="#l3">L3 Aggregates &amp; joins</a><a href="#l4">L4 Heuristics &amp; trees</a><a href="#l5">L5 Cost-based</a><a href="#l6">L6 Transactions</a><a href="#t7">T7 T-SQL &amp; MAC</a><a href="#most-repeated">Most repeated</a><a href="#exam-index">Exam index</a><a href="#corrections">Corrections</a><a href="#sources">Sources</a></nav>
-</div>
-</header>
-<main>
+<body id="top">
 
-<section class="sheet hero">
-<span class="kicker">IS312 · Database Systems II · Midterm</span>
-<h1>Exam-Night Revision <span>&amp; Verified Question Bank</span></h1>
-<p>Each lecture has a short revision, then its questions with model answers. Every count is the number of <b>distinct readable papers</b> out of the 8 supplied (2013, 2014, 2015, 2017, 2019, 2021 IS312, 2021 SIS312, 2023).</p>
-<div class="legend"><span>Past exam</span><span>Lecture slides</span><span>Lecture HTML</span><span>AI-generated</span><span>⚠ = repeated idea</span><span>Tap “Model answer” to open</span></div>
+<header class="study-nav">
+  <nav class="study-nav-inner" aria-label="Primary navigation">
+    <a class="study-brand" href="index.html">
+      <span class="study-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5.5" rx="7.5" ry="3"></ellipse>
+          <path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13"></path>
+          <path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"></path>
+        </svg>
+      </span>
+      Database Engineering
+    </a>
+    <a class="back-home" href="index.html">
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11.5 4 5.5 10l6 6M6 10h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to Home
+    </a>
+  </nav>
+  <div class="section-nav">
+    <div class="section-nav-inner">
+      <nav class="chips" aria-label="Sections"><a href="#l1" title="Lecture 1: Indexing">L1</a><a href="#l2" title="Lecture 2: Query processing">L2</a><a href="#l3" title="Lecture 3: Aggregates, GROUP BY and join algorithms">L3</a><a href="#l4" title="Lecture 4: Heuristic optimization and query trees">L4</a><a href="#l5" title="Lecture 5: Cost-based optimization">L5</a><a href="#l6" title="Lecture 6: Transaction processing">L6</a><a href="#t7" title="Topic 7: T-SQL objects and mandatory access control">T7</a><a href="#most-repeated">Most repeated</a><a href="#exam-index">Exam index</a><a href="#corrections">Corrections</a><a href="#sources">Sources</a></nav>
+      <button class="tool-btn" id="toggle-all" type="button" data-open="0"><span id="toggle-verb">Show</span> <span class="wide">all </span>answers</button>
+    </div>
+  </div>
+</header>
+
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<main class="doc">
+
+<section class="sheet cover">
+  <div>
+    <span class="kicker">IS312 · Database Systems II · Midterm</span>
+    <h1>Exam-Night <span>Midterm</span> Revision</h1>
+    <p class="sub">Each lecture has a short revision, then its questions with model answers. Every count is the number of <b>distinct readable papers</b> out of the 8 supplied (2013, 2014, 2015, 2017, 2019, 2021 IS312, 2021 SIS312, 2023).</p>
+    <span class="badge">Start with the ideas marked ⚠ — they repeat across papers.</span>
+  </div>
+  <svg class="cover-tree" viewBox="0 0 330 190" role="img" aria-label="Most repeated ideas, by number of papers out of 8: block nested-loop join cost 7; recoverable, cascadeless or strict classification 6; heuristics before cost-based optimization 4; MAX or MIN with a B-tree 4; dirty read, ACID and transaction states 3 each">
+  <text x="12" y="20" fill="#d6e8d9" font-size="10.5" font-weight="700" letter-spacing="1.3" font-family="sans-serif">MOST REPEATED IDEAS</text>
+  <text x="318" y="20" text-anchor="end" fill="#bcd0cd" font-size="10.5" font-family="sans-serif">papers out of 8</text>
+  <g font-family="sans-serif" font-size="12.5">
+  <text x="12" y="46" fill="#f4f7f4">Block nested-loop join cost</text><text x="318" y="46" text-anchor="end" fill="#c3e2cc" font-weight="700">7</text><rect x="12" y="52" width="306" height="6" rx="3" fill="rgba(255,255,255,.14)"/><rect x="12" y="52" width="267.8" height="6" rx="3" fill="#a9d8bd"/>
+  <text x="12" y="77" fill="#f4f7f4">Recoverable / cascadeless / strict</text><text x="318" y="77" text-anchor="end" fill="#c3e2cc" font-weight="700">6</text><rect x="12" y="83" width="306" height="6" rx="3" fill="rgba(255,255,255,.14)"/><rect x="12" y="83" width="229.5" height="6" rx="3" fill="#a9d8bd"/>
+  <text x="12" y="108" fill="#f4f7f4">Heuristics before cost-based</text><text x="318" y="108" text-anchor="end" fill="#c3e2cc" font-weight="700">4</text><rect x="12" y="114" width="306" height="6" rx="3" fill="rgba(255,255,255,.14)"/><rect x="12" y="114" width="153" height="6" rx="3" fill="#a9d8bd"/>
+  <text x="12" y="139" fill="#f4f7f4">MAX / MIN with a B-tree</text><text x="318" y="139" text-anchor="end" fill="#c3e2cc" font-weight="700">4</text><rect x="12" y="145" width="306" height="6" rx="3" fill="rgba(255,255,255,.14)"/><rect x="12" y="145" width="153" height="6" rx="3" fill="#a9d8bd"/>
+  <text x="12" y="170" fill="#f4f7f4">Dirty read · ACID · transaction states</text><text x="318" y="170" text-anchor="end" fill="#c3e2cc" font-weight="700">3 each</text><rect x="12" y="176" width="306" height="6" rx="3" fill="rgba(255,255,255,.14)"/><rect x="12" y="176" width="114.8" height="6" rx="3" fill="#a9d8bd"/>
+  </g>
+  </svg>
+  <div class="cover-meta">
+    <div><b>67</b>questions with model answers</div>
+    <div><b>8</b>past midterms, 2013–2023</div>
+    <div><b>74</b>past-exam questions indexed</div>
+  </div>
 </section>
 
-<section class="sheet" id="contents">
-<h2>Contents</h2>
-<ul class="tocgrid"><li><a href="#l1"><span class="n">1</span><span>Indexing<small>Week 02 · Medium priority</small></span></a></li><li><a href="#l2"><span class="n">2</span><span>Query Processing: Selection, Projection, Set Operations<small>Week 03 · Medium priority</small></span></a></li><li><a href="#l3"><span class="n">3</span><span>Aggregates, GROUP BY and Join Algorithms<small>Week 04 · High priority</small></span></a></li><li><a href="#l4"><span class="n">4</span><span>Heuristic Optimization and Query Trees<small>Weeks 04–05 · High priority</small></span></a></li><li><a href="#l5"><span class="n">5</span><span>Cost-Based Optimization<small>Weeks 05–06 · Lower priority</small></span></a></li><li><a href="#l6"><span class="n">6</span><span>Transaction Processing<small>Week 07 · High priority</small></span></a></li><li><a href="#t7"><span class="n">7</span><span>T-SQL Objects and Mandatory Access Control<small>Exam topics outside the supplied slides · Lower priority</small></span></a></li><li><a href="#most-repeated"><span class="n">A</span><span>Most-Repeated Ideas<small>Ranked by number of papers</small></span></a></li><li><a href="#exam-index"><span class="n">B</span><span>Complete Exam-Question Index<small>Every visible question, with links</small></span></a></li><li><a href="#corrections"><span class="n">C</span><span>Answer-Key Corrections<small>Verified errors and incomplete keys</small></span></a></li><li><a href="#sources"><span class="n">D</span><span>Sources Used<small>Files inspected and what could not be read</small></span></a></li></ul>
+<section class="sheet chapter" id="contents">
+<span class="kicker">Start here</span>
+<h2>What’s inside</h2>
+<ol class="toc">
+<li><span class="n">01</span><a href="#l1">Indexing<small>Week 02 · Medium priority</small></a></li>
+<li><span class="n">02</span><a href="#l2">Query Processing: Selection, Projection, Set Operations<small>Week 03 · Medium priority</small></a></li>
+<li><span class="n">03</span><a href="#l3">Aggregates, GROUP BY and Join Algorithms<small>Week 04 · High priority</small></a></li>
+<li><span class="n">04</span><a href="#l4">Heuristic Optimization and Query Trees<small>Weeks 04–05 · High priority</small></a></li>
+<li><span class="n">05</span><a href="#l5">Cost-Based Optimization<small>Weeks 05–06 · Lower priority</small></a></li>
+<li><span class="n">06</span><a href="#l6">Transaction Processing<small>Week 07 · High priority</small></a></li>
+<li><span class="n">07</span><a href="#t7">T-SQL Objects and Mandatory Access Control<small>Exam topics outside the supplied slides · Lower priority</small></a></li>
+<li><span class="n">A</span><a href="#most-repeated">Most-Repeated Ideas<small>Ranked by number of papers</small></a></li>
+<li><span class="n">B</span><a href="#exam-index">Complete Exam-Question Index<small>Every visible question, with links</small></a></li>
+<li><span class="n">C</span><a href="#corrections">Answer-Key Corrections<small>Verified errors and incomplete keys</small></a></li>
+<li><span class="n">D</span><a href="#sources">Sources Used<small>Files inspected and what could not be read</small></a></li>
+</ol>
 <div class="note warn" style="margin-top:14px"><b>Study these first.</b>
 <a href="#q-nlj-large">Block nested-loop join cost</a> (7 papers; the same large problem in 5) ·
 <a href="#q-rec-repeated">Recoverable / cascadeless / strict classification</a> (6 papers; announced as multiple choice: <a href="#l6-mcq">practice set</a>) ·
 <a href="#q-hbefore">Heuristics before cost-based optimization</a> (4) ·
 <a href="#q-btree-maxmin">MAX / MIN with a B-tree</a> (4) ·
 <a href="#q-dirty">Dirty read</a> (3) · <a href="#q-acid">ACID</a> (3) · <a href="#q-states">Transaction states</a> (3).</div>
+<ul class="keylist">
+<li><span class="src-chip exam">Past exam</span> <span class="src-chip slides">Lecture slides</span> <span class="src-chip html">Lecture HTML</span> <span class="src-chip ai">AI-generated</span> — where each question comes from.</li>
+<li><span class="rep hot">⚠ Repeated in … exam papers</span> — the idea was asked in more than one of the 8 papers.</li>
+<li><b>Model answer</b> — tap it to open the answer. The button at the top of the page opens all of them at once.</li>
+</ul>
 </section>
 
-<section class="sheet" id="l1">
-<h2><span class="ln">Lecture 1</span>Indexing <span class="wk">Week 02</span></h2>
+<section class="sheet chapter" id="l1">
+<span class="kicker">Lecture 1 · Week 02</span>
+<h2>Indexing</h2>
 
 <h3 id="l1-a">A. Exam Priority</h3>
 
@@ -468,8 +591,9 @@ footer{margin:22px 4px 0;color:var(--muted);font-size:.8rem;text-align:center}
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="l2">
-<h2><span class="ln">Lecture 2</span>Query Processing: Selection, Projection and Set Operations <span class="wk">Week 03</span></h2>
+<section class="sheet chapter" id="l2">
+<span class="kicker">Lecture 2 · Week 03</span>
+<h2>Query Processing: Selection, Projection and Set Operations</h2>
 
 <h3 id="l2-a">A. Exam Priority</h3>
 
@@ -754,8 +878,9 @@ Where dno='3'</pre></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="l3">
-<h2><span class="ln">Lecture 3</span>Aggregates, GROUP BY and Join Algorithms <span class="wk">Week 04</span></h2>
+<section class="sheet chapter" id="l3">
+<span class="kicker">Lecture 3 · Week 04</span>
+<h2>Aggregates, GROUP BY and Join Algorithms</h2>
 
 <h3 id="l3-a">A. Exam Priority</h3>
 
@@ -1167,8 +1292,9 @@ Where dno='3'</pre></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="l4">
-<h2><span class="ln">Lecture 4</span>Heuristic Optimization and Query Trees <span class="wk">Weeks 04–05</span></h2>
+<section class="sheet chapter" id="l4">
+<span class="kicker">Lecture 4 · Weeks 04–05</span>
+<h2>Heuristic Optimization and Query Trees</h2>
 
 <h3 id="l4-a">A. Exam Priority</h3>
 
@@ -1530,8 +1656,9 @@ Where dno='3'</pre></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="l5">
-<h2><span class="ln">Lecture 5</span>Cost-Based Optimization <span class="wk">Weeks 05–06</span></h2>
+<section class="sheet chapter" id="l5">
+<span class="kicker">Lecture 5 · Weeks 05–06</span>
+<h2>Cost-Based Optimization</h2>
 
 <h3 id="l5-a">A. Exam Priority</h3>
 
@@ -1788,8 +1915,9 @@ Where dno='3'</pre></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="l6">
-<h2><span class="ln">Lecture 6</span>Transaction Processing <span class="wk">Week 07</span></h2>
+<section class="sheet chapter" id="l6">
+<span class="kicker">Lecture 6 · Week 07</span>
+<h2>Transaction Processing</h2>
 
 <h3 id="l6-a">A. Exam Priority</h3>
 
@@ -2685,8 +2813,9 @@ Where dno='3'</pre></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="t7">
-<h2><span class="ln">Topic 7</span>T-SQL Objects and Mandatory Access Control <span class="wk">Outside the supplied slides</span></h2>
+<section class="sheet chapter" id="t7">
+<span class="kicker">Topic 7 · Outside the supplied slides</span>
+<h2>T-SQL Objects and Mandatory Access Control</h2>
 
 <h3 id="t7-a">A. Exam Priority</h3>
 
@@ -2844,8 +2973,9 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="most-repeated">
-<h2><span class="ln">A</span>Most-Repeated Ideas</h2>
+<section class="sheet chapter" id="most-repeated">
+<span class="kicker">Reference A</span>
+<h2>Most-Repeated Ideas</h2>
 <p class="sub">A count is the number of <b>distinct readable papers</b> (out of 8) that directly ask about the idea. 2021 IS312 and 2021 SIS312 are two papers. An idea that only appears inside an answer is not counted. The counts rest on the readable material: 2015 Q3–Q4 and the figure of 2014 Q9 are missing from the PDF.</p>
 
 <h3>1. Ideas ranked by number of papers (broader ideas)</h3>
@@ -2893,8 +3023,9 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="exam-index">
-<h2><span class="ln">B</span>Complete Exam-Question Index</h2>
+<section class="sheet chapter" id="exam-index">
+<span class="kicker">Reference B</span>
+<h2>Complete Exam-Question Index</h2>
 <p class="sub">Every visible question and subquestion of the supplied exam PDF: <b>74</b> entries in 8 papers, plus the missing ones marked in violet. Each entry links to the question that answers it.</p>
 <div class="tw"><table class="idx c5">
 <tr><th>Question</th><th class="c">PDF page</th><th>Main idea</th><th>Covered in</th><th>Consolidated?</th></tr>
@@ -2903,8 +3034,9 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="corrections">
-<h2><span class="ln">C</span>Answer-Key Corrections</h2>
+<section class="sheet chapter" id="corrections">
+<span class="kicker">Reference C</span>
+<h2>Answer-Key Corrections</h2>
 <h3>1. Errors in the answer keys</h3>
 <div class="tw"><table class="c5">
 <tr><th>Question</th><th>Original key</th><th>Corrected result</th><th>Reason</th><th>See</th></tr>
@@ -2936,8 +3068,9 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet" id="sources">
-<h2><span class="ln">D</span>Sources Used</h2>
+<section class="sheet chapter" id="sources">
+<span class="kicker">Reference D</span>
+<h2>Sources Used</h2>
 
 <h3>1. Lecture files</h3>
 <div class="tw"><table class="c4">
@@ -2981,25 +3114,46 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 </main>
 <script>
 (function(){
-  var b=document.getElementById('toggle-all');
-  if(b){b.addEventListener('click',function(){
-    var d=document.querySelectorAll('details.ans'),open=b.getAttribute('data-open')!=='1';
-    for(var i=0;i<d.length;i++){d[i].open=open;}
-    b.setAttribute('data-open',open?'1':'0');b.textContent=open?'Hide all answers':'Show all answers';});}
+  var b=document.getElementById('toggle-all'),verb=document.getElementById('toggle-verb');
+  function answers(){return document.querySelectorAll('details.ans');}
+  function markScroll(){var w=document.querySelectorAll('.tw,.fig');
+    for(var i=0;i<w.length;i++){w[i].classList.toggle('scrollable',w[i].scrollWidth>w[i].clientWidth+2);}}
+  /* show or hide every model answer */
+  function setAll(open){var d=answers();for(var i=0;i<d.length;i++){d[i].open=open;}
+    if(b){b.setAttribute('data-open',open?'1':'0');}
+    if(verb){verb.textContent=open?'Hide':'Show';}
+    markScroll();}
+  if(b){b.addEventListener('click',function(){setAll(b.getAttribute('data-open')!=='1');});}
+  /* a link to a question opens its answer */
   function openTarget(){var h=location.hash.slice(1);if(!h)return;var el=document.getElementById(h);
     if(el&&el.classList.contains('q')){var d=el.querySelector('details.ans');if(d)d.open=true;}}
   window.addEventListener('hashchange',openTarget);openTarget();
-  var chips=document.querySelectorAll('.chips a'),secs=[];
+  /* section shortcuts: mark the section in view and keep its chip visible */
+  var bar=document.querySelector('.chips'),chips=document.querySelectorAll('.chips a'),secs=[];
   for(var i=0;i<chips.length;i++){var s=document.getElementById(chips[i].getAttribute('href').slice(1));if(s)secs.push([s,chips[i]]);}
-  if('IntersectionObserver' in window&&secs.length){
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){
-      for(var j=0;j<secs.length;j++){secs[j][1].classList.toggle('on',secs[j][0]===e.target);}}});},{rootMargin:'-20% 0px -70% 0px'});
-    for(var k=0;k<secs.length;k++){io.observe(secs[k][0]);}}
-  function markScroll(){var w=document.querySelectorAll('.tw,.fig');
-    for(var i=0;i<w.length;i++){w[i].classList.toggle('scrollable',w[i].scrollWidth>w[i].clientWidth+2);}}
+  function activate(sec){
+    for(var j=0;j<secs.length;j++){var on=secs[j][0]===sec,c=secs[j][1];c.classList.toggle('on',on);
+      if(on&&bar&&bar.scrollWidth>bar.clientWidth){bar.scrollLeft=Math.max(0,c.offsetLeft-(bar.clientWidth-c.offsetWidth)/2);}}}
+  var io=null,hdr=document.querySelector('.study-nav'),timer=null;
+  function watch(){
+    if(!('IntersectionObserver' in window)||!secs.length)return;
+    if(io)io.disconnect();
+    /* a thin band just under the sticky header decides which section is the current one */
+    var top=(hdr?hdr.offsetHeight:0)+12,band=Math.max(60,Math.round(window.innerHeight*.12));
+    var bottom=Math.max(0,window.innerHeight-top-band);
+    io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){activate(e.target);}});},{rootMargin:'-'+top+'px 0px -'+bottom+'px 0px'});
+    for(var k=0;k<secs.length;k++){io.observe(secs[k][0]);}
+    var first=document.querySelectorAll('.cover,#contents');for(var t=0;t<first.length;t++){io.observe(first[t]);}
+  }
+  watch();
+  window.addEventListener('resize',function(){clearTimeout(timer);timer=setTimeout(watch,150);});
+  /* printing: open every answer for the printout, then put them back */
+  var closed=null;
+  window.addEventListener('beforeprint',function(){var d=answers();if(!closed){closed=[];}
+    for(var i=0;i<d.length;i++){if(!d[i].open){closed.push(d[i]);d[i].open=true;}}});
+  window.addEventListener('afterprint',function(){if(closed){for(var i=0;i<closed.length;i++){closed[i].open=false;}closed=null;}markScroll();});
   window.addEventListener('load',markScroll);window.addEventListener('resize',markScroll);
   document.addEventListener('toggle',markScroll,true);
-  if(b){b.addEventListener('click',markScroll);}
   markScroll();
 })();
 </script>
