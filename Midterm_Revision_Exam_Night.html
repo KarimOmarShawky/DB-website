@@ -404,7 +404,7 @@ button.opt .ot{min-width:0;overflow-wrap:anywhere}
   </nav>
   <div class="section-nav">
     <div class="section-nav-inner">
-      <nav class="chips" aria-label="Sections"><a href="#l1" title="Lecture 1: Indexing">L1</a><a href="#l2" title="Lecture 2: Query processing">L2</a><a href="#l3" title="Lecture 3: Aggregates, GROUP BY and join algorithms">L3</a><a href="#l4" title="Lecture 4: Heuristic optimization and query trees">L4</a><a href="#l5" title="Lecture 5: Cost-based optimization">L5</a><a href="#l6" title="Lecture 6: Transaction processing">L6</a><a href="#t7" title="Topic 7: T-SQL objects and mandatory access control">T7</a><a href="#mock-exam" title="Full mock exam: 30 MCQ + 10 written">Exam</a><a href="#most-repeated">Most repeated</a><a href="#exam-index">Exam index</a><a href="#corrections">Corrections</a></nav>
+      <nav class="chips" aria-label="Sections"><a href="#l1" title="Lecture 1: Indexing">L1</a><a href="#l2" title="Lecture 2: Query processing">L2</a><a href="#l3" title="Lecture 3: Aggregates, GROUP BY and join algorithms">L3</a><a href="#l4" title="Lecture 4: Heuristic optimization and query trees">L4</a><a href="#l5" title="Lecture 5: Cost-based optimization">L5</a><a href="#l6" title="Lecture 6: Transaction processing">L6</a><a href="#mock-exam" title="Full mock exam: 30 MCQ + 10 written">Exam</a><a href="#most-repeated">Most repeated</a><a href="#exam-index">Exam index</a><a href="#corrections">Corrections</a></nav>
       <button class="tool-btn" id="toggle-all" type="button" data-open="0"><span id="toggle-verb">Show</span> <span class="wide">all </span>answers</button>
     </div>
   </div>
@@ -450,7 +450,6 @@ button.opt .ot{min-width:0;overflow-wrap:anywhere}
 <li><span class="n">04</span><a href="#l4">Heuristic Optimization and Query Trees<small>Weeks 04–05 · High priority</small></a></li>
 <li><span class="n">05</span><a href="#l5">Cost-Based Optimization<small>Weeks 05–06 · Lower priority</small></a></li>
 <li><span class="n">06</span><a href="#l6">Transaction Processing<small>Week 07 · High priority</small></a></li>
-<li><span class="n">07</span><a href="#t7">T-SQL Objects and Mandatory Access Control<small>Exam topics outside the supplied slides · Lower priority</small></a></li>
 <li><span class="n">★</span><a href="#mock-exam">Full Mock Exam<small>30 multiple choice + 10 written · timed · marked for you</small></a></li>
 <li><span class="n">A</span><a href="#most-repeated">Most-Repeated Ideas<small>Ranked by number of papers</small></a></li>
 <li><span class="n">B</span><a href="#exam-index">Complete Exam-Question Index<small>Every visible question, with links</small></a></li>
@@ -3208,183 +3207,6 @@ Where dno='3'</pre></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
 
-<section class="sheet chapter" id="t7">
-<span class="kicker">Topic 7 · Outside the supplied slides</span>
-<h2>T-SQL Objects and Mandatory Access Control</h2>
-
-<h3 id="t7-a">A. Exam Priority</h3>
-
-<div class="prio low">
-<p><span class="badge low">Lower priority</span> &nbsp;Relevant ideas appear in <b>2 of 8</b> readable papers: 2014, 2023. Neither topic is in the supplied lecture files, so this section is limited to what the two exam questions and their keys require.</p>
-<ul class="tight">
-<li>T-SQL stored procedure / user-defined function — <b>1</b> paper (2023); T-SQL trigger — <b>1</b> paper (2023) — one 5-mark question in the most recent paper.</li>
-<li>Mandatory access control — <b>1</b> paper (2014).</li>
-</ul>
-</div>
-
-<h3 id="t7-b">B. Short Revision</h3>
-<h4>1. Which T-SQL object?</h4>
-<div class="tw"><table class="c3">
-<tr><th>Object</th><th>Use it when</th><th>How it runs</th></tr>
-<tr><td><b>Stored procedure</b></td><td>a task or report is requested repeatedly, with parameters</td><td><code>EXEC name @param = value</code>; returns result sets or OUTPUT parameters</td></tr>
-<tr><td><b>User-defined function</b></td><td>one value has to be computed and used inside queries</td><td><code>SELECT dbo.name(value)</code>; declared with <code>RETURNS type</code></td></tr>
-<tr><td><b>Trigger</b></td><td>a rule must be enforced automatically whenever a table is changed</td><td>fires on INSERT / UPDATE / DELETE; cancels the change with <code>ROLLBACK</code></td></tr>
-</table></div>
-<ul>
-<li>Inside a trigger, the table <code>inserted</code> holds the new rows and <code>deleted</code> the old rows. One statement can insert <b>many rows</b>, so <code>inserted</code> may hold more than one row.</li>
-<li><code>FOR INSERT</code> is an <b>AFTER</b> trigger: when it runs, the new rows are already in the table, so a count includes them.</li>
-</ul>
-<h4>2. Mandatory access control (MAC)</h4>
-<p>Each individual gets a <b>clearance</b> and each document a <b>classification</b>, taken from ordered <b>security classes</b>: top secret (TS) &gt; secret (S) &gt; confidential (C) &gt; unclassified (U). A person can access documents whose classification is equal to or lower than the person’s clearance.</p>
-
-<h3 id="t7-c">C. Practice Questions and Model Answers</h3>
-<div class="qs">
-<div class="lec-progress no-print"><div class="lp-top"><b>Your progress</b><span class="lp-count">0 / 0 done</span><span class="lp-score"></span><button type="button" class="ix-btn ghost small" data-act="reset-sec">Reset this lecture</button></div><div class="lp-bar"><span></span></div><p class="lp-tip">Multiple-choice questions mark themselves. For written questions: type your answer, check it against the model answer, then rate yourself.</p></div>
-
-
-<article class="q" id="q-tsql-count" data-kind="written">
-<div class="qh"><span class="qn">Question 7.1</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">T-SQL object for a report</span></div>
-<div class="qb">
-<div class="meta">
-<p><b>Source:</b> Past exam — 2023, Q4.1, PDF pages 22–23 [2 marks]. (Exact wording; schema copied as printed, including the table name “registeration”. Official key available.)</p>
-<p><b>Idea tested:</b> T-SQL stored procedure / user-defined function</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2023.</p>
-<p><b>Exact or similar repetitions:</b> Asked once (2023). It is the first of the two parts of the T-SQL question.</p>
-</div>
-<p class="lbl">Question:</p>
-<div class="qtext">
-<p>Consider the following schema:</p>
-<pre>department(DID, dname)
-student(SID, sname, gpa, dept)      // dept is a foreign key from department(DID)
-course(CID, cname, credit, dept)    // dept is a foreign key from department(DID)
-registeration(sid, cid)             // sid is a foreign key from student(SID) - cid is a foreign key from course(CID)</pre><p>“1. A report to retrieve the total number of registrations in a certain course is usually requested. Write a T-SQL object that can achieve that.”</p>
-</div>
-<div class="ix no-print">
-<label class="ix-label" for="ta-q-tsql-count">Your answer <span class="sub">(optional — write it first, then check)</span></label>
-<textarea id="ta-q-tsql-count" rows="4" placeholder="Write your answer here before opening the model answer…"></textarea>
-<div class="ix-bar"><button type="button" class="ix-btn" data-act="check">Check against model answer</button><span class="ix-rate" hidden>How did you do? <button type="button" data-rate="2">✓ Got it</button><button type="button" data-rate="1">~ Partly</button><button type="button" data-rate="0">✗ Missed it</button></span></div>
-</div>
-<details class="ans"><summary>Model answer</summary>
-<div class="ab">
-<p>A report that is requested repeatedly with a parameter → a <b>stored procedure</b> (a scalar function is also accepted by the key).</p>
-<pre><span class="kw">CREATE PROCEDURE</span> num_reg @cname <span class="kw">VARCHAR</span>(50)
-<span class="kw">AS</span>
-<span class="kw">BEGIN</span>
-    <span class="kw">SELECT</span> COUNT(*) <span class="kw">AS</span> total_registrations
-    <span class="kw">FROM</span> registeration <span class="kw">AS</span> r
-    <span class="kw">JOIN</span> course <span class="kw">AS</span> c <span class="kw">ON</span> c.CID = r.cid
-    <span class="kw">WHERE</span> c.cname = @cname;
-<span class="kw">END</span>;
-GO
-<span class="kw">EXEC</span> num_reg @cname = 'Database Systems II';</pre>
-<p><b>Alternative — user-defined function:</b></p>
-<pre><span class="kw">CREATE FUNCTION</span> num_reg_fun (@cname <span class="kw">VARCHAR</span>(50))
-<span class="kw">RETURNS INT</span>
-<span class="kw">AS</span>
-<span class="kw">BEGIN</span>
-    <span class="kw">DECLARE</span> @num <span class="kw">INT</span>;
-    <span class="kw">SELECT</span> @num = COUNT(*)
-    <span class="kw">FROM</span> registeration <span class="kw">AS</span> r
-    <span class="kw">JOIN</span> course <span class="kw">AS</span> c <span class="kw">ON</span> c.CID = r.cid
-    <span class="kw">WHERE</span> c.cname = @cname;
-    <span class="kw">RETURN</span> @num;
-<span class="kw">END</span>;
-GO
-<span class="kw">SELECT</span> dbo.num_reg_fun('Database Systems II') <span class="kw">AS</span> total_registrations;</pre>
-<p><b>Official key:</b> <code>create proc num_reg @cname varchar(5) as declare @num int select @num = count(*) from registeration, course where course.cid = registeration.cid and cname = @cname return @num</code> [1 mark for the header, 1 mark for the query], or the same query inside <code>create function num_reg_fun (@cname varchar(5)) returns int</code>.</p>
-<p class="sub">Both key versions work. Two small points: <code>varchar(5)</code> cuts any course name longer than five characters, so declare a longer parameter; and a procedure’s <code>RETURN</code> can only hand back an integer, which is fine for a count.</p>
-</div>
-</details>
-</div>
-</article>
-
-<article class="q" id="q-tsql-trigger" data-kind="written">
-<div class="qh"><span class="qn">Question 7.2</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Trigger: at most 6 courses</span></div>
-<div class="qb">
-<div class="meta">
-<p><b>Source:</b> Past exam — 2023, Q4.2, PDF page 23 [3 marks]. (Exact wording; same schema. Official key available — it contains errors.)</p>
-<p><b>Idea tested:</b> T-SQL trigger</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2023.</p>
-<p><b>Exact or similar repetitions:</b> Asked once (2023). It is the second part of the T-SQL question.</p>
-</div>
-<p class="lbl">Question:</p>
-<div class="qtext">
-<p>Consider the following schema:</p>
-<pre>department(DID, dname)
-student(SID, sname, gpa, dept)      // dept is a foreign key from department(DID)
-course(CID, cname, credit, dept)    // dept is a foreign key from department(DID)
-registeration(sid, cid)             // sid is a foreign key from student(SID) - cid is a foreign key from course(CID)</pre><p>“2. Maximum number of courses that a student can register in is 6. Write a T-SQL object that can achieve that.”</p>
-</div>
-<div class="ix no-print">
-<label class="ix-label" for="ta-q-tsql-trigger">Your answer <span class="sub">(optional — write it first, then check)</span></label>
-<textarea id="ta-q-tsql-trigger" rows="4" placeholder="Write your answer here before opening the model answer…"></textarea>
-<div class="ix-bar"><button type="button" class="ix-btn" data-act="check">Check against model answer</button><span class="ix-rate" hidden>How did you do? <button type="button" data-rate="2">✓ Got it</button><button type="button" data-rate="1">~ Partly</button><button type="button" data-rate="0">✗ Missed it</button></span></div>
-</div>
-<details class="ans"><summary>Model answer</summary>
-<div class="ab">
-<p>A rule that must hold on every insert → a <b>trigger</b> on <code>registeration</code>.</p>
-<pre><span class="kw">CREATE TRIGGER</span> max_reg
-<span class="kw">ON</span> registeration
-<span class="kw">AFTER INSERT</span>
-<span class="kw">AS</span>
-<span class="kw">BEGIN</span>
-    <span class="kw">IF EXISTS</span> (
-        <span class="kw">SELECT</span> r.sid
-        <span class="kw">FROM</span> registeration <span class="kw">AS</span> r
-        <span class="kw">WHERE</span> r.sid <span class="kw">IN</span> (<span class="kw">SELECT</span> sid <span class="kw">FROM</span> inserted)
-        <span class="kw">GROUP BY</span> r.sid
-        <span class="kw">HAVING</span> COUNT(*) &gt; 6
-    )
-    <span class="kw">BEGIN</span>
-        RAISERROR('A student cannot register in more than 6 courses.', 16, 1);
-        <span class="kw">ROLLBACK TRANSACTION</span>;
-    <span class="kw">END</span>
-<span class="kw">END</span>;</pre>
-<ul>
-<li><b>Why <code>&gt; 6</code>:</b> an AFTER trigger runs when the new rows are already in the table, so the count includes them. Six courses are allowed; the seventh makes the count 7 and is rolled back.</li>
-<li><b>Why <code>IN (SELECT sid FROM inserted)</code> with <code>GROUP BY</code>:</b> one INSERT statement can add several rows, for one student or for several. Every affected student is checked.</li>
-<li><code>ROLLBACK</code> cancels the insert. Add <code>UPDATE</code> to the trigger events if a registration’s <code>sid</code> can be changed.</li>
-</ul>
-<p><b>Official key:</b> <code>create trigger max_reg on registeration for insert as if ((select count(*) from registeration where sid = (select sid from inserted)) &gt;= 3) begin print('max num of regis is 3') rollback end</code> [1 mark header, 1 mark condition, 1 mark rollback].</p>
-<div class="note fix"><b>Answer-key correction:</b> the key checks <b>3</b>, but the question says <b>6</b>. Changing only the number is not enough: with <code>&gt;= 6</code> the sixth course would be rejected, because the trigger fires after the insert — the test must be <code>&gt; 6</code>. Also, <code>sid = (select sid from inserted)</code> fails when a statement inserts more than one row. Corrected solution: the trigger above.</div>
-</div>
-</details>
-</div>
-</article>
-
-<article class="q" id="q-mac" data-kind="written">
-<div class="qh"><span class="qn">Question 7.3</span><span class="src-chip exam">Past exam</span><span class="rep zero">Tested in 1 exam paper</span><span class="sub">Mandatory access control</span></div>
-<div class="qb">
-<div class="meta">
-<p><b>Source:</b> Past exam — 2014, Q6, PDF page 3 [1 point]. (Exact wording. Official key available.)</p>
-<p><b>Idea tested:</b> Mandatory access control</p>
-<p><b>Appeared in:</b> 1 verified exam paper — 2014.</p>
-<p><b>Exact or similar repetitions:</b> Asked once, in 2014. No later paper asks about database security.</p>
-</div>
-<p class="lbl">Question:</p>
-<div class="qtext">
-<p>“Explain mandatory access control and list its security classes.”</p>
-</div>
-<div class="ix no-print">
-<label class="ix-label" for="ta-q-mac">Your answer <span class="sub">(optional — write it first, then check)</span></label>
-<textarea id="ta-q-mac" rows="4" placeholder="Write your answer here before opening the model answer…"></textarea>
-<div class="ix-bar"><button type="button" class="ix-btn" data-act="check">Check against model answer</button><span class="ix-rate" hidden>How did you do? <button type="button" data-rate="2">✓ Got it</button><button type="button" data-rate="1">~ Partly</button><button type="button" data-rate="0">✗ Missed it</button></span></div>
-</div>
-<details class="ans"><summary>Model answer</summary>
-<div class="ab">
-<p><b>Mandatory access control</b> works by assigning a <b>clearance</b> to individuals and a <b>classification</b> to documents. A person with clearance level X can access documents whose classification level is equal to or less than X.</p>
-<p><b>Security classes:</b> top secret (TS), secret (S), confidential (C) and unclassified (U), where TS is the highest level and U the lowest: TS &gt; S &gt; C &gt; U.</p>
-<p>This is the official key. “Mandatory” means the rule is imposed by the system for everyone; users cannot pass the access on at their own discretion.</p>
-<div class="note gap"><b>Outside the supplied slides.</b> Database security is not covered in the supplied lecture files; the answer is the 2014 answer key.</div>
-</div>
-</details>
-</div>
-</article>
-
-</div>
-<a class="backtop" href="#top">↑ Back to top</a>
-</section>
-
 <section class="sheet chapter" id="mock-exam">
 <span class="kicker">Full mock exam</span>
 <h2>Mock Midterm: 30 Multiple-Choice + 10 Written</h2>
@@ -3568,12 +3390,6 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <ul class="xopts" style="list-style:none;padding:0;margin:0"><li><button type="button" class="opt" data-l="A"><span class="ob">A</span><span class="ot">Partially committed: the last operation has executed but the effects are not yet permanent (not safely stored); committed: the effects are permanent and survive any later failure.</span></button></li><li><button type="button" class="opt" data-l="B"><span class="ob">B</span><span class="ot">Partially committed: the transaction has failed and is being rolled back; committed: it has restarted.</span></button></li><li><button type="button" class="opt" data-l="C"><span class="ob">C</span><span class="ot">Partially committed: only reads were executed; committed: the writes were executed too.</span></button></li><li><button type="button" class="opt" data-l="D"><span class="ob">D</span><span class="ot">There is no difference; they are two names for the same state.</span></button></li></ul>
 <div class="xexp" hidden><p class="verdict xres"></p><p>A failure in the partially committed state sends the transaction to Failed and its changes are undone. After commit, the transaction cannot be aborted. See <a href="#q-states">Question 6.25</a> (2019 and 2021 SIS312).</p></div></div>
 </article>
-<article class="xq" id="xm30" data-topic="T7" data-correct="D">
-<div class="qh"><span class="qn">MCQ 30</span><span class="src-chip exam">Past exam 2023</span><span class="sub">T-SQL · from <a href="#q-tsql-count">Question 7.1</a></span></div>
-<div class="qb"><div class="xstem"><p>A report that returns the total number of registrations for <b>a given course</b> is requested often. Which T-SQL object is the best fit?</p></div>
-<ul class="xopts" style="list-style:none;padding:0;margin:0"><li><button type="button" class="opt" data-l="A"><span class="ob">A</span><span class="ot">A trigger on the registration table.</span></button></li><li><button type="button" class="opt" data-l="B"><span class="ob">B</span><span class="ot">A view, because a view takes the course name as a parameter.</span></button></li><li><button type="button" class="opt" data-l="C"><span class="ob">C</span><span class="ot">An index on the course name.</span></button></li><li><button type="button" class="opt" data-l="D"><span class="ob">D</span><span class="ot">A stored procedure (or a function) with the course name as a parameter.</span></button></li></ul>
-<div class="xexp" hidden><p class="verdict xres"></p><p>A parameterised, repeatedly requested report is a stored procedure (the official key also accepts a scalar function). A trigger fires automatically on INSERT / UPDATE / DELETE and is for rules, as in <a href="#q-tsql-trigger">Question 7.2</a>; a view cannot take parameters.</p></div></div>
-</article>
 <h3 class="xpart" id="x-b">Part B — Written questions (50 marks)</h3>
 <p class="sub">Answer all ten. The marks are shown on each question.</p>
 <article class="xw" id="xw1" data-max="4">
@@ -3594,47 +3410,6 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <p class="sub">Basis: Week 02 — Indexing, W2&amp;3&amp;4.pdf, slides 15–21, 26 (PDF pages 15–21, 26).</p>
 <div class="xguide"><b>Marking guide (4 marks):</b> 1 mark each for primary, clustering and secondary (indexing field, file order, sparse/dense, number per file); 1 mark for the efficiency comparison.</div></div></details>
 <div class="xmark"><label for="xwm1">Your mark (be honest):</label><select id="xwm1"><option value="">— mark —</option><option value="0">0</option><option value="0.5">0.5</option><option value="1">1</option><option value="1.5">1.5</option><option value="2">2</option><option value="2.5">2.5</option><option value="3">3</option><option value="3.5">3.5</option><option value="4">4</option></select><span>/ 4</span></div>
-</div>
-</article>
-<article class="xw" id="xw2" data-max="3">
-<div class="qh"><span class="qn">Written 2</span><span class="marks-chip">3 marks</span><span class="src-chip exam">Past exam 2023</span><span class="sub">T-SQL object · from <a href="#q-tsql-trigger">Question 7.2</a></span></div>
-<div class="qb"><div class="qtext">
-<p>Consider the following schema:</p>
-<pre>department(DID, dname)
-student(SID, sname, gpa, dept)      // dept is a foreign key from department(DID)
-course(CID, cname, credit, dept)    // dept is a foreign key from department(DID)
-registeration(sid, cid)             // sid is a foreign key from student(SID) - cid is a foreign key from course(CID)</pre><p>“2. Maximum number of courses that a student can register in is 6. Write a T-SQL object that can achieve that.”</p>
-</div>
-<label class="ix-label" style="margin-top:10px" for="xwt2">Your answer</label>
-<textarea id="xwt2" rows="6" placeholder="Write your full answer, as you would on paper…"></textarea>
-<details class="ans xans"><summary>Model answer and marking guide</summary><div class="ab">
-<p>A rule that must hold on every insert → a <b>trigger</b> on <code>registeration</code>.</p>
-<pre><span class="kw">CREATE TRIGGER</span> max_reg
-<span class="kw">ON</span> registeration
-<span class="kw">AFTER INSERT</span>
-<span class="kw">AS</span>
-<span class="kw">BEGIN</span>
-    <span class="kw">IF EXISTS</span> (
-        <span class="kw">SELECT</span> r.sid
-        <span class="kw">FROM</span> registeration <span class="kw">AS</span> r
-        <span class="kw">WHERE</span> r.sid <span class="kw">IN</span> (<span class="kw">SELECT</span> sid <span class="kw">FROM</span> inserted)
-        <span class="kw">GROUP BY</span> r.sid
-        <span class="kw">HAVING</span> COUNT(*) &gt; 6
-    )
-    <span class="kw">BEGIN</span>
-        RAISERROR('A student cannot register in more than 6 courses.', 16, 1);
-        <span class="kw">ROLLBACK TRANSACTION</span>;
-    <span class="kw">END</span>
-<span class="kw">END</span>;</pre>
-<ul>
-<li><b>Why <code>&gt; 6</code>:</b> an AFTER trigger runs when the new rows are already in the table, so the count includes them. Six courses are allowed; the seventh makes the count 7 and is rolled back.</li>
-<li><b>Why <code>IN (SELECT sid FROM inserted)</code> with <code>GROUP BY</code>:</b> one INSERT statement can add several rows, for one student or for several. Every affected student is checked.</li>
-<li><code>ROLLBACK</code> cancels the insert. Add <code>UPDATE</code> to the trigger events if a registration’s <code>sid</code> can be changed.</li>
-</ul>
-<p><b>Official key:</b> <code>create trigger max_reg on registeration for insert as if ((select count(*) from registeration where sid = (select sid from inserted)) &gt;= 3) begin print('max num of regis is 3') rollback end</code> [1 mark header, 1 mark condition, 1 mark rollback].</p>
-<div class="note fix"><b>Answer-key correction:</b> the key checks <b>3</b>, but the question says <b>6</b>. Changing only the number is not enough: with <code>&gt;= 6</code> the sixth course would be rejected, because the trigger fires after the insert — the test must be <code>&gt; 6</code>. Also, <code>sid = (select sid from inserted)</code> fails when a statement inserts more than one row. Corrected solution: the trigger above.</div>
-<div class="xguide"><b>Marking guide (3 marks):</b> 1 mark header (trigger on registeration, after insert); 1 mark condition (count of the student’s registrations &gt; 6, taken after the insert); 1 mark rollback / error.</div></div></details>
-<div class="xmark"><label for="xwm2">Your mark (be honest):</label><select id="xwm2"><option value="">— mark —</option><option value="0">0</option><option value="0.5">0.5</option><option value="1">1</option><option value="1.5">1.5</option><option value="2">2</option><option value="2.5">2.5</option><option value="3">3</option></select><span>/ 3</span></div>
 </div>
 </article>
 <article class="xw" id="xw3" data-max="5">
@@ -3921,9 +3696,6 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <li><a href="#q-linear-vs-index">Linear scan vs index access</a> — 2021 SIS312</li>
 <li><a href="#q-unrepeatable">Unrepeatable read problem</a> — 2019</li>
 <li><a href="#q-rec-repeated">Modifying a schedule to make it strict</a> — 2017</li>
-<li><a href="#q-tsql-count">T-SQL stored procedure / user-defined function</a> — 2023</li>
-<li><a href="#q-tsql-trigger">T-SQL trigger</a> — 2023</li>
-<li><a href="#q-mac">Mandatory access control</a> — 2014</li>
 </ul>
 
 <h3>4. Lecture ideas with 0 verified exam papers</h3>
@@ -3937,7 +3709,7 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <p class="sub">Every visible question and subquestion of the supplied exam PDF: <b>74</b> entries in 8 papers, plus the missing ones marked in violet. Each entry links to the question that answers it.</p>
 <div class="tw"><table class="idx c5">
 <tr><th>Question</th><th class="c">PDF page</th><th>Main idea</th><th>Covered in</th><th>Consolidated?</th></tr>
-<tr class="newpaper"><th colspan="5">2013 — Midterm Exam – Spring 2013 (2 April 2013) · Dr. Ali H. El-Bastawissy, Dr. Mohamed Elwakil · 10 points · PDF page 1 · no answer key</th></tr><tr><td>Q1</td><td class="c">1</td><td>Lost update problem</td><td><a href="#q-lost">Question 6.21</a></td><td>Consolidated with 2021 Q3(b).</td></tr><tr><td>Q2</td><td class="c">1</td><td>Transaction definition; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Diagram consolidated with 2019 Q3(c), 2021 SIS312 Q3(c); the definition is also answered in <a href="#q-acid">Question 6.24</a>.</td></tr><tr><td>Q3</td><td class="c">1</td><td>Primary vs secondary vs clustering index</td><td><a href="#q-idx-types">Question 1.4</a></td><td>Not consolidated.</td></tr><tr><td>Q4(a)</td><td class="c">1</td><td>Join algorithms and their preconditions</td><td><a href="#q-join-algs">Question 3.11</a></td><td>Q4(a) and Q4(b) answered together.</td></tr><tr><td>Q4(b)</td><td class="c">1</td><td>Join algorithms and their preconditions</td><td><a href="#q-join-algs">Question 3.11</a></td><td>Q4(a) and Q4(b) answered together.</td></tr><tr><td>Q5</td><td class="c">1</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2015 Q1 and Q5.</td></tr><tr><td>Q6</td><td class="c">1</td><td>Query-processing steps</td><td><a href="#q-qp-steps">Question 2.1</a></td><td>Consolidated with 2015 Q2.</td></tr><tr><td>Q7</td><td class="c">1</td><td>Heuristic optimization rules</td><td><a href="#q-hrules">Question 4.4</a></td><td>Consolidated with 2021 SIS312 Q2(d).</td></tr><tr><td>Q8</td><td class="c">1</td><td>Selectivity, selection cardinality, blocking factor and join selectivity</td><td><a href="#q-stats">Question 5.1</a></td><td>Not consolidated.</td></tr><tr><td>Q9</td><td class="c">1</td><td>Single-loop join cost</td><td><a href="#q-single-loop">Question 5.2</a></td><td>Not consolidated.</td></tr><tr><td>Q10</td><td class="c">1</td><td>Pipelining vs materialization</td><td><a href="#q-pipelining">Question 2.5</a></td><td>Consolidated with 2015 Q6.</td></tr><tr class="newpaper"><th colspan="5">2014 — Midterm Exam – Spring 2014 (5 May 2014) · Dr. Mohamed Elwakil, Dr. Waleed Helmy · 10 points · PDF pages 2–3 · answer key</th></tr><tr><td>Q1</td><td class="c">2</td><td>Transaction definition; ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2021 Q3(a), 2021 SIS312 Q3(a).</td></tr><tr><td>Q2</td><td class="c">2</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2021 SIS312 Q3(b), 2023 Q3(a).</td></tr><tr><td>Q3</td><td class="c">2</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2021 Q1(a), 2021 SIS312 Q1(a), 2023 Q1(a).</td></tr><tr><td>Q4</td><td class="c">2–3</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-formula">Question 3.3</a></td><td>Not consolidated (formula only).</td></tr><tr><td>Q5</td><td class="c">3</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2015 Q8, 2017 Q3, 2021 Q2(d).</td></tr><tr><td>Q6</td><td class="c">3</td><td>Mandatory access control</td><td><a href="#q-mac">Question 7.3</a></td><td>Not consolidated.</td></tr><tr><td>Q7</td><td class="c">3</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-s52">Question 6.4</a></td><td>Not consolidated (own schedule S52).</td></tr><tr><td>Q8</td><td class="c">3</td><td>Conflict-serializability and precedence graph</td><td><a href="#q-confser-s3">Question 6.19</a></td><td>Not consolidated (own schedule S3).</td></tr><tr class="missing"><td>Q9</td><td class="c">3</td><td>Heuristic optimization of a query tree</td><td><a href="#q-tree-missing">Lecture 4 · missing-figure note</a></td><td>Method practised in the Sailors and tree-equivalence questions. <b>Query-tree figure is not in the PDF — question cannot be reproduced.</b></td></tr><tr class="newpaper"><th colspan="5">2015 — Midterm Exam – Spring 2015 (30 March 2015) · Dr. Mohamed Elwakil (page 6 also prints Dr. Ehab Ezzat) · 10 points · PDF pages 4–6 · answer key</th></tr><tr><td>Q1</td><td class="c">4</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2013 Q5 and 2015 Q5.</td></tr><tr><td>Q2</td><td class="c">4</td><td>Query-processing steps</td><td><a href="#q-qp-steps">Question 2.1</a></td><td>Consolidated with 2013 Q6.</td></tr><tr class="missing"><td>Q3</td><td class="c">—</td><td colspan="3"><b>Missing from the PDF</b> — the PDF jumps from Q2 to Q5; the question text is not available.</td></tr><tr class="missing"><td>Q4</td><td class="c">—</td><td colspan="3"><b>Missing from the PDF</b> — the PDF jumps from Q2 to Q5; the question text is not available.</td></tr><tr><td>Q5</td><td class="c">4</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2013 Q5 and 2015 Q1.</td></tr><tr><td>Q6</td><td class="c">4–5</td><td>Pipelining vs materialization</td><td><a href="#q-pipelining">Question 2.5</a></td><td>Consolidated with 2013 Q10.</td></tr><tr><td>Q7</td><td class="c">5</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-small">Question 3.2</a></td><td>Not consolidated (own numbers).</td></tr><tr><td>Q8</td><td class="c">5</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated (reversed wording: “after”).</td></tr><tr><td>Q9</td><td class="c">5–6</td><td>Query-tree equivalence and the SQL of a tree</td><td><a href="#q-tree-equiv">Question 4.3</a></td><td>Not consolidated (figure on PDF page 6 is readable).</td></tr><tr class="newpaper"><th colspan="5">2017 — Midterm Exam 2017 · Dr. Noha Nagy, Dr. Neveen El Gamal · 20 points · PDF pages 7–9 · no answer key</th></tr><tr><td>Q1</td><td class="c">7</td><td>Dense and sparse indexes for aggregate operations</td><td><a href="#q-agg-dense-sparse">Question 3.8</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">7</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2019, 2021, 2021 SIS312, 2023.</td></tr><tr><td>Q2(b)</td><td class="c">8</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2019 and 2023.</td></tr><tr><td>Q3</td><td class="c">8</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2014 Q5, 2015 Q8, 2021 Q2(d).</td></tr><tr><td>Q4(a)</td><td class="c">8</td><td>Conflict-serializability and precedence graph</td><td><a href="#q-confser-repeated">Question 6.18</a></td><td>Not consolidated.</td></tr><tr><td>Q4(b)</td><td class="c">9</td><td>Recoverability classification of a schedule; Modifying a schedule to make it strict</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2021 Q3(c), 2023 Q3(b); the “make it strict” part is 2017 only.</td></tr><tr class="newpaper"><th colspan="5">2019 — Midterm Exam 2019 · Dr. Noha Nagy · 20 points · PDF pages 10–13 · answer key for Q3(c) only (white text)</th></tr><tr><td>Q1.1(a)</td><td class="c">10</td><td>SQL to relational algebra</td><td><a href="#q-sailors">Question 4.2</a></td><td>Parts (a) and (b) answered together.</td></tr><tr><td>Q1.1(b)</td><td class="c">10</td><td>Heuristic optimization of a query tree</td><td><a href="#q-sailors">Question 4.2</a></td><td>Parts (a) and (b) answered together.</td></tr><tr><td>Q1.1(c)</td><td class="c">10</td><td>Commutativity of projection</td><td><a href="#q-pi-comm">Question 4.8</a></td><td>Not consolidated.</td></tr><tr><td>Q1.2(a)</td><td class="c">11</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2021, 2021 SIS312, 2023.</td></tr><tr><td>Q1.2(b)</td><td class="c">11</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017 and 2023.</td></tr><tr><td>Q2.3</td><td class="c">11</td><td>Dense vs sparse index for non-existent keys</td><td><a href="#q-dense-missing">Question 1.1</a></td><td>Consolidated with 2021 Q1(b).</td></tr><tr><td>Q2.4</td><td class="c">12</td><td>Suitable index for GROUP BY</td><td><a href="#q-groupby-index">Question 3.9</a></td><td>Not consolidated.</td></tr><tr><td>Q3(a)</td><td class="c">12</td><td>Unrepeatable read problem</td><td><a href="#q-unrepeatable">Question 6.22</a></td><td>Not consolidated.</td></tr><tr><td>Q3(b)</td><td class="c">12</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-2019">Question 6.2</a></td><td>Not consolidated (variation of the repeated schedule).</td></tr><tr><td>Q3(c)</td><td class="c">13</td><td>Partially committed vs committed; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Consolidated with 2021 SIS312 Q3(c) and 2013 Q2.</td></tr><tr class="newpaper"><th colspan="5">2021 — Midterm Exam 2021 — Database Systems II · Dr. Noha Nagy · 20 points · PDF pages 14–16 · no answer key</th></tr><tr><td>Q1(a)</td><td class="c">14</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2014 Q3, 2021 SIS312 Q1(a), 2023 Q1(a).</td></tr><tr><td>Q1(b)</td><td class="c">14</td><td>Dense vs sparse index for non-existent keys</td><td><a href="#q-dense-missing">Question 1.1</a></td><td>Consolidated with 2019 Q2.3.</td></tr><tr><td>Q1(c)</td><td class="c">14</td><td>Primary index: sparse or dense</td><td><a href="#q-primary-sd">Question 1.2</a></td><td>Not consolidated.</td></tr><tr><td>Q1(d)(1)</td><td class="c">14</td><td>Cost of DISTINCT (duplicate elimination)</td><td><a href="#q-distinct">Question 2.3</a></td><td>Parts (1) and (2) answered together.</td></tr><tr><td>Q1(d)(2)</td><td class="c">14</td><td>Cost of DISTINCT (duplicate elimination)</td><td><a href="#q-distinct">Question 2.3</a></td><td>Parts (1) and (2) answered together.</td></tr><tr><td>Q2(a)</td><td class="c">15</td><td>Pushing projection down</td><td><a href="#q-pi-push">Question 4.5</a></td><td>Not consolidated.</td></tr><tr><td>Q2(b)</td><td class="c">15</td><td>Projection over set difference</td><td><a href="#q-pi-diff">Question 4.6</a></td><td>Not consolidated.</td></tr><tr><td>Q2(c) — printed as a second “a)”</td><td class="c">15</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021 SIS312, 2023.</td></tr><tr><td>Q2(d) — printed as a second “b)”</td><td class="c">15</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2014 Q5, 2015 Q8, 2017 Q3.</td></tr><tr><td>Q3(a)</td><td class="c">16</td><td>ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2014 Q1, 2021 SIS312 Q3(a).</td></tr><tr><td>Q3(b)</td><td class="c">16</td><td>Lost update problem</td><td><a href="#q-lost">Question 6.21</a></td><td>Consolidated with 2013 Q1.</td></tr><tr><td>Q3(c)</td><td class="c">16</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2017 Q4(b), 2023 Q3(b).</td></tr><tr class="newpaper"><th colspan="5">2021 SIS312 — Midterm Exam 2021 — SIS312: DB Management Engineering · Dr. Noha Nagy · 20 points · PDF pages 17–19 · answer key</th></tr><tr><td>Q1(a)</td><td class="c">17</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated (MIN instead of MAX).</td></tr><tr><td>Q1(b)</td><td class="c">17</td><td>Indexes on heap files must be dense</td><td><a href="#q-heap-dense">Question 1.3</a></td><td>Not consolidated.</td></tr><tr><td>Q1(c)</td><td class="c">17</td><td>Linear scan vs index access</td><td><a href="#q-linear-vs-index">Question 5.3</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">17</td><td>Commuting selection with projection</td><td><a href="#q-sigma-pi">Question 4.7</a></td><td>Not consolidated.</td></tr><tr><td>Q2(b)</td><td class="c">17–18</td><td>Why SQL is translated into relational algebra</td><td><a href="#q-why-ra">Question 2.2</a></td><td>Not consolidated.</td></tr><tr><td>Q2(c) — printed as “a)”</td><td class="c">18</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021, 2023.</td></tr><tr><td>Q2(d)</td><td class="c">18</td><td>Heuristic optimization rules</td><td><a href="#q-hrules">Question 4.4</a></td><td>Consolidated with 2013 Q7.</td></tr><tr><td>Q3(a)</td><td class="c">18</td><td>ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2014 Q1, 2021 Q3(a).</td></tr><tr><td>Q3(b)</td><td class="c">19</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2014 Q2, 2023 Q3(a).</td></tr><tr><td>Q3(c)</td><td class="c">19</td><td>Partially committed vs committed; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Consolidated with 2019 Q3(c) and 2013 Q2.</td></tr><tr><td>Q3(d) — printed as “a)”, schedules S1 and S2</td><td class="c">19</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-s1s2">Question 6.3</a></td><td>Not consolidated (own schedules).</td></tr><tr class="newpaper"><th colspan="5">2023 — Midterm Exam 2023 · Dr. Noha Nagy · 20 points · PDF pages 21–23 · answer key</th></tr><tr><td>Q1(a)</td><td class="c">21</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2014 Q3, 2021 Q1(a), 2021 SIS312 Q1(a).</td></tr><tr><td>Q1(b)</td><td class="c">21</td><td>Index-only query</td><td><a href="#q-index-only">Question 3.7</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">21</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021, 2021 SIS312.</td></tr><tr><td>Q2(b) — printed as a second “a)”</td><td class="c">21</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017 and 2019.</td></tr><tr><td>Q3(a)</td><td class="c">22</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2014 Q2, 2021 SIS312 Q3(b).</td></tr><tr><td>Q3(b)</td><td class="c">22</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2017 Q4(b), 2021 Q3(c).</td></tr><tr><td>Q4.1</td><td class="c">22–23</td><td>T-SQL stored procedure / user-defined function</td><td><a href="#q-tsql-count">Question 7.1</a></td><td>Not consolidated.</td></tr><tr><td>Q4.2</td><td class="c">23</td><td>T-SQL trigger</td><td><a href="#q-tsql-trigger">Question 7.2</a></td><td>Not consolidated.</td></tr>
+<tr class="newpaper"><th colspan="5">2013 — Midterm Exam – Spring 2013 (2 April 2013) · Dr. Ali H. El-Bastawissy, Dr. Mohamed Elwakil · 10 points · PDF page 1 · no answer key</th></tr><tr><td>Q1</td><td class="c">1</td><td>Lost update problem</td><td><a href="#q-lost">Question 6.21</a></td><td>Consolidated with 2021 Q3(b).</td></tr><tr><td>Q2</td><td class="c">1</td><td>Transaction definition; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Diagram consolidated with 2019 Q3(c), 2021 SIS312 Q3(c); the definition is also answered in <a href="#q-acid">Question 6.24</a>.</td></tr><tr><td>Q3</td><td class="c">1</td><td>Primary vs secondary vs clustering index</td><td><a href="#q-idx-types">Question 1.4</a></td><td>Not consolidated.</td></tr><tr><td>Q4(a)</td><td class="c">1</td><td>Join algorithms and their preconditions</td><td><a href="#q-join-algs">Question 3.11</a></td><td>Q4(a) and Q4(b) answered together.</td></tr><tr><td>Q4(b)</td><td class="c">1</td><td>Join algorithms and their preconditions</td><td><a href="#q-join-algs">Question 3.11</a></td><td>Q4(a) and Q4(b) answered together.</td></tr><tr><td>Q5</td><td class="c">1</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2015 Q1 and Q5.</td></tr><tr><td>Q6</td><td class="c">1</td><td>Query-processing steps</td><td><a href="#q-qp-steps">Question 2.1</a></td><td>Consolidated with 2015 Q2.</td></tr><tr><td>Q7</td><td class="c">1</td><td>Heuristic optimization rules</td><td><a href="#q-hrules">Question 4.4</a></td><td>Consolidated with 2021 SIS312 Q2(d).</td></tr><tr><td>Q8</td><td class="c">1</td><td>Selectivity, selection cardinality, blocking factor and join selectivity</td><td><a href="#q-stats">Question 5.1</a></td><td>Not consolidated.</td></tr><tr><td>Q9</td><td class="c">1</td><td>Single-loop join cost</td><td><a href="#q-single-loop">Question 5.2</a></td><td>Not consolidated.</td></tr><tr><td>Q10</td><td class="c">1</td><td>Pipelining vs materialization</td><td><a href="#q-pipelining">Question 2.5</a></td><td>Consolidated with 2015 Q6.</td></tr><tr class="newpaper"><th colspan="5">2014 — Midterm Exam – Spring 2014 (5 May 2014) · Dr. Mohamed Elwakil, Dr. Waleed Helmy · 10 points · PDF pages 2–3 · answer key</th></tr><tr><td>Q1</td><td class="c">2</td><td>Transaction definition; ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2021 Q3(a), 2021 SIS312 Q3(a).</td></tr><tr><td>Q2</td><td class="c">2</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2021 SIS312 Q3(b), 2023 Q3(a).</td></tr><tr><td>Q3</td><td class="c">2</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2021 Q1(a), 2021 SIS312 Q1(a), 2023 Q1(a).</td></tr><tr><td>Q4</td><td class="c">2–3</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-formula">Question 3.3</a></td><td>Not consolidated (formula only).</td></tr><tr><td>Q5</td><td class="c">3</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2015 Q8, 2017 Q3, 2021 Q2(d).</td></tr><tr><td>Q6</td><td class="c">3</td><td>Mandatory access control</td><td><a href="#q-mac">Question 7.3</a></td><td>Not consolidated.</td></tr><tr><td>Q7</td><td class="c">3</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-s52">Question 6.4</a></td><td>Not consolidated (own schedule S52).</td></tr><tr><td>Q8</td><td class="c">3</td><td>Conflict-serializability and precedence graph</td><td><a href="#q-confser-s3">Question 6.19</a></td><td>Not consolidated (own schedule S3).</td></tr><tr class="missing"><td>Q9</td><td class="c">3</td><td>Heuristic optimization of a query tree</td><td><a href="#q-tree-missing">Lecture 4 · missing-figure note</a></td><td>Method practised in the Sailors and tree-equivalence questions. <b>Query-tree figure is not in the PDF — question cannot be reproduced.</b></td></tr><tr class="newpaper"><th colspan="5">2015 — Midterm Exam – Spring 2015 (30 March 2015) · Dr. Mohamed Elwakil (page 6 also prints Dr. Ehab Ezzat) · 10 points · PDF pages 4–6 · answer key</th></tr><tr><td>Q1</td><td class="c">4</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2013 Q5 and 2015 Q5.</td></tr><tr><td>Q2</td><td class="c">4</td><td>Query-processing steps</td><td><a href="#q-qp-steps">Question 2.1</a></td><td>Consolidated with 2013 Q6.</td></tr><tr class="missing"><td>Q3</td><td class="c">—</td><td colspan="3"><b>Missing from the PDF</b> — the PDF jumps from Q2 to Q5; the question text is not available.</td></tr><tr class="missing"><td>Q4</td><td class="c">—</td><td colspan="3"><b>Missing from the PDF</b> — the PDF jumps from Q2 to Q5; the question text is not available.</td></tr><tr><td>Q5</td><td class="c">4</td><td>Sorting vs hashing (advantages and disadvantages)</td><td><a href="#q-sort-hash">Question 2.4</a></td><td>Consolidated with 2013 Q5 and 2015 Q1.</td></tr><tr><td>Q6</td><td class="c">4–5</td><td>Pipelining vs materialization</td><td><a href="#q-pipelining">Question 2.5</a></td><td>Consolidated with 2013 Q10.</td></tr><tr><td>Q7</td><td class="c">5</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-small">Question 3.2</a></td><td>Not consolidated (own numbers).</td></tr><tr><td>Q8</td><td class="c">5</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated (reversed wording: “after”).</td></tr><tr><td>Q9</td><td class="c">5–6</td><td>Query-tree equivalence and the SQL of a tree</td><td><a href="#q-tree-equiv">Question 4.3</a></td><td>Not consolidated (figure on PDF page 6 is readable).</td></tr><tr class="newpaper"><th colspan="5">2017 — Midterm Exam 2017 · Dr. Noha Nagy, Dr. Neveen El Gamal · 20 points · PDF pages 7–9 · no answer key</th></tr><tr><td>Q1</td><td class="c">7</td><td>Dense and sparse indexes for aggregate operations</td><td><a href="#q-agg-dense-sparse">Question 3.8</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">7</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2019, 2021, 2021 SIS312, 2023.</td></tr><tr><td>Q2(b)</td><td class="c">8</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2019 and 2023.</td></tr><tr><td>Q3</td><td class="c">8</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2014 Q5, 2015 Q8, 2021 Q2(d).</td></tr><tr><td>Q4(a)</td><td class="c">8</td><td>Conflict-serializability and precedence graph</td><td><a href="#q-confser-repeated">Question 6.18</a></td><td>Not consolidated.</td></tr><tr><td>Q4(b)</td><td class="c">9</td><td>Recoverability classification of a schedule; Modifying a schedule to make it strict</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2021 Q3(c), 2023 Q3(b); the “make it strict” part is 2017 only.</td></tr><tr class="newpaper"><th colspan="5">2019 — Midterm Exam 2019 · Dr. Noha Nagy · 20 points · PDF pages 10–13 · answer key for Q3(c) only (white text)</th></tr><tr><td>Q1.1(a)</td><td class="c">10</td><td>SQL to relational algebra</td><td><a href="#q-sailors">Question 4.2</a></td><td>Parts (a) and (b) answered together.</td></tr><tr><td>Q1.1(b)</td><td class="c">10</td><td>Heuristic optimization of a query tree</td><td><a href="#q-sailors">Question 4.2</a></td><td>Parts (a) and (b) answered together.</td></tr><tr><td>Q1.1(c)</td><td class="c">10</td><td>Commutativity of projection</td><td><a href="#q-pi-comm">Question 4.8</a></td><td>Not consolidated.</td></tr><tr><td>Q1.2(a)</td><td class="c">11</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2021, 2021 SIS312, 2023.</td></tr><tr><td>Q1.2(b)</td><td class="c">11</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017 and 2023.</td></tr><tr><td>Q2.3</td><td class="c">11</td><td>Dense vs sparse index for non-existent keys</td><td><a href="#q-dense-missing">Question 1.1</a></td><td>Consolidated with 2021 Q1(b).</td></tr><tr><td>Q2.4</td><td class="c">12</td><td>Suitable index for GROUP BY</td><td><a href="#q-groupby-index">Question 3.9</a></td><td>Not consolidated.</td></tr><tr><td>Q3(a)</td><td class="c">12</td><td>Unrepeatable read problem</td><td><a href="#q-unrepeatable">Question 6.22</a></td><td>Not consolidated.</td></tr><tr><td>Q3(b)</td><td class="c">12</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-2019">Question 6.2</a></td><td>Not consolidated (variation of the repeated schedule).</td></tr><tr><td>Q3(c)</td><td class="c">13</td><td>Partially committed vs committed; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Consolidated with 2021 SIS312 Q3(c) and 2013 Q2.</td></tr><tr class="newpaper"><th colspan="5">2021 — Midterm Exam 2021 — Database Systems II · Dr. Noha Nagy · 20 points · PDF pages 14–16 · no answer key</th></tr><tr><td>Q1(a)</td><td class="c">14</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2014 Q3, 2021 SIS312 Q1(a), 2023 Q1(a).</td></tr><tr><td>Q1(b)</td><td class="c">14</td><td>Dense vs sparse index for non-existent keys</td><td><a href="#q-dense-missing">Question 1.1</a></td><td>Consolidated with 2019 Q2.3.</td></tr><tr><td>Q1(c)</td><td class="c">14</td><td>Primary index: sparse or dense</td><td><a href="#q-primary-sd">Question 1.2</a></td><td>Not consolidated.</td></tr><tr><td>Q1(d)(1)</td><td class="c">14</td><td>Cost of DISTINCT (duplicate elimination)</td><td><a href="#q-distinct">Question 2.3</a></td><td>Parts (1) and (2) answered together.</td></tr><tr><td>Q1(d)(2)</td><td class="c">14</td><td>Cost of DISTINCT (duplicate elimination)</td><td><a href="#q-distinct">Question 2.3</a></td><td>Parts (1) and (2) answered together.</td></tr><tr><td>Q2(a)</td><td class="c">15</td><td>Pushing projection down</td><td><a href="#q-pi-push">Question 4.5</a></td><td>Not consolidated.</td></tr><tr><td>Q2(b)</td><td class="c">15</td><td>Projection over set difference</td><td><a href="#q-pi-diff">Question 4.6</a></td><td>Not consolidated.</td></tr><tr><td>Q2(c) — printed as a second “a)”</td><td class="c">15</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021 SIS312, 2023.</td></tr><tr><td>Q2(d) — printed as a second “b)”</td><td class="c">15</td><td>Heuristic optimization before cost-based optimization</td><td><a href="#q-hbefore">Question 4.1</a></td><td>Consolidated with 2014 Q5, 2015 Q8, 2017 Q3.</td></tr><tr><td>Q3(a)</td><td class="c">16</td><td>ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2014 Q1, 2021 SIS312 Q3(a).</td></tr><tr><td>Q3(b)</td><td class="c">16</td><td>Lost update problem</td><td><a href="#q-lost">Question 6.21</a></td><td>Consolidated with 2013 Q1.</td></tr><tr><td>Q3(c)</td><td class="c">16</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2017 Q4(b), 2023 Q3(b).</td></tr><tr class="newpaper"><th colspan="5">2021 SIS312 — Midterm Exam 2021 — SIS312: DB Management Engineering · Dr. Noha Nagy · 20 points · PDF pages 17–19 · answer key</th></tr><tr><td>Q1(a)</td><td class="c">17</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated (MIN instead of MAX).</td></tr><tr><td>Q1(b)</td><td class="c">17</td><td>Indexes on heap files must be dense</td><td><a href="#q-heap-dense">Question 1.3</a></td><td>Not consolidated.</td></tr><tr><td>Q1(c)</td><td class="c">17</td><td>Linear scan vs index access</td><td><a href="#q-linear-vs-index">Question 5.3</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">17</td><td>Commuting selection with projection</td><td><a href="#q-sigma-pi">Question 4.7</a></td><td>Not consolidated.</td></tr><tr><td>Q2(b)</td><td class="c">17–18</td><td>Why SQL is translated into relational algebra</td><td><a href="#q-why-ra">Question 2.2</a></td><td>Not consolidated.</td></tr><tr><td>Q2(c) — printed as “a)”</td><td class="c">18</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021, 2023.</td></tr><tr><td>Q2(d)</td><td class="c">18</td><td>Heuristic optimization rules</td><td><a href="#q-hrules">Question 4.4</a></td><td>Consolidated with 2013 Q7.</td></tr><tr><td>Q3(a)</td><td class="c">18</td><td>ACID properties</td><td><a href="#q-acid">Question 6.24</a></td><td>Consolidated with 2014 Q1, 2021 Q3(a).</td></tr><tr><td>Q3(b)</td><td class="c">19</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2014 Q2, 2023 Q3(a).</td></tr><tr><td>Q3(c)</td><td class="c">19</td><td>Partially committed vs committed; Transaction states and state diagram</td><td><a href="#q-states">Question 6.25</a></td><td>Consolidated with 2019 Q3(c) and 2013 Q2.</td></tr><tr><td>Q3(d) — printed as “a)”, schedules S1 and S2</td><td class="c">19</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-s1s2">Question 6.3</a></td><td>Not consolidated (own schedules).</td></tr><tr class="newpaper"><th colspan="5">2023 — Midterm Exam 2023 · Dr. Noha Nagy · 20 points · PDF pages 21–23 · answer key</th></tr><tr><td>Q1(a)</td><td class="c">21</td><td>MAX / MIN using a B-tree index</td><td><a href="#q-btree-maxmin">Question 3.6</a></td><td>Consolidated with 2014 Q3, 2021 Q1(a), 2021 SIS312 Q1(a).</td></tr><tr><td>Q1(b)</td><td class="c">21</td><td>Index-only query</td><td><a href="#q-index-only">Question 3.7</a></td><td>Not consolidated.</td></tr><tr><td>Q2(a)</td><td class="c">21</td><td>Block nested-loop join cost</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017, 2019, 2021, 2021 SIS312.</td></tr><tr><td>Q2(b) — printed as a second “a)”</td><td class="c">21</td><td>Minimum buffers for a nested-loop join</td><td><a href="#q-nlj-large">Question 3.1</a></td><td>Consolidated: identical in 2017 and 2019.</td></tr><tr><td>Q3(a)</td><td class="c">22</td><td>Dirty read problem</td><td><a href="#q-dirty">Question 6.20</a></td><td>Consolidated with 2014 Q2, 2021 SIS312 Q3(b).</td></tr><tr><td>Q3(b)</td><td class="c">22</td><td>Recoverability classification of a schedule</td><td><a href="#q-rec-repeated">Question 6.1</a></td><td>Consolidated: same schedule in 2017 Q4(b), 2021 Q3(c).</td></tr>
 </table></div>
 <a class="backtop" href="#top">↑ Back to top</a>
 </section>
@@ -3949,7 +3721,7 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <div class="tw"><table class="c5">
 <tr><th>Question</th><th>Original key</th><th>Corrected result</th><th>Reason</th><th>See</th></tr>
 <tr><td>2015 Q7<br>nested-loop join, 14 and 6 blocks, 3 buffers</td><td>“smaller table (S) in the outer loop”, then 14 + 14/1 × 6 = <b>98</b></td><td><b>90</b> block reads with S outer (6 + 6 × 14), plus the output term</td><td>98 is the cost with R in the outer loop; the key put b<sub>R</sub> in the outer position</td><td><a href="#q-nlj-small">Lecture 3 · Question 3.2</a></td></tr>
-<tr><td>2023 Q4.2<br>trigger, maximum 6 courses</td><td>condition <code>&gt;= 3</code>, message “max num of regis is 3”, <code>sid = (select sid from inserted)</code></td><td>reject when the count is <b>&gt; 6</b>, for every student in <code>inserted</code></td><td>the question says 6; an AFTER trigger already counts the new row; <code>inserted</code> can hold several rows</td><td><a href="#q-tsql-trigger">Topic 7 · Question 7.2</a></td></tr>
+
 </table></div>
 
 <h3>2. Incomplete or imprecise keys</h3>
@@ -3962,7 +3734,7 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
 <tr><td>2021 SIS312 Q1(b)</td><td>“True. As the file is not sorted so the block contains records not sorted”</td><td>The example that the question asks for</td><td><a href="#q-heap-dense">Lecture 1 · Question 1.3</a></td></tr>
 <tr><td>2021 SIS312 Q1(c)</td><td>no key text in the PDF</td><td>Example from the lecture exercise: σ<sub>dno&gt;5</sub> costs 5,004 blocks through the index and 2,000 by linear search</td><td><a href="#q-linear-vs-index">Lecture 5 · Question 5.3</a></td></tr>
 <tr><td>2021 SIS312 Q2(c), 2023 Q2(a)</td><td>b<sub>S</sub> / (n<sub>B</sub> − 2) written without rounding; b<sub>S</sub> = total bytes / block size = 7,500</td><td>The result 18,757,500 stands. Write the ceiling. With whole records per block b<sub>S</sub> would be 8,334 and R outer would be slightly cheaper</td><td><a href="#q-nlj-large">Lecture 3 · Question 3.1</a></td></tr>
-<tr><td>2023 Q1(b), Q4.1</td><td>“Select max salary from employee”; parameter <code>varchar(5)</code></td><td>Valid SQL is <code>SELECT MAX(Salary) FROM EMPLOYEE</code>; use a longer parameter type for a course name</td><td><a href="#q-index-only">Lecture 3 · Question 3.7</a>, <a href="#q-tsql-count">Topic 7 · Question 7.1</a></td></tr>
+
 </table></div>
 
 <h3>3. Slips in the other supplied material</h3>
@@ -4161,7 +3933,7 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
         startBtn=document.getElementById('x-start'),finBtn=document.getElementById('x-finish'),
         resetBtn=document.getElementById('x-reset'),instEl=document.getElementById('x-inst'),
         resEl=document.getElementById('x-result'),tick=null;
-    var TOPICS={L1:['Lecture 1 · Indexing','l1'],L2:['Lecture 2 · Query processing','l2'],L3:['Lecture 3 · Aggregates and joins','l3'],L4:['Lecture 4 · Heuristic optimization','l4'],L5:['Lecture 5 · Cost-based optimization','l5'],L6:['Lecture 6 · Transactions','l6'],T7:['T-SQL and access control','t7']};
+    var TOPICS={L1:['Lecture 1 · Indexing','l1'],L2:['Lecture 2 · Query processing','l2'],L3:['Lecture 3 · Aggregates and joins','l3'],L4:['Lecture 4 · Heuristic optimization','l4'],L5:['Lecture 5 · Cost-based optimization','l5'],L6:['Lecture 6 · Transactions','l6']};
     function persist(){save(EKEY,E);}
     function fmt(s){s=Math.max(0,s);var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x;}
     function paintTime(){
@@ -4233,7 +4005,7 @@ registeration(sid, cid)             // sid is a foreign key from student(SID) - 
       h+='<p><b>'+msg+'</b></p>';
       if(r.unmarked){h+='<p class="sub">'+r.unmarked+' written question'+(r.unmarked>1?'s are':' is')+' not marked yet: open its model answer, compare, and choose your mark. This panel updates as you mark.</p>';}
       h+='<p class="lbl">Multiple choice by topic</p><table class="xtopics"><tr><th>Topic</th><th>Score</th><th style="width:34%">&nbsp;</th></tr>';
-      var order=['L1','L2','L3','L4','L5','L6','T7'],weak=[];
+      var order=['L1','L2','L3','L4','L5','L6'],weak=[];
       order.forEach(function(k){var t=r.byTopic[k];if(!t)return;var p=Math.round(100*t.r/t.n),cls=p<50?'low':(p<75?'mid':'');if(p<75)weak.push(k);
         h+='<tr><td><a href="#'+TOPICS[k][1]+'">'+TOPICS[k][0]+'</a></td><td>'+t.r+' / '+t.n+'</td><td><span class="tb '+cls+'"><span style="width:'+p+'%"></span></span></td></tr>';});
       h+='</table>';
