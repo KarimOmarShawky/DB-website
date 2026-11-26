@@ -238,6 +238,7 @@
     .optimization { --accent: #76609a; --tint: #f0edf5; }
     .transactions { --accent: #5a6ca7; --tint: #edf1ff; }
     .revision { --accent: #a7543e; --tint: #f7ece6; }
+    .serializability { --accent: #9a4f7b; --tint: #f6ecf2; }
 
     .card-top {
       display: flex;
@@ -408,7 +409,7 @@
       <section id="study-guides" aria-labelledby="guides-title">
         <div class="section-heading">
           <h2 id="guides-title">Choose a study guide</h2>
-          <p>Six independent guides · open any topic to begin</p>
+          <p>Seven independent guides · open any topic to begin</p>
         </div>
 
         <nav class="guide-grid" aria-label="Study guides">
@@ -517,13 +518,32 @@
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
           </a>
+
+          <a class="guide-card serializability" href="Transaction_Processing_3_Study_Guide.html">
+            <span class="card-top">
+              <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="5.5" r="2.5"></circle>
+                  <circle cx="5.5" cy="18" r="2.5"></circle>
+                  <circle cx="18.5" cy="18" r="2.5"></circle>
+                  <path d="M10.8 7.7 6.7 15.8m6.5-8.1 4.1 8.1M8 18h8"></path>
+                </svg>
+              </span>
+              <span class="card-index">06</span>
+            </span>
+            <h3>Serializability</h3>
+            <p>Test whether interleaved schedules are safe, using precedence graphs.</p>
+            <span class="card-action">Open guide
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
         </nav>
       </section>
     </main>
 
     <footer>
       <span>Database Engineering · Study Hub</span>
-      <span>Six topics. One place to start.</span>
+      <span>Seven topics. One place to start.</span>
     </footer>
   </div>
 </body>
